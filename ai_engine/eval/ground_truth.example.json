@@ -1,0 +1,6 @@
+[
+  {"image": "samples/rx01.jpg", "age": 62, "gender": "Male",
+   "medicines": [
+     {"brand_name": "Bizoran 5/20", "dosage_syntax": "1+0+0", "duration_days": 30, "timing": "After Meal"},
+     {"brand_name": "Rolac 10", "dosage_syntax": "1+1+1", "duration_days": 14, "timing": "After Meal"}]}
+]
