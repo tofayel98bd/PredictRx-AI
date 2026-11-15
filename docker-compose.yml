@@ -1,0 +1,87 @@
+name: predictrx-ai
+
+services:
+  # Isolated PostgreSQL 16 Database
+  predictrx-postgres:
+    container_name: predictrx-postgres
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-predictrx_db}
+      POSTGRES_USER: ${POSTGRES_USER:-predictrx_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-predictrx_password_dev}
+    ports:
+      - "5434:5432"
+    volumes:
+      - predictrx_pgdata:/var/lib/postgresql/data
+    networks:
+      - predictrx_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-predictrx_user} -d ${POSTGRES_DB:-predictrx_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # FastAPI Backend (PredictRx CDSS Core Engine)
+  predictrx-backend:
+    container_name: predictrx-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      predictrx-postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_SERVER: predictrx-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-predictrx_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-predictrx_password_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-predictrx_db}
+      SECRET_KEY: ${SECRET_KEY:-predictrx_super_secret_jwt_key_change_in_production_2026_xyz}
+      ENVIRONMENT: production
+      DEBUG: "false"
+      BACKEND_CORS_ORIGINS: '["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://localhost:8000"]'
+    ports:
+      - "8000:8000"
+    networks:
+      - predictrx_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # React + Vite Frontend (Nginx Production Reverse Proxy)
+  predictrx-frontend:
+    container_name: predictrx-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+        VITE_ENABLE_MOCK_FALLBACK: "false"
+    restart: unless-stopped
+    depends_on:
+      predictrx-backend:
+        condition: service_healthy
+    ports:
+      - "5173:80"
+      - "3000:80"
+    networks:
+      - predictrx_network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+volumes:
+  predictrx_pgdata:
+    external: true
+
+networks:
+  predictrx_network:
+    name: predictrx_network

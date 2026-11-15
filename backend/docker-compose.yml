@@ -1,0 +1,30 @@
+name: predictrx-ai
+
+services:
+  predictrx-postgres:
+    container_name: predictrx-postgres
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-predictrx_db}
+      POSTGRES_USER: ${POSTGRES_USER:-predictrx_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-predictrx_password_dev}
+    ports:
+      - "5434:5432"
+    volumes:
+      - predictrx_pgdata:/var/lib/postgresql/data
+    networks:
+      - predictrx_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-predictrx_user} -d ${POSTGRES_DB:-predictrx_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  predictrx_pgdata:
+    name: predictrx_pgdata
+
+networks:
+  predictrx_network:
+    name: predictrx_network
