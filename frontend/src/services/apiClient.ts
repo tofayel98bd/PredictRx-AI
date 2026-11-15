@@ -15,6 +15,13 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
+// In test environment, bypass live network requests to ensure fast, isolated, deterministic test executions
+if (isTestEnv) {
+  apiClient.interceptors.request.use(() => {
+    return Promise.reject(new Error('Test mode: isolated mock adapter'));
+  });
+}
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {

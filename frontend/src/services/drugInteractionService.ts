@@ -1,4 +1,4 @@
-import { apiClient, ENABLE_MOCK_FALLBACK } from './apiClient';
+import { apiClient, ENABLE_MOCK_FALLBACK, MOCK_LATENCY_MS } from './apiClient';
 import { DrugInteraction } from '../types';
 import { COMMON_DRUG_INTERACTIONS } from '../constants';
 
@@ -10,7 +10,7 @@ export async function getDrugInteractions(search?: string, severity?: string): P
     return response.data;
   } catch (error) {
     if (ENABLE_MOCK_FALLBACK) {
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, MOCK_LATENCY_MS));
       let results = [...COMMON_DRUG_INTERACTIONS];
       if (search && search.trim()) {
         const q = search.toLowerCase();
