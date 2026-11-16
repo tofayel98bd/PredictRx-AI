@@ -1,13 +1,38 @@
 """PredictRx Prescription Analysis and Decision Support Endpoints."""
 
 from datetime import datetime, timezone
+import hashlib
 import json
+import os
+from pathlib import Path
+import sys
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from sqlalchemy.orm import Session
 
+# Dynamic import of ai_engine from workspace
+_project_root = Path(__file__).resolve().parent
+while _project_root.name and _project_root.name != "PredictRx-AI" and _project_root.parent != _project_root:
+    _project_root = _project_root.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+_ai_dir = _project_root / "ai_engine"
+if _ai_dir.exists() and str(_ai_dir) not in sys.path:
+    sys.path.insert(0, str(_ai_dir))
+
+from dotenv import load_dotenv
+load_dotenv(_project_root / ".env")
+load_dotenv(_ai_dir / ".env")
+
+try:
+    from ai_engine.app.pipeline import analyze_prescription_image
+    AI_ENGINE_AVAILABLE = True
+except Exception as _e:
+    AI_ENGINE_AVAILABLE = False
+
 from app.api.deps import get_optional_user
+from app.cache.smart_cache import smart_cache
 from app.core.exceptions import ResourceNotFoundError
 from app.core.logging import get_logger
 from app.db.session import get_db
@@ -73,8 +98,75 @@ async def analyze_prescription_endpoint(
         except Exception:
             pass
 
-    # If medications were not explicitly provided in body (e.g. image upload flow)
-    # Extract based on prescription image file name or standard clinical scenario
+    # Step 0: Fast-Path Smart Offline Cache Check (< 15ms Fail-Safe)
+    if not raw_meds or file_bytes:
+        cached_scenario = smart_cache.match_scenario(
+            file_bytes=file_bytes,
+            file_name=file_name,
+            patient_context=parsed_patient_context.model_dump(),
+            raw_meds=raw_meds if raw_meds else None,
+        )
+        if cached_scenario:
+            logger.info(f"Serving request from PredictRx Smart Cache [{cached_scenario.get('scenario_id')}] (sub-15ms fast path)")
+            return smart_cache.to_analysis_result(cached_scenario, file_name=file_name)
+
+    ai_pipeline_meta = None
+    ai_prescription_alerts = None
+
+    # Step 1: Real Multimodal Vision LLM Extraction via ai_engine
+    if file_bytes and not raw_meds and AI_ENGINE_AVAILABLE:
+        try:
+            logger.info(f"Invoking Vision LLM OCR pipeline for image: {file_name} ({len(file_bytes)} bytes)")
+            # Execute OCR + deterministic syntax extraction
+            ai_result = analyze_prescription_image(
+                image=file_bytes,
+                patient_context=parsed_patient_context.model_dump(),
+                votes=1,
+            )
+            ai_pipeline_meta = ai_result.get("meta")
+            ai_prescription_alerts = ai_result.get("prescription_level_alerts")
+
+            extracted = ai_result.get("extracted_prescription", [])
+            if extracted:
+                logger.info(f"Vision LLM successfully extracted {len(extracted)} medication(s)")
+                raw_meds = [
+                    {
+                        "brand_name": m.get("brand_name"),
+                        "generic_name": m.get("generic_name"),
+                        "form": m.get("form"),
+                        "strength": m.get("strength"),
+                        "dosage_raw": m.get("dosage_syntax"),
+                        "dosage_syntax": m.get("dosage_syntax"),
+                        "frequency": m.get("dosage_syntax"),
+                        "timing": m.get("timing"),
+                        "duration": f"{m.get('duration_days')} days" if m.get("duration_days") else None,
+                        "duration_days": m.get("duration_days"),
+                        "confidence": m.get("confidence", 0.95),
+                        "issues": m.get("issues", []),
+                    }
+                    for m in extracted
+                ]
+
+                # Update patient age/gender/weight from prescription if not explicitly set
+                detected_pat = ai_result.get("detected_patient", {})
+                if detected_pat.get("age") and parsed_patient_context.age == 45:
+                    try:
+                        parsed_patient_context.age = int(detected_pat["age"])
+                    except (ValueError, TypeError):
+                        pass
+                if detected_pat.get("gender") and parsed_patient_context.gender == "Male":
+                    parsed_patient_context.gender = str(detected_pat["gender"]).capitalize()
+                if detected_pat.get("weight_kg") and not parsed_patient_context.weight_kg:
+                    try:
+                        parsed_patient_context.weight_kg = float(detected_pat["weight_kg"])
+                    except (ValueError, TypeError):
+                        pass
+            else:
+                logger.warning("Vision LLM returned 0 medications. Falling back to clinical demo baseline.")
+        except Exception as exc:
+            logger.error(f"Vision LLM extraction failed: {exc}. Gracefully falling back to clinical baseline.")
+
+    # Fallback to standard scenario if medications were not provided or extracted
     if not raw_meds:
         # Check if ketorolac + antihypertensive scenario or standard demo scenario
         is_ketorolac_scenario = (
@@ -152,7 +244,16 @@ async def analyze_prescription_endpoint(
         file_bytes=file_bytes,
         user_id=user_id,
         client_ip=client_ip,
+        ai_pipeline_meta=ai_pipeline_meta,
+        ai_prescription_alerts=ai_prescription_alerts,
     )
+
+    if file_bytes:
+        try:
+            h = hashlib.sha256(file_bytes).hexdigest()
+            smart_cache.save_analysis(h, result.model_dump())
+        except Exception:
+            pass
 
     return result
 
@@ -335,3 +436,61 @@ def _format_analysis_result(rx: Any, analysis: PrescriptionAnalysis) -> Prescrip
             review_timestamp=analysis.reviewed_at.isoformat() if analysis.reviewed_at else None,
         ),
     )
+
+
+@router.get("/cache/status", summary="Get Smart Cache Statistics")
+def get_cache_status():
+    """Return live cache statistics (hits, misses, hit ratio, fast-path serves)."""
+    return smart_cache.get_stats()
+
+
+@router.get("/scenarios", summary="List Golden Demo Hackathon Scenarios")
+def list_demo_scenarios():
+    """Return the 3 Golden Hackathon Clinical Demo Scenarios for instant presentation."""
+    return [
+        {
+            "scenario_id": "GOLDEN_01_CKD_KETOROLAC",
+            "title": "Case 1: Mohammad Abdul Karim (CKD 3a + 14d Ketorolac Contraindication)",
+            "patient_name": "Mohammad Abdul Karim",
+            "age": 62,
+            "gender": "Male",
+            "creatinine": 2.1,
+            "egfr": 34.5,
+            "risk_score": 86.0,
+            "highlight": "86% AKI Risk, KDIGO 2024 Violation, Safe Paracetamol Substitution",
+        },
+        {
+            "scenario_id": "GOLDEN_02_TRIPLE_WHAMMY",
+            "title": "Case 2: Begum Rokeya Sultana (ACEi + Diuretic + NSAID Triple Whammy)",
+            "patient_name": "Begum Rokeya Sultana",
+            "age": 54,
+            "gender": "Female",
+            "creatinine": 1.3,
+            "egfr": 52.0,
+            "risk_score": 78.0,
+            "highlight": "78% Hemodynamic Collapse Risk, CMAJ 2013 Protocol, Topical Gel Alternative",
+        },
+        {
+            "scenario_id": "GOLDEN_03_PEDIATRIC_ASPIRIN",
+            "title": "Case 3: Master Ayan (Pediatric 8yo + Aspirin / Reye's Syndrome)",
+            "patient_name": "Master Ayan",
+            "age": 8,
+            "gender": "Male",
+            "creatinine": 0.5,
+            "egfr": 110.0,
+            "risk_score": 84.0,
+            "highlight": "84% Pediatric ADE Risk, Reye's Syndrome Fatal Contraindication, Napa Syrup Substitution",
+        },
+    ]
+
+
+@router.get("/scenarios/{scenario_id}", response_model=PrescriptionAnalysisResult, summary="Run Golden Demo Scenario Instantly")
+def run_demo_scenario(scenario_id: str) -> PrescriptionAnalysisResult:
+    """Instantly execute a pre-computed Golden Scenario in < 15ms without network calls."""
+    scenario = smart_cache.get_scenario(scenario_id)
+    if not scenario:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Golden Demo Scenario '{scenario_id}' not found.",
+        )
+    return smart_cache.to_analysis_result(scenario)

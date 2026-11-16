@@ -16,7 +16,7 @@ router = APIRouter()
 def list_drugs(
     search: Optional[str] = Query(None, description="Search by brand name, generic name, or manufacturer"),
     skip: int = Query(0, ge=0),
-    limit: int = Query(50, ge=1, le=100),
+    limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
 ) -> List[DrugCatalogResponse]:
     """Retrieve cataloged Bangladesh medicines from DGDA master data."""

@@ -20,6 +20,7 @@ from app.schemas.analysis import (
     AnalysisSummarySchema,
     BanglaPatientCompanionSchema,
     ClinicianReviewStateSchema,
+    IssueSchema,
     PatientContextSchema,
     PrescriptionAlertSchema,
     PrescriptionAnalysisResult,
@@ -55,6 +56,8 @@ class AnalysisOrchestrator:
         file_bytes: Optional[bytes] = None,
         user_id: Optional[uuid.UUID] = None,
         client_ip: Optional[str] = None,
+        ai_pipeline_meta: Optional[Dict[str, Any]] = None,
+        ai_prescription_alerts: Optional[List[Dict[str, Any]]] = None,
     ) -> PrescriptionAnalysisResult:
         start_time = time.perf_counter()
         logger.info(f"Starting CDSS analysis for patient: {patient_context.name} (age {patient_context.age})")
@@ -96,6 +99,17 @@ class AnalysisOrchestrator:
         generics_for_interaction: List[str] = []
         prescription_alerts: List[PrescriptionAlertSchema] = []
 
+        # Add any prescription-level alerts detected by Vision/AI pipeline
+        if ai_prescription_alerts:
+            for alert in ai_prescription_alerts:
+                prescription_alerts.append(
+                    PrescriptionAlertSchema(
+                        code=alert.get("code", "PRESCRIPTION_ALERT"),
+                        severity=alert.get("severity", "WARNING"),
+                        message=alert.get("message", ""),
+                    )
+                )
+
         for item in raw_medications:
             brand_token = item.get("brand_name") or item.get("name") or "Unknown Medicine"
             dose_raw = item.get("dosage_raw") or item.get("dosage_syntax") or item.get("frequency") or "1+0+1"
@@ -119,8 +133,22 @@ class AnalysisOrchestrator:
                 timing_raw=timing_raw,
                 strength=norm_res.strength or strength_raw,
                 form=norm_res.dosage_form or form_raw,
-                confidence=norm_res.confidence,
+                confidence=norm_res.confidence if norm_res.is_matched else item.get("confidence", 0.90),
             )
+
+            # Merge issues from AI pipeline if present
+            if item.get("issues"):
+                existing_codes = {i.code for i in val_med.issues}
+                for iss in item["issues"]:
+                    code = iss.get("code") if isinstance(iss, dict) else getattr(iss, "code", "")
+                    if code and code not in existing_codes:
+                        val_med.issues.append(
+                            IssueSchema(
+                                code=code,
+                                severity=iss.get("severity") if isinstance(iss, dict) else getattr(iss, "severity", "WARNING"),
+                                message=iss.get("message") if isinstance(iss, dict) else getattr(iss, "message", ""),
+                            )
+                        )
             validated_meds.append(val_med)
 
         # Include patient's current ongoing home medications in interaction check
@@ -248,11 +276,11 @@ class AnalysisOrchestrator:
             file_name=file_name or "prescription_upload.png",
             status="COMPLETED",
             meta=AnalysisMetaSchema(
-                votes=1,
-                latency_ms=latency_ms,
-                ocr_engine="PredictRx Hybrid Vision Pipeline v1.0",
-                legibility=0.96,
-                is_prescription=True,
+                votes=ai_pipeline_meta.get("votes", 1) if ai_pipeline_meta else 1,
+                latency_ms=ai_pipeline_meta.get("latency_ms", latency_ms) if ai_pipeline_meta else latency_ms,
+                ocr_engine="PredictRx Multi-Pass Vision LLM + BD Deterministic Rule Engine" if ai_pipeline_meta else "PredictRx Hybrid Vision Pipeline v1.0",
+                legibility=ai_pipeline_meta.get("legibility", 0.96) if ai_pipeline_meta else 0.96,
+                is_prescription=ai_pipeline_meta.get("is_prescription", True) if ai_pipeline_meta else True,
             ),
             detected_patient={
                 "age": patient_context.age,

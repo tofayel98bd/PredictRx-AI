@@ -264,7 +264,7 @@ def validate_prescription(raw: RawPrescription, patient_context: Optional[dict] 
     # Smart Fallback: If AI placed dosage or timing inside instructions_raw, recover them!
     for m in raw.medicines:
         if not m.dosage_raw and m.instructions_raw:
-            if parse_dosage(m.instructions_raw).kind not in ("missing", "invalid"):
+            if parse_dosage(m.instructions_raw).status not in ("missing", "invalid"):
                 m.dosage_raw = m.instructions_raw
         if not m.timing_raw and m.instructions_raw:
             if normalize_timing(m.instructions_raw) is not None:

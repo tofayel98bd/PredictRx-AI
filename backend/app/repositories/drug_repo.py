@@ -62,3 +62,7 @@ class DrugRepository:
     def count(self) -> int:
         from sqlalchemy import func
         return self.db.scalar(select(func.count(BDDrugCatalog.id))) or 0
+
+    def get_all_catalog_entries(self) -> List[BDDrugCatalog]:
+        """Retrieve all active catalog entries for fuzzy matching index."""
+        return list(self.db.execute(select(BDDrugCatalog).where(BDDrugCatalog.is_active == True)).scalars().all())

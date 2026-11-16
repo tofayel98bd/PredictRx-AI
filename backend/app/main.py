@@ -21,6 +21,16 @@ async def lifespan(app: FastAPI):
     # Startup: ensure upload directory exists
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.PROJECT_VERSION} [{settings.ENVIRONMENT}]")
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Sync Vision LLM configuration to os.environ for ai_engine
+    import os
+    if settings.GEMINI_API_KEY and not os.getenv("GEMINI_API_KEY"):
+        os.environ["GEMINI_API_KEY"] = settings.GEMINI_API_KEY
+    if settings.ANTHROPIC_API_KEY and not os.getenv("ANTHROPIC_API_KEY"):
+        os.environ["ANTHROPIC_API_KEY"] = settings.ANTHROPIC_API_KEY
+    if settings.LLM_PROVIDER and not os.getenv("LLM_PROVIDER"):
+        os.environ["LLM_PROVIDER"] = settings.LLM_PROVIDER
+
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}")
 

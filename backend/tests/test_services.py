@@ -59,6 +59,35 @@ def test_drug_normalization(db_session):
     assert res3.is_matched is True
     assert "Olmesartan" in (res3.generic_name or "")
 
+    # Test fuzzy misspelled brands (OCR & handwriting errors)
+    res_sergil = service.normalize("Tab. Sergil 20mg")
+    assert res_sergil.is_matched is True
+    assert res_sergil.brand_name == "Sergel"
+    assert res_sergil.generic_name == "Esomeprazole"
+    assert res_sergil.normalized_source == "fuzzy_matched"
+    assert res_sergil.confidence >= 0.75
+
+    res_bizorun = service.normalize("Tab. Bizorun 5/20")
+    assert res_bizorun.is_matched is True
+    assert res_bizorun.brand_name == "Bizoran"
+    assert "Olmesartan" in (res_bizorun.generic_name or "")
+    assert res_bizorun.normalized_source == "fuzzy_matched"
+
+    res_rolaq = service.normalize("Rolaq 10")
+    assert res_rolaq.is_matched is True
+    assert res_rolaq.brand_name == "Rolac"
+    assert "Ketorolac" in (res_rolaq.generic_name or "")
+
+    res_naprosin = service.normalize("Naprosin 500")
+    assert res_naprosin.is_matched is True
+    assert res_naprosin.brand_name == "Naprosyn"
+    assert res_naprosin.generic_name == "Naproxen"
+
+    # Test fuzzy generic name resolution
+    res_generic_typo = service.normalize("Paracetmol")
+    assert res_generic_typo.is_matched is True
+    assert res_generic_typo.generic_name == "Paracetamol"
+
 
 def test_interaction_triple_whammy(db_session):
     service = InteractionService(db_session)
