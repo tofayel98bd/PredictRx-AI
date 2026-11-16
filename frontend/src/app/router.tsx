@@ -90,6 +90,14 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: 'prescription-analysis',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <PrescriptionAnalysisPage />
+          </Suspense>
+        ),
+      },
+      {
         path: 'prescriptions',
         element: (
           <Suspense fallback={<PageLoader />}>

@@ -36,7 +36,7 @@ import { ClinicianReviewModal } from '@/components/clinical/ClinicianReviewModal
 import { DemoScenarioSwitcher } from '@/components/clinical/DemoScenarioSwitcher';
 import { analyzePrescription, fetchScenarioAnalysis } from '@/services/prescriptionService';
 import { PatientContext, PrescriptionAnalysisResult } from '@/types';
-import { DEMO_PATIENT_CONTEXT, DEMO_ANALYSIS_RESULT, MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario } from '@/constants';
+import { MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario } from '@/constants';
 import { toast } from 'sonner';
 
 // Validation schema for patient context form
