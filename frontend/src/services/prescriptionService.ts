@@ -1,6 +1,6 @@
 import { apiClient, ENABLE_MOCK_FALLBACK, MOCK_LATENCY_MS } from './apiClient';
 import { PatientContext, PrescriptionAnalysisResult } from '../types';
-import { DEMO_ANALYSIS_RESULT } from '../constants';
+import { DEMO_ANALYSIS_RESULT, GOLDEN_DEMO_SCENARIOS } from '../constants';
 
 // In-memory store for session additions
 const analysisStore: PrescriptionAnalysisResult[] = [
@@ -226,6 +226,24 @@ export async function saveClinicianReview(
         notes: review.notes,
       };
       return { ...item };
+    }
+    throw error;
+  }
+}
+
+export async function fetchScenarioAnalysis(scenarioId: string): Promise<PrescriptionAnalysisResult> {
+  try {
+    const response = await apiClient.get<PrescriptionAnalysisResult>(`/api/v1/predict-rx/scenarios/${scenarioId}`);
+    analysisStore.unshift(response.data);
+    return response.data;
+  } catch (error) {
+    if (ENABLE_MOCK_FALLBACK) {
+      const match = GOLDEN_DEMO_SCENARIOS.find((s) => s.scenario_id === scenarioId || s.id === scenarioId);
+      if (match) {
+        analysisStore.unshift(match.analysis_result);
+        return match.analysis_result;
+      }
+      return DEMO_ANALYSIS_RESULT;
     }
     throw error;
   }
