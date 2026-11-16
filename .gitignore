@@ -1,7 +1,6 @@
 .env
 *.env
 .idea/
-docs/
 __pycache__/
 *.pyc
 *.pyo

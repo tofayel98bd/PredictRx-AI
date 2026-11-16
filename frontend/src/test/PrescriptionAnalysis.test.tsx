@@ -57,4 +57,43 @@ describe('PrescriptionAnalysisPage', () => {
     },
     15000
   );
+
+  it('renders 1-Click 3 Golden Demo Scenarios Switcher and allows switching cases', async () => {
+    renderWithProviders(<PrescriptionAnalysisPage />);
+
+    // Verify 3 scenario cards exist
+    expect(screen.getByText(/1-Click Hackathon Golden Demo Scenarios/i)).toBeInTheDocument();
+    expect(screen.getByText(/Case 1: Abdul Karim/i)).toBeInTheDocument();
+    expect(screen.getByText(/Case 2: Begum Rokeya/i)).toBeInTheDocument();
+    expect(screen.getByText(/Case 3: Master Ayan/i)).toBeInTheDocument();
+
+    // Click Autofill on Case 2 (Begum Rokeya)
+    const rokeyaBtn = screen.getByRole('button', { name: /Autofill Case 2: Begum Rokeya/i });
+    fireEvent.click(rokeyaBtn);
+    await waitFor(() => {
+      expect(screen.getByDisplayValue(/Begum Rokeya Sultana/i)).toBeInTheDocument();
+      expect(screen.getByDisplayValue(/PRX-BD-2026-042/i)).toBeInTheDocument();
+    });
+
+    // Click Autofill on Case 3 (Master Ayan)
+    const ayanBtn = screen.getByRole('button', { name: /Autofill Case 3: Master Ayan/i });
+    fireEvent.click(ayanBtn);
+    await waitFor(() => {
+      expect(screen.getByDisplayValue(/Master Ayan/i)).toBeInTheDocument();
+      expect(screen.getByDisplayValue(/PRX-PED-2026-015/i)).toBeInTheDocument();
+    });
+  });
+
+  it('executes 1-Click Instant Run for Golden Scenario 2 (Triple Whammy)', async () => {
+    renderWithProviders(<PrescriptionAnalysisPage />);
+
+    const instantRunRokeya = screen.getByRole('button', { name: /Instant Run Case 2: Begum Rokeya/i });
+    fireEvent.click(instantRunRokeya);
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Ramiril 5mg/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Lasix 40mg/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/Voltalin 50mg/i).length).toBeGreaterThan(0);
+    });
+  });
 });

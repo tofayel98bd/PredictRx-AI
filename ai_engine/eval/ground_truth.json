@@ -1,0 +1,482 @@
+[
+  {
+    "case_id": "rx01",
+    "image": "samples/rx01.jpg",
+    "patient_name": "Md. Abdul Karim",
+    "age": 62,
+    "gender": "Male",
+    "weight_kg": 68.0,
+    "clinical_notes": "Known T2DM, CKD Stage 3 (eGFR 34.5). Low back ache x 2 wks.",
+    "medicines": [
+      {
+        "brand_name": "Bizoran 5/20",
+        "generic_name": "Olmesartan + Amlodipine",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Rolac 10",
+        "generic_name": "Ketorolac Tromethamine",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 14,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Rolac 5-day ceiling exceeded",
+      "Nephrotoxic clash with ARB in CKD"
+    ],
+    "risk_tier": "CRITICAL"
+  },
+  {
+    "case_id": "rx02",
+    "image": "samples/rx02.jpg",
+    "patient_name": "Begum Rokeya",
+    "age": 54,
+    "gender": "Female",
+    "weight_kg": 64.0,
+    "clinical_notes": "Congestive Heart Failure, Bilateral pedal edema.",
+    "medicines": [
+      {
+        "brand_name": "Angilock 50",
+        "generic_name": "Losartan Potassium",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Lasix 40",
+        "generic_name": "Furosemide",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "Morning"
+      },
+      {
+        "brand_name": "Rolac 10",
+        "generic_name": "Ketorolac Tromethamine",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 7,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Triple Whammy: ARB + Diuretic + NSAID",
+      "Acute renal hemodynamic collapse risk"
+    ],
+    "risk_tier": "CRITICAL"
+  },
+  {
+    "case_id": "rx03",
+    "image": "samples/rx03.jpg",
+    "patient_name": "Master Ayan",
+    "age": 7,
+    "gender": "Male",
+    "weight_kg": 22.0,
+    "clinical_notes": "Viral influenza, High fever (103 F), Runny nose, Dry cough.",
+    "medicines": [
+      {
+        "brand_name": "Ecosprin 75",
+        "generic_name": "Aspirin",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 5,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Ceevit 250",
+        "generic_name": "Ascorbic Acid",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 7,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Pediatric Aspirin contraindication",
+      "Fatal Reye's syndrome hazard"
+    ],
+    "risk_tier": "CRITICAL"
+  },
+  {
+    "case_id": "rx04",
+    "image": "samples/rx04.jpg",
+    "patient_name": "Haji Nurul Islam",
+    "age": 74,
+    "gender": "Male",
+    "weight_kg": 58.0,
+    "clinical_notes": "Elderly Type 2 Diabetes, frequent dizziness, borderline renal status.",
+    "medicines": [
+      {
+        "brand_name": "Glibenclamide 5",
+        "generic_name": "Glibenclamide",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "Before Meal"
+      },
+      {
+        "brand_name": "Metfo 850",
+        "generic_name": "Metformin HCl",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 30,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Napa 500",
+        "generic_name": "Paracetamol",
+        "dosage_syntax": "1+1+1",
+        "duration_days": 5,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Sulfonylurea (Glibenclamide) severe hypoglycemia warning in age >70"
+    ],
+    "risk_tier": "HIGH"
+  },
+  {
+    "case_id": "rx05",
+    "image": "samples/rx05.jpg",
+    "patient_name": "Mrs. Nasreen Akter",
+    "age": 28,
+    "gender": "Female",
+    "weight_kg": 56.0,
+    "clinical_notes": "Gravida 1, 10 weeks pregnancy. Severe burning micturition (UTI).",
+    "medicines": [
+      {
+        "brand_name": "Ciprocin 500",
+        "generic_name": "Ciprofloxacin",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 7,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Seclo 20",
+        "generic_name": "Omeprazole",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 14,
+        "timing": "Before Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Fluoroquinolone (Ciprofloxacin) strictly contraindicated in pregnancy 1st trimester (cartilage toxicity)"
+    ],
+    "risk_tier": "CRITICAL"
+  },
+  {
+    "case_id": "rx06",
+    "image": "samples/rx06.jpg",
+    "patient_name": "Kazi Mahfuzur Rahman",
+    "age": 45,
+    "gender": "Male",
+    "weight_kg": 72.0,
+    "clinical_notes": "History of bleeding duodenal ulcer 2 months ago. Neck spasm.",
+    "medicines": [
+      {
+        "brand_name": "Aceclofenac 100",
+        "generic_name": "Aceclofenac",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 10,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Pantobex 20",
+        "generic_name": "Pantoprazole",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 14,
+        "timing": "Before Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Non-selective NSAID (Aceclofenac) high ulcer recurrence & GI hemorrhage risk"
+    ],
+    "risk_tier": "HIGH"
+  },
+  {
+    "case_id": "rx07",
+    "image": "samples/rx07.jpg",
+    "patient_name": "Jannatul Ferdous",
+    "age": 36,
+    "gender": "Female",
+    "weight_kg": 52.0,
+    "clinical_notes": "Chronic Bronchial Asthma on inhaler. Performance anxiety & palpitations.",
+    "medicines": [
+      {
+        "brand_name": "Indever 40",
+        "generic_name": "Propranolol",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 15,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Napa Extend 665",
+        "generic_name": "Paracetamol",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 5,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Non-selective Beta-Blocker (Propranolol) contraindicated in Asthma (fatal bronchospasm hazard)"
+    ],
+    "risk_tier": "CRITICAL"
+  },
+  {
+    "case_id": "rx08",
+    "image": "samples/rx08.jpg",
+    "patient_name": "Solaiman Shikdar",
+    "age": 52,
+    "gender": "Male",
+    "weight_kg": 65.0,
+    "clinical_notes": "Chronic Liver Disease (Child-Pugh B), Bilirubin 3.2, severe generalized body pain.",
+    "medicines": [
+      {
+        "brand_name": "Napa 500",
+        "generic_name": "Paracetamol",
+        "dosage_syntax": "2+2+2",
+        "duration_days": 10,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Urso 300",
+        "generic_name": "Ursodeoxycholic Acid",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 30,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "High-dose Paracetamol toxicity warning in hepatic impairment / cirrhosis"
+    ],
+    "risk_tier": "HIGH"
+  },
+  {
+    "case_id": "rx09",
+    "image": "samples/rx09.jpg",
+    "patient_name": "Md. Rafiqul Islam",
+    "age": 60,
+    "gender": "Male",
+    "weight_kg": 76.0,
+    "clinical_notes": "Uncontrolled Stage 2 Hypertension (BP 175/105 mmHg), severe nasal congestion.",
+    "medicines": [
+      {
+        "brand_name": "Norvask 5",
+        "generic_name": "Amlodipine Besylate",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "Morning"
+      },
+      {
+        "brand_name": "Rhinil",
+        "generic_name": "Pseudoephedrine + Chlorpheniramine",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 7,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Systemic Sympathomimetic Decongestant exacerbates severe uncontrolled hypertension"
+    ],
+    "risk_tier": "MEDIUM"
+  },
+  {
+    "case_id": "rx10",
+    "image": "samples/rx10.jpg",
+    "patient_name": "Baby Samia",
+    "age": 3,
+    "gender": "Female",
+    "weight_kg": 13.5,
+    "clinical_notes": "Acute Otitis Media, ear discharge, irritability, low fever.",
+    "medicines": [
+      {
+        "brand_name": "Moxaclav 156 Susp",
+        "generic_name": "Amoxicillin + Clavulanic Acid",
+        "dosage_syntax": "1+1+1",
+        "duration_days": 7,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Tofen Syrup",
+        "generic_name": "Ketotifen",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 5,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Safe pediatric regimen, verify weight-based antibiotic dosing (45mg/kg/day)"
+    ],
+    "risk_tier": "LOW"
+  },
+  {
+    "case_id": "rx11",
+    "image": "samples/rx11.jpg",
+    "patient_name": "Mrs. Shahana Begum",
+    "age": 58,
+    "gender": "Female",
+    "weight_kg": 62.0,
+    "clinical_notes": "Diabetic Kidney Disease Stage 4 (eGFR 26 mL/min). Uncontrolled HbA1c 9.2%.",
+    "medicines": [
+      {
+        "brand_name": "Jardiance 10",
+        "generic_name": "Empagliflozin",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "Morning"
+      },
+      {
+        "brand_name": "Trajenta 5",
+        "generic_name": "Linagliptin",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "SGLT2-Inhibitor (Empagliflozin) initiation restriction when eGFR <30 mL/min"
+    ],
+    "risk_tier": "HIGH"
+  },
+  {
+    "case_id": "rx12",
+    "image": "samples/rx12.jpg",
+    "patient_name": "Al-Haj Anwar Hossain",
+    "age": 65,
+    "gender": "Male",
+    "weight_kg": 70.0,
+    "clinical_notes": "Post-PCI drug-eluting stent (3 weeks ago). Heartburn and acid reflux.",
+    "medicines": [
+      {
+        "brand_name": "Lopirel 75",
+        "generic_name": "Clopidogrel",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Seclo 20",
+        "generic_name": "Omeprazole",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 30,
+        "timing": "Before Meal"
+      },
+      {
+        "brand_name": "Rosuva 10",
+        "generic_name": "Rosuvastatin",
+        "dosage_syntax": "0+0+1",
+        "duration_days": 30,
+        "timing": "Night"
+      }
+    ],
+    "expected_alerts": [
+      "Omeprazole CYP2C19 competitive inhibition reduces Clopidogrel antiplatelet activation -> Stent thrombosis hazard"
+    ],
+    "risk_tier": "HIGH"
+  },
+  {
+    "case_id": "rx13",
+    "image": "samples/rx13.jpg",
+    "patient_name": "Abul Kashem Molla",
+    "age": 53,
+    "gender": "Male",
+    "weight_kg": 78.0,
+    "clinical_notes": "Acute Gouty Arthritis of right 1st MTP joint. Serum Uric Acid 9.8 mg/dL.",
+    "medicines": [
+      {
+        "brand_name": "Uricon 100",
+        "generic_name": "Allopurinol",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Lasix 40",
+        "generic_name": "Furosemide",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 15,
+        "timing": "Morning"
+      },
+      {
+        "brand_name": "D-Cof Syrup",
+        "generic_name": "Dextromethorphan + Guaifenesin",
+        "dosage_syntax": "1+1+1",
+        "duration_days": 5,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Loop Diuretic (Furosemide) impairs renal urate excretion, precipitating severe gout flare-up"
+    ],
+    "risk_tier": "MEDIUM"
+  },
+  {
+    "case_id": "rx14",
+    "image": "samples/rx14.jpg",
+    "patient_name": "Advocate Shamsul Alam",
+    "age": 68,
+    "gender": "Male",
+    "weight_kg": 63.0,
+    "clinical_notes": "Parkinson's Disease (resting tremor & rigidity), frequent nausea & dyspepsia.",
+    "medicines": [
+      {
+        "brand_name": "Syndopa 110",
+        "generic_name": "Levodopa + Carbidopa",
+        "dosage_syntax": "1+1+1",
+        "duration_days": 30,
+        "timing": "Before Meal"
+      },
+      {
+        "brand_name": "Motigut 10",
+        "generic_name": "Domperidone",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 10,
+        "timing": "Before Meal"
+      },
+      {
+        "brand_name": "Calbo D",
+        "generic_name": "Calcium + Vitamin D3",
+        "dosage_syntax": "1+0+0",
+        "duration_days": 30,
+        "timing": "After Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Safe antiemetic choice (Domperidone does not cross BBB; verify avoidance of Metoclopramide)"
+    ],
+    "risk_tier": "LOW"
+  },
+  {
+    "case_id": "rx15",
+    "image": "samples/rx15.jpg",
+    "patient_name": "Mst. Farida Yasmin",
+    "age": 34,
+    "gender": "Female",
+    "weight_kg": 55.0,
+    "clinical_notes": "Post-laparoscopic appendectomy Day 3. Wounds healing well, minimal pain.",
+    "medicines": [
+      {
+        "brand_name": "Cef-3 200",
+        "generic_name": "Cefixime Trihydrate",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 7,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Napa 500",
+        "generic_name": "Paracetamol",
+        "dosage_syntax": "1+1+1",
+        "duration_days": 5,
+        "timing": "After Meal"
+      },
+      {
+        "brand_name": "Maxpro 20",
+        "generic_name": "Esomeprazole",
+        "dosage_syntax": "1+0+1",
+        "duration_days": 14,
+        "timing": "Before Meal"
+      }
+    ],
+    "expected_alerts": [
+      "Standard clean post-operative oral regimen - No contraindications detected"
+    ],
+    "risk_tier": "LOW"
+  }
+]

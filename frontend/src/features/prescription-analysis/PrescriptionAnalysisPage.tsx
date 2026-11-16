@@ -33,9 +33,10 @@ import { ShapWaterfallChart } from '@/components/clinical/ShapWaterfallChart';
 import { RiskGaugeCard } from '@/components/clinical/RiskGaugeCard';
 import { BanglaPatientCompanion } from '@/components/clinical/BanglaPatientCompanion';
 import { ClinicianReviewModal } from '@/components/clinical/ClinicianReviewModal';
-import { analyzePrescription } from '@/services/prescriptionService';
+import { DemoScenarioSwitcher } from '@/components/clinical/DemoScenarioSwitcher';
+import { analyzePrescription, fetchScenarioAnalysis } from '@/services/prescriptionService';
 import { PatientContext, PrescriptionAnalysisResult } from '@/types';
-import { DEMO_PATIENT_CONTEXT, DEMO_ANALYSIS_RESULT, MEDICAL_SAFETY_DISCLAIMER } from '@/constants';
+import { DEMO_PATIENT_CONTEXT, DEMO_ANALYSIS_RESULT, MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario } from '@/constants';
 import { toast } from 'sonner';
 
 // Validation schema for patient context form
@@ -84,6 +85,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<PrescriptionAnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState('clinical');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>('GOLDEN_01_CKD_KETOROLAC');
 
   // Form setup
   const {
@@ -118,27 +120,52 @@ export const PrescriptionAnalysisPage: React.FC = () => {
     }
   }, [searchParams]);
 
-  const loadDemoData = () => {
-    setValue('patient_id', DEMO_PATIENT_CONTEXT.patient_id);
-    setValue('name', DEMO_PATIENT_CONTEXT.name);
-    setValue('age', DEMO_PATIENT_CONTEXT.age);
-    setValue('gender', (DEMO_PATIENT_CONTEXT.gender as any) || 'Male');
-    setValue('weight_kg', DEMO_PATIENT_CONTEXT.weight_kg);
-    setValue('creatinine', DEMO_PATIENT_CONTEXT.creatinine);
-    setValue('egfr', DEMO_PATIENT_CONTEXT.egfr);
-    setValue('hba1c', DEMO_PATIENT_CONTEXT.hba1c);
-    setValue('systolic_bp', DEMO_PATIENT_CONTEXT.systolic_bp);
-    setValue('diastolic_bp', DEMO_PATIENT_CONTEXT.diastolic_bp);
-    setValue('conditions_text', DEMO_PATIENT_CONTEXT.conditions.join(', '));
-    setValue('current_meds_text', DEMO_PATIENT_CONTEXT.current_medications.join(', '));
-    setValue('allergies_text', DEMO_PATIENT_CONTEXT.allergies?.join(', ') || '');
+  const handleSelectScenario = async (scenario: GoldenDemoScenario, instantRun: boolean = false) => {
+    setActiveScenarioId(scenario.scenario_id);
 
-    // Create a mock image file for the upload input
-    const demoBlob = new Blob(['sample-prescription-image-bytes'], { type: 'image/jpeg' });
-    const demoFile = new File([demoBlob], 'sample_rx_bizoran_rolac.jpg', { type: 'image/jpeg' });
-    setFile(demoFile);
-    setFilePreview('https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=60');
-    toast.success('Loaded Hackathon Synthetic Demonstration Patient Scenario.');
+    // 1. Populate form fields
+    const ctx = scenario.patient_context;
+    setValue('patient_id', ctx.patient_id || '');
+    setValue('name', ctx.name || '');
+    setValue('age', ctx.age);
+    setValue('gender', (ctx.gender as any) || 'Male');
+    setValue('weight_kg', ctx.weight_kg);
+    setValue('creatinine', ctx.creatinine);
+    setValue('egfr', ctx.egfr);
+    setValue('hba1c', ctx.hba1c);
+    setValue('systolic_bp', ctx.systolic_bp);
+    setValue('diastolic_bp', ctx.diastolic_bp);
+    setValue('conditions_text', ctx.conditions?.join(', ') || '');
+    setValue('current_meds_text', ctx.current_medications?.join(', ') || '');
+    setValue('allergies_text', ctx.allergies?.join(', ') || '');
+
+    // 2. Set sample file preview
+    const sampleBlob = new Blob(['sample-prescription-image-bytes'], { type: 'image/jpeg' });
+    const sampleFile = new File([sampleBlob], scenario.sample_file_name, { type: 'image/jpeg' });
+    setFile(sampleFile);
+    setFilePreview(scenario.preview_image);
+
+    if (instantRun) {
+      setIsAnalyzing(true);
+      setCurrentStageIndex(WORKFLOW_STAGES.length - 1);
+      try {
+        const result = await fetchScenarioAnalysis(scenario.scenario_id);
+        setAnalysisResult(result);
+        toast.success(`Executed Fast-Path Evaluation for ${scenario.title} (${result.meta.latency_ms}ms)`);
+      } catch {
+        setAnalysisResult(scenario.analysis_result);
+        toast.success(`Loaded pre-computed result for ${scenario.title}`);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    } else {
+      toast.success(`Autofilled profile for ${scenario.title}. Click "Run Safety Evaluation" to process.`);
+    }
+  };
+
+  const loadDemoData = () => {
+    const defaultScenario = GOLDEN_DEMO_SCENARIOS[0];
+    handleSelectScenario(defaultScenario, false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -277,6 +304,13 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           <span>Load Hackathon Demo Scenario (CKD 3 / Ketorolac)</span>
         </Button>
       </div>
+
+      {/* 1-Click 3 Golden Demo Scenarios Switcher */}
+      <DemoScenarioSwitcher
+        activeScenarioId={activeScenarioId}
+        onSelectScenario={handleSelectScenario}
+        isLoading={isAnalyzing}
+      />
 
       {/* Upload and Patient Context Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

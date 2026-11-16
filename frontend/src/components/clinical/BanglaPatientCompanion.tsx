@@ -39,8 +39,27 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({ data, p
     ].join(' ');
 
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = 'bn-BD';
+    
+    // Dynamic Voice Detection with Bengali fallbacks (bn-BD, bn-IN, bn)
+    const availableVoices = window.speechSynthesis.getVoices();
+    const banglaVoice = availableVoices.find(
+      (v) =>
+        v.lang === 'bn-BD' ||
+        v.lang === 'bn-IN' ||
+        v.lang.toLowerCase().startsWith('bn') ||
+        v.name.toLowerCase().includes('bangla') ||
+        v.name.toLowerCase().includes('bengali')
+    );
+
+    if (banglaVoice) {
+      utterance.voice = banglaVoice;
+      utterance.lang = banglaVoice.lang;
+    } else {
+      utterance.lang = 'bn-BD';
+    }
+
     utterance.rate = 0.9;
+    utterance.pitch = 1.0;
 
     utterance.onend = () => setIsPlaying(false);
     utterance.onerror = () => {
