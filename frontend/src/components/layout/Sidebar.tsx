@@ -14,6 +14,7 @@ import {
   Stethoscope,
   AlertTriangle,
   HeartHandshake,
+  Presentation,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +35,7 @@ const navItems = [
   { name: 'Clinical Risk Analysis', path: '/risk-analysis/AN-2026-0941', icon: Activity },
   { name: 'Clinical Reports', path: '/reports/AN-2026-0941', icon: FileText },
   { name: 'Bangla Companion', path: '/bangla-companion', icon: HeartHandshake, badgeText: 'বাংলা' },
+  { name: 'Pitch Deck (10-Slide)', path: '/pitch_deck.html', icon: Presentation, isExternal: true, badgeText: 'PITCH' },
   { name: 'System Settings', path: '/settings', icon: Settings },
 ];
 
@@ -93,6 +95,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
+            if (item.isExternal) {
+              return (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={onCloseMobile}
+                  className={cn(
+                    'group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all text-muted-foreground hover:bg-muted hover:text-foreground',
+                    collapsed && 'justify-center px-2'
+                  )}
+                >
+                  <Icon className={cn('h-5 w-5 shrink-0 text-cyan-500', !collapsed && 'mr-3')} />
+                  {!collapsed && <span className="truncate">{item.name}</span>}
+                  {!collapsed && item.badgeText && (
+                    <Badge variant="demo" className="ml-auto text-[10px] py-0 px-1.5 bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border-cyan-400/40">
+                      {item.badgeText}
+                    </Badge>
+                  )}
+                </a>
+              );
+            }
             return (
               <NavLink
                 key={item.path}

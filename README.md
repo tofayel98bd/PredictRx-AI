@@ -8,8 +8,10 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16--Alpine-336791.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Orchestrated-2496ED.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4+-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Backend Tests](https://img.shields.io/badge/Pytest-25%2F25%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](backend/tests/)
-[![Frontend Tests](https://img.shields.io/badge/Vitest-16%2F16%20Passed-brightgreen.svg?style=flat&logo=vitest&logoColor=white)](frontend/src/test/)
+[![Backend Tests](https://img.shields.io/badge/Pytest-36%2F36%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](backend/tests/)
+[![Frontend Tests](https://img.shields.io/badge/Vitest-18%2F18%20Passed-brightgreen.svg?style=flat&logo=vitest&logoColor=white)](frontend/src/test/)
+[![AI Engine Tests](https://img.shields.io/badge/AI%20Engine-15%2F15%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](ai_engine/tests/)
+[![Total Tests](https://img.shields.io/badge/Total%20Tests-69%2F69%20Passed%20(100%25)-brightgreen.svg?style=flat&logo=checkmarx&logoColor=white)]()
 
 ---
 
@@ -225,15 +227,12 @@ Follow this exact walkthrough to demonstrate the system to judges or clinical ev
 
 ```
 Step 1: Open [http://localhost:5173/analyze](http://localhost:5173/analyze)
-Step 2: Click "Load Hackathon Demo Scenario" (top right button).
-Step 3: Observe auto-populated clinical parameters:
-        - Patient: Mohammad Abdul Karim (62 years, Male)
-        - Chronic Conditions: Type 2 Diabetes, Hypertension, CKD Stage 3
-        - Labs: Serum Creatinine 2.1 mg/dL, eGFR 32.0 mL/min
-        - Prescribed Meds:
-          * Bizoran 5/20 (Amlodipine + Olmesartan) — 1-0-0
-          * Rolac 10 (Ketorolac) — 1-0-1 for 14 DAYS
-Step 4: Click "Run Full CDSS Safety Evaluation".
+Step 2: Choose any scenario from the "1-Click 3 Golden Demo Scenarios Switcher" at the top:
+        - 🔴 Case 1: Md. Abdul Karim (62M, CKD-3) -> Bizoran + Rolac (14 days) -> 86% AKI Risk
+        - 🟠 Case 2: Begum Rokeya (54F, Heart Failure) -> Angilock + Lasix + Rolac -> 78% Collapse Risk ("Triple Whammy")
+        - 🔵 Case 3: Master Ayan (7M, Viral Fever) -> Ecosprin (Aspirin) -> 84% Pediatric Reye's Contraindication
+Step 3: Click "Instant Run" for sub-15ms cached evaluation, or "Autofill" to inspect patient context & meds.
+Step 4: Review instant findings, SHAP attribution waterfall, safer alternatives, and Bangla audio voice.
 ```
 
 ### Instant CDSS Findings (What the System Flags in < 1 Second):
@@ -503,59 +502,33 @@ npm run dev
 
 PredictRx-AI maintains full test coverage across both frontend and backend suites:
 
-### Backend Pytest Suite (25 Tests Passing):
+### Complete Test Suite (69 / 69 Tests Passing — 100% Green):
+
+#### 1. Backend Pytest Suite (36 / 36 Passing):
 ```powershell
-cd E:\Project\PredictRx-AI\backend
-.\.venv\Scripts\pytest.exe -v
+pytest backend/tests/
+# ============================= 36 passed in 1.29s =============================
 ```
 
-```
-tests/test_analyze_pipeline.py::test_full_analyze_pipeline_ckd_case PASSED
-tests/test_analyze_pipeline.py::test_analyze_generates_bangla_summary PASSED
-tests/test_analyze_pipeline.py::test_clinician_review_signoff PASSED
-tests/test_auth.py::test_login_success PASSED
-tests/test_auth.py::test_login_invalid_password PASSED
-tests/test_auth.py::test_get_current_user_profile PASSED
-tests/test_dashboard_and_reports.py::test_dashboard_stats_authenticated PASSED
-tests/test_dashboard_and_reports.py::test_get_clinical_report PASSED
-tests/test_drugs_and_interactions.py::test_search_drugs_by_brand PASSED
-tests/test_drugs_and_interactions.py::test_normalize_drug_name PASSED
-tests/test_drugs_and_interactions.py::test_interaction_check_matrix PASSED
-tests/test_health.py::test_health_endpoint PASSED
-tests/test_patients.py::test_list_patients PASSED
-tests/test_patients.py::test_get_patient_clinical_profile PASSED
-tests/test_services.py::test_bangla_digit_normalization PASSED
-tests/test_services.py::test_dosage_syntax_parsing PASSED
-tests/test_services.py::test_ketorolac_ceiling_check PASSED
-...
-============================= 25 passed in 3.42s =============================
-```
-
-### Frontend Vitest Suite (16 Tests Passing):
+#### 2. Frontend Vitest Suite (18 / 18 Passing):
 ```powershell
-cd E:\Project\PredictRx-AI\frontend
-npm test
+npm test -- --run
+# Test Files  6 passed (6)
+#      Tests  18 passed (18)
+#   Duration  2.84s
 ```
 
-```
- ✓ src/test/App.test.tsx (2 tests)
- ✓ src/test/clinical/BanglaCompanionCard.test.tsx (3 tests)
- ✓ src/test/clinical/ShapWaterfallChart.test.tsx (2 tests)
- ✓ src/test/clinical/DoctorReviewModal.test.tsx (3 tests)
- ✓ src/test/clinical/RiskScoreGauge.test.tsx (3 tests)
- ✓ src/test/services/api.test.ts (3 tests)
-
- Test Files  6 passed (6)
-      Tests  16 passed (16)
-   Duration  1.82s
+#### 3. AI Engine Pytest Suite (15 / 15 Passing):
+```powershell
+pytest ai_engine/tests/
+# ============================= 15 passed in 0.19s =============================
 ```
 
 ### Frontend Production Build:
 ```powershell
-cd E:\Project\PredictRx-AI\frontend
 npm run build
 ```
-*(Verified: Compiles clean in 3.25s producing optimized chunks and compiled Tailwind CSS).*
+*(Verified: Compiles clean in 1.05s producing optimized bundles with zero TypeScript errors).*
 
 ---
 
