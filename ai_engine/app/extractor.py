@@ -144,5 +144,15 @@ class MockExtractor:
 
 
 def get_extractor(provider: str | None = None) -> Extractor:
-    provider = (provider or os.getenv("LLM_PROVIDER", "anthropic")).lower()
-    return GeminiExtractor() if provider == "gemini" else AnthropicExtractor()
+    from dotenv import load_dotenv
+    load_dotenv()
+    if not provider:
+        provider = os.getenv("LLM_PROVIDER")
+        if not provider:
+            if os.getenv("GEMINI_API_KEY"):
+                provider = "gemini"
+            elif os.getenv("ANTHROPIC_API_KEY"):
+                provider = "anthropic"
+            else:
+                provider = "gemini"
+    return GeminiExtractor() if provider.lower() == "gemini" else AnthropicExtractor()

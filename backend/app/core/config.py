@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List, Optional, Union
 from pydantic import computed_field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -70,6 +70,13 @@ class Settings(BaseSettings):
         "image/webp",
         "application/pdf",
     }
+
+    # Vision LLM & AI Engine Configuration
+    LLM_PROVIDER: str = "gemini"
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    ANTHROPIC_API_KEY: Optional[str] = None
+    ANTHROPIC_MODEL: str = "claude-sonnet-5-5"
 
 
 settings = Settings()

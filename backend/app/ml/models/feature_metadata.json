@@ -1,0 +1,35 @@
+{
+  "model_type": "XGBRegressor",
+  "version": "1.0.0",
+  "trained_date": "2026-11-16",
+  "n_samples": 5000,
+  "features": [
+    "age",
+    "egfr",
+    "serum_creatinine",
+    "systolic_bp",
+    "diastolic_bp",
+    "hba1c",
+    "has_ckd",
+    "has_diabetes",
+    "has_hypertension",
+    "medication_count",
+    "nsaid_prescribed",
+    "nsaid_duration_days",
+    "nsaid_ceiling_breach",
+    "arb_acei_prescribed",
+    "diuretic_prescribed",
+    "nephrotoxic_interaction",
+    "triple_whammy"
+  ],
+  "metrics": {
+    "rmse": 2.88,
+    "r2_score": 0.9873
+  },
+  "target": "aki_risk_percentage",
+  "clinical_guidelines": [
+    "KDIGO 2024 CKD Guidelines",
+    "CMAJ 2013 Triple Whammy Study",
+    "Beers Criteria 2023"
+  ]
+}
