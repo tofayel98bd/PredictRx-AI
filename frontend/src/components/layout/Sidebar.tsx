@@ -75,10 +75,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: FileText,
     },
     {
-      name: t('sidebar.banglaCompanion', { ns: 'navigation', defaultValue: 'Bangla Companion' }),
+      name: isBn
+        ? t('sidebar.patientCompanion', { ns: 'navigation', defaultValue: 'রোগীর ওষুধ নির্দেশিকা' })
+        : t('sidebar.patientCompanion', { ns: 'navigation', defaultValue: 'Patient Medication Guide' }),
       path: '/bangla-companion',
       icon: HeartHandshake,
-      badgeText: 'বাংলা',
+      badgeText: isBn ? 'অডিও' : 'AUDIO',
     },
     {
       name: t('sidebar.pitchDeck', { ns: 'navigation', defaultValue: 'Pitch Deck (10-Slide)' }),

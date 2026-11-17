@@ -9,6 +9,7 @@ import {
   AlertCircle,
   UserCheck,
   ShieldAlert,
+  Stethoscope,
 } from 'lucide-react';
 import { useTheme } from '@/app/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
@@ -114,15 +115,26 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
           <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
 
-        <div className="flex flex-col min-w-0">
-          <div className="hidden md:flex items-center space-x-2 text-xs text-muted-foreground">
-            <span>{categoryStr}</span>
-            <span>/</span>
-            <span className="font-medium text-foreground truncate max-w-[220px]">{titleStr}</span>
+        {/* On Mobile: Compact Brand Badge (Zero Duplication with page content) */}
+        <div className="flex md:hidden items-center space-x-2 min-w-0">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm shrink-0">
+            <Stethoscope className="h-4 w-4" />
           </div>
-          <h1 className="text-sm sm:text-base md:text-lg font-bold text-foreground tracking-tight truncate">
-            {titleStr}
-          </h1>
+          <div className="flex items-center space-x-1.5 whitespace-nowrap">
+            <span className="font-bold text-sm tracking-tight text-foreground">
+              PredictRx
+            </span>
+            <span className="text-[10px] font-extrabold font-mono text-primary px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20">
+              AI
+            </span>
+          </div>
+        </div>
+
+        {/* On Desktop: Sleek, Non-Duplicating Breadcrumbs */}
+        <div className="hidden md:flex items-center space-x-2 text-xs font-medium text-muted-foreground min-w-0">
+          <span className="text-muted-foreground hover:text-foreground transition-colors">{categoryStr}</span>
+          <span className="text-muted-foreground/50">/</span>
+          <span className="font-semibold text-foreground truncate max-w-[280px]">{titleStr}</span>
         </div>
       </div>
 

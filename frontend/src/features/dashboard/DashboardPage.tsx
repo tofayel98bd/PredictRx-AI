@@ -429,18 +429,18 @@ export const DashboardPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-950 dark:text-emerald-200">
                   <HeartHandshake className="h-4 w-4 text-emerald-600" />
-                  <span>{isBn ? 'সহজ বাংলা রোগী নির্দেশিকা' : 'Bangla Patient Companion'}</span>
+                  <span>{isBn ? 'রোগীর ওষুধ নির্দেশিকা ও লিফলেট' : 'Patient Medication Guide'}</span>
                 </div>
                 <Badge variant="success" className="text-[10px]">{isBn ? 'অডিও সহ' : 'With Audio'}</Badge>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
                 {isBn
                   ? 'রোগী এবং স্বজনদের জন্য সহজ ভাষায় প্রেসক্রিপশন নির্দেশিকা, খাওয়ার নিয়ম ও অডিও স্পিচ শুনুন।'
-                  : 'Patient and caregiver prescription instructions in plain Bengali, dosing schedules and text-to-speech audio.'}
+                  : 'Patient and caregiver prescription instructions in plain colloquial terms, dosing schedules and text-to-speech audio.'}
               </p>
               <Button asChild size="sm" className="w-full text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
                 <Link to="/bangla-companion">
-                  {isBn ? 'বাংলা নির্দেশিকা খুলুন →' : 'Open Bangla Companion →'}
+                  {isBn ? 'রোগী নির্দেশিকা খুলুন →' : 'Open Patient Guide →'}
                 </Link>
               </Button>
             </CardContent>
