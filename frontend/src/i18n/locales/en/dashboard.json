@@ -1,0 +1,50 @@
+{
+  "hubBanner": {
+    "badge": "Bangladesh CDSS Intelligence Hub",
+    "title": "Welcome, Dr. M. Ashraful Hoque",
+    "description": "Active CDSS surveillance covering DGDA drug catalog, KDIGO clinical practice guidelines, and real-time machine learning complication predictors.",
+    "ctaAnalyze": "Analyze Prescription",
+    "ctaInteractions": "Drug Interaction Center"
+  },
+  "metrics": {
+    "totalPrescriptions": "Total Prescriptions",
+    "prescriptionsSub": "+14% from last week",
+    "criticalAlerts": "Critical Adverse Risks",
+    "alertsSub": "Immediate clinician review required",
+    "interactionsPrevented": "Drug Interactions Flagged",
+    "interactionsSub": "DGDA cross-referenced",
+    "reviewedPatients": "Patients Monitored",
+    "patientsSub": "Renal safety profiles active"
+  },
+  "charts": {
+    "riskDistribution": "Prescription Complication Risk Distribution",
+    "riskDistributionSub": "Real-time ML risk stratification across active clinical workload",
+    "weeklyActivity": "7-Day Surveillance & Interception Activity",
+    "weeklyActivitySub": "Daily volume of analyzed prescriptions vs detected collision alerts",
+    "analyzed": "Analyzed",
+    "alerts": "Alerts",
+    "lowRisk": "Low Risk",
+    "moderateRisk": "Moderate Risk",
+    "highRisk": "High Risk",
+    "criticalAdverse": "Critical Adverse"
+  },
+  "recentTable": {
+    "title": "Recent Clinical Prescription Audits",
+    "description": "Latest prescriptions processed with automated risk assessment and DGDA brand mapping.",
+    "viewAll": "View Complete Archive",
+    "colId": "Analysis ID",
+    "colPatient": "Patient Name & MRN",
+    "colRisk": "Risk Level",
+    "colInteractions": "Collisions",
+    "colDate": "Date Processed",
+    "colAction": "Actions",
+    "viewReport": "Review Report"
+  },
+  "goldenScenarios": {
+    "title": "Clinical Benchmark Scenarios",
+    "description": "Pre-configured synthetic patient scenarios highlighting high-risk collisions and clinical safety rules.",
+    "scenario1": "Ketorolac + Ramipril (AKI Risk)",
+    "scenario2": "Triple Whammy Collision",
+    "scenario3": "Safe Antihypertensive Therapy"
+  }
+}

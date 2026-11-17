@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   History,
   Search,
@@ -22,6 +23,8 @@ import { PrescriptionAnalysisResult } from '@/types';
 import { formatDate } from '@/lib/utils';
 
 export const PrescriptionListPage: React.FC = () => {
+  const { t, i18n } = useTranslation(['prescriptions', 'common']);
+  const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
   const [prescriptions, setPrescriptions] = useState<PrescriptionAnalysisResult[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [severityFilter, setSeverityFilter] = useState('ALL');
@@ -40,7 +43,11 @@ export const PrescriptionListPage: React.FC = () => {
     const matchesSearch =
       p.prescription_id.toLowerCase().includes(q) ||
       (p.patient_context.name && p.patient_context.name.toLowerCase().includes(q)) ||
-      p.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes(q) || (m.generic_name && m.generic_name.toLowerCase().includes(q)));
+      p.extracted_prescription.some(
+        (m) =>
+          m.brand_name.toLowerCase().includes(q) ||
+          (m.generic_name && m.generic_name.toLowerCase().includes(q))
+      );
 
     const matchesSeverity =
       severityFilter === 'ALL' ||
@@ -61,17 +68,17 @@ export const PrescriptionListPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground">
-            Prescription Records & Analysis History
+            {t('title', 'Prescription Records & Analysis History')}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Audit log of all scanned prescriptions, OCR parsed medications, and CDSS risk ratings.
+            {t('subtitle', 'Audit log of all scanned prescriptions, OCR parsed medications, and CDSS risk ratings.')}
           </p>
         </div>
 
         <Button asChild size="sm" className="self-start">
           <Link to="/analyze">
             <FileText className="mr-1.5 h-4 w-4" />
-            Analyze New Prescription
+            {t('btnAnalyzeNew', 'Upload New Prescription')}
           </Link>
         </Button>
       </div>
@@ -83,7 +90,10 @@ export const PrescriptionListPage: React.FC = () => {
             <div className="sm:col-span-6 relative">
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search prescription ID, patient name, or medicine (e.g. Bizoran, Rolac)..."
+                placeholder={t(
+                  'searchPlaceholder',
+                  'Search prescription ID, patient name, or medicine (e.g. Bizoran, Rolac)...'
+                )}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 text-xs"
@@ -96,11 +106,11 @@ export const PrescriptionListPage: React.FC = () => {
                 onChange={(e) => setSeverityFilter(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs"
               >
-                <option value="ALL">All Risk Severities</option>
-                <option value="CRITICAL">Critical Risk</option>
-                <option value="HIGH">High Risk</option>
-                <option value="MODERATE">Moderate Risk</option>
-                <option value="LOW">Low Risk</option>
+                <option value="ALL">{t('filterRisk', 'All Risk Levels')}</option>
+                <option value="CRITICAL">{t('status.critical', { ns: 'common', defaultValue: 'Critical Risk' })}</option>
+                <option value="HIGH">{t('status.high', { ns: 'common', defaultValue: 'High Risk' })}</option>
+                <option value="MODERATE">{t('status.moderate', { ns: 'common', defaultValue: 'Moderate Risk' })}</option>
+                <option value="LOW">{t('status.low', { ns: 'common', defaultValue: 'Low Risk' })}</option>
               </select>
             </div>
 
@@ -110,8 +120,8 @@ export const PrescriptionListPage: React.FC = () => {
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs"
               >
-                <option value="date">Sort by Most Recent</option>
-                <option value="risk">Sort by Highest Risk Score</option>
+                <option value="date">{isBn ? 'সর্বশেষ তারিখ অনুযায়ী' : 'Sort by Most Recent'}</option>
+                <option value="risk">{isBn ? 'সর্বোচ্চ ঝুঁকি স্কোর অনুযায়ী' : 'Sort by Highest Risk Score'}</option>
               </select>
             </div>
           </div>
@@ -122,7 +132,9 @@ export const PrescriptionListPage: React.FC = () => {
       <div className="space-y-3">
         {sorted.length === 0 ? (
           <Card className="border-dashed p-8 text-center">
-            <p className="text-sm font-semibold text-muted-foreground">No prescription records matched your query.</p>
+            <p className="text-sm font-semibold text-muted-foreground">
+              {t('emptyState', 'No prescription records matched your query.')}
+            </p>
             <Button
               variant="outline"
               size="sm"
@@ -132,12 +144,15 @@ export const PrescriptionListPage: React.FC = () => {
               }}
               className="mt-3 text-xs"
             >
-              Reset Filters
+              {t('actions.reset', { ns: 'common', defaultValue: 'Reset Filters' })}
             </Button>
           </Card>
         ) : (
           sorted.map((item) => {
             const isCritical = item.clinical_risk.risk_classification === 'CRITICAL';
+            const riskClassLabel = isBn
+              ? (item.clinical_risk.risk_classification === 'CRITICAL' ? 'মারাত্মক ঝুঁকি' : 'স্বাভাবিক')
+              : item.clinical_risk.risk_classification;
             return (
               <Card
                 key={item.analysis_id}
@@ -168,20 +183,20 @@ export const PrescriptionListPage: React.FC = () => {
                             {formatDate(item.timestamp)}
                           </span>
                           {item.clinical_risk.is_synthetic_demo && (
-                            <Badge variant="demo" className="text-[9px]">DEMO</Badge>
+                            <Badge variant="demo" className="text-[9px]">{isBn ? 'ডেমো' : 'DEMO'}</Badge>
                           )}
                         </div>
 
                         <div className="text-xs text-foreground font-medium flex items-center space-x-2">
                           <User className="h-3 w-3 text-muted-foreground" />
-                          <span>{item.patient_context.name || 'Anonymous Patient'}</span>
+                          <span>{item.patient_context.name || (isBn ? 'নামহীন রোগী' : 'Anonymous Patient')}</span>
                           <span className="text-muted-foreground">
-                            (Age {item.patient_context.age}, eGFR {item.patient_context.egfr ?? 'N/A'})
+                            ({isBn ? `বয়স ${item.patient_context.age}` : `Age ${item.patient_context.age}`}, eGFR {item.patient_context.egfr ?? 'N/A'})
                           </span>
                         </div>
 
                         <div className="text-xs text-muted-foreground">
-                          <strong>Meds: </strong>
+                          <strong>{isBn ? 'ওষুধসমূহ: ' : 'Meds: '}</strong>
                           {item.extracted_prescription.map((m) => m.brand_name).join(', ')}
                         </div>
                       </div>
@@ -194,16 +209,16 @@ export const PrescriptionListPage: React.FC = () => {
                           variant={isCritical ? 'critical' : 'success'}
                           className="text-xs"
                         >
-                          {item.clinical_risk.risk_classification} ({item.clinical_risk.risk_score}/100)
+                          {riskClassLabel} ({item.clinical_risk.risk_score}/100)
                         </Badge>
                         <span className="block text-[10px] text-muted-foreground mt-0.5">
-                          {item.drug_interactions.length} Interactions Flagged
+                          {item.drug_interactions.length} {isBn ? 'টি প্রতিক্রিয়া পরিলক্ষিত' : 'Interactions Flagged'}
                         </span>
                       </div>
 
                       <Button asChild size="sm" variant="outline" className="text-xs">
                         <Link to={`/reports/${item.analysis_id}`}>
-                          View Report <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
+                          {t('btnViewReport', isBn ? 'অডিট রিপোর্ট' : 'Audit Report')} <ArrowUpRight className="ml-1 h-3.5 w-3.5" />
                         </Link>
                       </Button>
                     </div>

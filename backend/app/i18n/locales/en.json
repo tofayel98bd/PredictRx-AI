@@ -1,0 +1,60 @@
+{
+  "common": {
+    "success": "Operation completed successfully.",
+    "failure": "Operation failed.",
+    "internal_error": "An internal error occurred while processing the clinical request.",
+    "not_found": "Requested resource not found.",
+    "forbidden": "Access forbidden. Insufficient permissions.",
+    "unauthorized": "Authentication credentials were not provided or are invalid.",
+    "bad_request": "Invalid request parameters.",
+    "validation_failed": "Request validation failed. Please check your parameters."
+  },
+  "auth": {
+    "invalid_credentials": "Invalid email or password.",
+    "account_deactivated": "Account is deactivated. Contact hospital administrator.",
+    "user_exists": "User with email '{email}' is already registered.",
+    "user_not_found": "Clinician account not found.",
+    "registration_success": "Clinician registered successfully.",
+    "login_success": "Login successful.",
+    "preferences_updated": "User preferences updated successfully.",
+    "token_invalid": "Authentication failed or token invalid.",
+    "invalid_language": "Language '{lang}' is not supported. Supported languages: en, bn."
+  },
+  "reports": {
+    "report_not_found": "Report for prescription '{prescription_id}' not found.",
+    "report_generated": "Clinical decision report generated successfully.",
+    "pdf_generated": "Bilingual PDF clinical audit report generated successfully.",
+    "safety_disclaimer": "MEDICAL SAFETY NOTICE: PredictRx-AI is an assistive Clinical Decision Support System (CDSS) for licensed healthcare professionals. All automated detections, risk scores, and guidance are advisory and must be verified by a qualified clinician."
+  },
+  "patients": {
+    "patient_not_found": "Patient with identifier '{identifier}' not found.",
+    "patient_created": "Patient profile registered successfully.",
+    "patient_updated": "Patient profile updated successfully."
+  },
+  "drugs": {
+    "drug_not_found": "Drug with identifier '{identifier}' not found.",
+    "search_query_empty": "Drug search query cannot be empty."
+  },
+  "prescriptions": {
+    "not_found": "Prescription record '{prescription_id}' not found.",
+    "upload_success": "Prescription uploaded and queued for safety analysis.",
+    "analysis_completed": "Prescription safety analysis completed.",
+    "review_submitted": "Clinician review submitted successfully."
+  },
+  "clinical": {
+    "critical_risk_alert": "High acute renal and ADE complication probability ({score}%). Immediate clinical intervention advised.",
+    "high_risk_alert": "Elevated complication risk ({score}%). Monitor renal parameters and adjust therapy.",
+    "moderate_risk_alert": "Moderate risk ({score}%). Routine vigilance indicated.",
+    "low_risk_alert": "Low acute complication risk ({score}%). Standard therapy protocol.",
+    "triple_whammy_note": "Synergistic hemodynamic collapse triggers acute kidney injury requiring emergency dialysis (CMAJ 2013).",
+    "nsaid_ceiling_note": "Exceeding the strict 5-day ceiling sharply increases the risk of renal papillary necrosis and gastrointestinal hemorrhage (FDA / BNF Black Box).",
+    "nephrotoxic_collision_note": "Simultaneous afferent vasoconstriction (NSAID) and efferent vasodilation (ARB) causes critical loss of glomerular perfusion pressure."
+  },
+  "validation": {
+    "field_required": "Field '{field}' is required.",
+    "invalid_value": "Invalid value provided for '{field}'.",
+    "invalid_file": "Prescription file is invalid or missing.",
+    "file_too_large": "Prescription image size exceeds maximum allowed limit (10MB).",
+    "invalid_file_type": "Invalid file format. Supported formats: PNG, JPG, JPEG, WEBP, PDF."
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "sidebar": {
+    "dashboard": "ড্যাশবোর্ড",
+    "analyze": "প্রেসক্রিপশন বিশ্লেষণ",
+    "prescriptions": "প্রেসক্রিপশন রেকর্ডস",
+    "patients": "রোগী নির্দেশিকা",
+    "drugInteractions": "ওষুধের পারস্পরিক প্রতিক্রিয়া",
+    "clinicalRisk": "ক্লিনিক্যাল ঝুঁকি বিশ্লেষণ",
+    "reports": "ক্লিনিক্যাল রিপোর্ট",
+    "banglaCompanion": "বাংলা নির্দেশিকা",
+    "pitchDeck": "পিচ ডেক (১০ স্লাইড)",
+    "settings": "সিস্টেম সেটিংস",
+    "collapse": "সাইডবার ছোট করুন",
+    "expand": "সাইডবার বড় করুন"
+  },
+  "header": {
+    "categories": {
+      "executive": "মনিটরিং ড্যাশবোর্ড",
+      "diagnostic": "ডায়াগনস্টিক এআই",
+      "records": "চিকিৎসা রেকর্ড",
+      "patientCare": "রোগী সেবা",
+      "pharmacovigilance": "ফার্মাকোভিজিল্যান্স",
+      "intelligence": "এআই বিশ্লেষণ",
+      "documentation": "ডকুমেন্টেশন",
+      "literacy": "রোগী সচেতনতা",
+      "preferences": "সেটিংস ও পছন্দ"
+    },
+    "titles": {
+      "dashboard": "ক্লিনিক্যাল সামগ্রিক ড্যাশবোর্ড",
+      "analyze": "প্রেসক্রিপশন ওসিআর ও নিরাপত্তা বিশ্লেষণ",
+      "prescriptions": "প্রেসক্রিপশন রেকর্ড ও ইতিহাস",
+      "patients": "রোগীদের তালিকা ও সুরক্ষা প্রোফাইল",
+      "drugInteractions": "ওষুধের ড্রাগ-ড্রাগ কলিশন পর্যবেক্ষণ কেন্দ্র",
+      "clinicalRisk": "ব্যাখ্যামূলক ঝুঁকি ও SHAP বিশ্লেষণ",
+      "reports": "যাচাইকৃত ক্লিনিক্যাল সিদ্ধান্ত রিপোর্ট",
+      "banglaCompanion": "রোগীদের সহজ বাংলা নির্দেশিকা (Bangla Companion)",
+      "settings": "সিস্টেম কনফিগারেশন ও অপারেশনাল পছন্দসমূহ",
+      "default": "ক্লিনিক্যাল ডিসিশন সাপোর্ট সিস্টেম"
+    },
+    "notifications": {
+      "button": "ক্লিনিক্যাল নিরাপত্তা বিজ্ঞপ্তি",
+      "title": "জরুরি ক্লিনিক্যাল সতর্কবার্তা",
+      "unreviewed": "{{count}}টি পর্যালোচনা বাকি",
+      "highAkiTitle": "তীব্র AKI ঝুঁকি: Ketorolac 14d + Olmesartan",
+      "highAkiDesc": "রোগী: মো. রফিকুল ইসলাম (CKD 3a, eGFR 34.5)",
+      "ceilingTitle": "সর্বোচ্চ নিরাপদ মেয়াদের সতর্কতা",
+      "ceilingDesc": "Ketorolac সেবনের সর্বোচ্চ নিরাপদ সীমা ৫ দিন।",
+      "viewMonitor": "ফার্মাকোভিজিল্যান্স মনিটর দেখুন →"
+    },
+    "profile": {
+      "doctorName": "ডা. মো. আশরাফুল হক",
+      "bmdcNumber": "বিএমডিসি #এ-৮৯৪১২"
+    },
+    "theme": {
+      "toggle": "থিম পরিবর্তন",
+      "dark": "ডার্ক মোড",
+      "light": "লাইট মোড"
+    }
+  }
+}

@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from app.core.logging import logger
+from app.i18n.translator import translator, t
 
 
 class ErrorDetail(BaseModel):
@@ -102,12 +103,27 @@ class FileValidationError(PredictRxException):
 
 
 async def predict_rx_exception_handler(request: Request, exc: PredictRxException) -> JSONResponse:
-    logger.warning(f"Domain exception on {request.method} {request.url.path}: {exc.code} - {exc.message}")
+    lang = translator.resolve_language(request)
+    localized_message = translator.translate(exc.message, lang=lang)
+    if localized_message == exc.message:
+        code_key_map = {
+            "NOT_FOUND": "common.not_found",
+            "RESOURCE_CONFLICT": "common.failure",
+            "AUTHENTICATION_FAILED": "auth.token_invalid",
+            "PERMISSION_DENIED": "common.forbidden",
+            "VALIDATION_ERROR": "common.validation_failed",
+            "INVALID_FILE": "validation.invalid_file",
+            "INTERNAL_ERROR": "common.internal_error",
+        }
+        if exc.code in code_key_map:
+            localized_message = translator.translate(code_key_map[exc.code], lang=lang)
+
+    logger.warning(f"Domain exception on {request.method} {request.url.path}: {exc.code} - {localized_message}")
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "success": False,
-            "message": exc.message,
+            "message": localized_message,
             "error": {
                 "code": exc.code,
                 "details": exc.details,
@@ -117,20 +133,27 @@ async def predict_rx_exception_handler(request: Request, exc: PredictRxException
 
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    lang = translator.resolve_language(request)
     details = []
     for err in exc.errors():
         loc = " -> ".join([str(x) for x in err.get("loc", [])])
+        raw_msg = err.get("msg", "Invalid value")
+        if "Field required" in raw_msg or err.get("type") == "missing":
+            det_msg = translator.translate("validation.field_required", lang=lang, field=loc)
+        else:
+            det_msg = translator.translate("validation.invalid_value", lang=lang, field=loc)
         details.append({
             "code": err.get("type", "value_error"),
             "field": loc,
-            "message": err.get("msg", "Invalid value"),
+            "message": det_msg,
         })
+    main_msg = translator.translate("common.validation_failed", lang=lang)
     logger.warning(f"Request validation failure on {request.method} {request.url.path}: {details}")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={
             "success": False,
-            "message": "Request validation failed. Please check your parameters.",
+            "message": main_msg,
             "error": {
                 "code": "REQUEST_VALIDATION_ERROR",
                 "details": details,
@@ -140,12 +163,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    lang = translator.resolve_language(request)
+    main_msg = translator.translate("common.internal_error", lang=lang)
     logger.error(f"Unhandled server exception on {request.method} {request.url.path}: {str(exc)}", exc_info=True)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "success": False,
-            "message": "An internal error occurred while processing the clinical request.",
+            "message": main_msg,
             "error": {
                 "code": "INTERNAL_SERVER_ERROR",
                 "details": [],

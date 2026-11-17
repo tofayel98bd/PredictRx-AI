@@ -1,0 +1,14 @@
+{
+  "required": "This field is required",
+  "invalidEmail": "Please provide a valid email address",
+  "invalidNumber": "Value must be a valid number",
+  "ageMin": "Age must be at least 1 year",
+  "ageMax": "Age must be realistic (maximum 120 years)",
+  "fileRequired": "Prescription file is required for OCR extraction",
+  "fileType": "Only PNG, JPG, JPEG, and PDF documents are supported",
+  "fileSize": "File size exceeds the 10MB maximum limit",
+  "creatinineRange": "Serum creatinine should be between 0.1 and 25.0 mg/dL",
+  "egfrRange": "eGFR value should be between 1 and 200 mL/min/1.73m²",
+  "bpFormat": "Blood pressure must be within normal physiological ranges",
+  "dosageSyntax": "Dosage syntax must follow standard medical patterns (e.g., 1+0+1, 1+1+1)"
+}

@@ -18,6 +18,7 @@ class User(Base, UUIDMixin, TimestampMixin):
     role: Mapped[str] = mapped_column(String(50), default="doctor", nullable=False)  # doctor, clinical_pharmacist, reviewer, admin
     bmdc_number: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, index=True)  # Bangladesh Medical & Dental Council reg
     department: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    preferred_language: Mapped[str] = mapped_column(String(5), default="en", server_default="en", nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # Relationships

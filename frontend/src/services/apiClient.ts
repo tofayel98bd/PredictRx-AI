@@ -15,6 +15,19 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
+// Attach user's active locale (en or bn) to Accept-Language header
+apiClient.interceptors.request.use((config) => {
+  try {
+    const lang = localStorage.getItem('predictrx_language') || 'en';
+    if (config.headers) {
+      config.headers['Accept-Language'] = lang;
+    }
+  } catch {
+    // LocalStorage fallback
+  }
+  return config;
+});
+
 // In test environment, bypass live network requests to ensure fast, isolated, deterministic test executions
 if (isTestEnv) {
   apiClient.interceptors.request.use(() => {

@@ -1,0 +1,35 @@
+{
+  "title": "Patient Directory & Safety Profiles",
+  "subtitle": "Continuously monitored renal and cardiovascular safety profiles for high-risk clinical cohorts.",
+  "searchPlaceholder": "Search by MRN, Patient Name, or Contact...",
+  "btnRegisterPatient": "Register New Patient",
+  "table": {
+    "colMrn": "MRN / ID",
+    "colName": "Patient Name",
+    "colAgeGender": "Age / Gender",
+    "colRenal": "Renal Function (eGFR / Cr)",
+    "colConditions": "Active Conditions",
+    "colRiskStatus": "Surveillance Status",
+    "colAction": "Actions"
+  },
+  "detail": {
+    "back": "Back to Directory",
+    "demographics": "Demographics & Vital Parameters",
+    "age": "Age",
+    "gender": "Gender",
+    "phone": "Contact Phone",
+    "address": "Address",
+    "bloodPressure": "Blood Pressure",
+    "egfr": "eGFR (Kidney Function)",
+    "creatinine": "Serum Creatinine",
+    "hba1c": "HbA1c",
+    "weight": "Weight",
+    "height": "Height",
+    "conditions": "Chronic Conditions",
+    "medications": "Current Ongoing Medications",
+    "allergies": "Known Allergies",
+    "lastEvaluated": "Last evaluated",
+    "recentPrescriptions": "Patient Prescription History",
+    "safetyAlerts": "Active Clinical Safety Alerts"
+  }
+}

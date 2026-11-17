@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { ClinicalRiskAnalysis } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,9 @@ interface RiskGaugeCardProps {
 }
 
 export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
+  const { t, i18n } = useTranslation(['analysis', 'common']);
+  const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
+
   const getBadgeVariant = (classification: string) => {
     switch (classification) {
       case 'CRITICAL':
@@ -32,22 +36,40 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
     return 'text-emerald-600 dark:text-emerald-400';
   };
 
+  const formatRiskBadge = (classification: string) => {
+    if (isBn) {
+      switch (classification) {
+        case 'CRITICAL':
+          return 'মারাত্মক ঝুঁকি';
+        case 'HIGH':
+          return 'উচ্চ ঝুঁকি';
+        case 'MODERATE':
+          return 'মাঝারি ঝুঁকি';
+        case 'LOW':
+          return 'স্বাভাবিক';
+        default:
+          return `${classification} ঝুঁকি`;
+      }
+    }
+    return `${classification} ${t('results.riskGauge.riskSuffix', 'RISK')}`;
+  };
+
   return (
     <Card className="border-border shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base font-bold flex items-center space-x-2">
             <ShieldAlert className="h-5 w-5 text-red-600" />
-            <span>Prescription Risk Assessment</span>
+            <span>{t('results.riskGauge.title', 'Prescription Risk Assessment')}</span>
           </CardTitle>
           <div className="flex items-center space-x-2">
             {risk.is_synthetic_demo && (
               <Badge variant="demo">
-                DEMO — NOT CLINICALLY VALIDATED
+                {t('results.riskGauge.demoBadge', 'DEMO — NOT CLINICALLY VALIDATED')}
               </Badge>
             )}
             <Badge variant={getBadgeVariant(risk.risk_classification)}>
-              {risk.risk_classification} RISK
+              {formatRiskBadge(risk.risk_classification)}
             </Badge>
           </div>
         </div>
@@ -65,18 +87,18 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
             </div>
             <div>
               <h4 className="font-bold text-foreground text-sm">
-                Composite Adverse Drug Event Probability Score
+                {t('results.riskGauge.scoreTitle', 'Composite Adverse Drug Event Probability Score')}
               </h4>
               <p className="text-xs text-muted-foreground mt-0.5 max-w-md">
-                Estimated index combining pharmacodynamic drug-drug interaction, patient renal clearance, and duration ceilings.
+                {t('results.riskGauge.scoreDesc', 'Estimated index combining pharmacodynamic drug-drug interaction, patient renal clearance, and duration ceilings.')}
               </p>
             </div>
           </div>
 
           <div className="w-full sm:w-48 text-right sm:text-left space-y-1">
             <div className="flex justify-between text-xs font-semibold">
-              <span className="text-muted-foreground">Threshold:</span>
-              <span className="text-red-600">Critical (&gt;75)</span>
+              <span className="text-muted-foreground">{t('results.riskGauge.threshold', 'Threshold:')}</span>
+              <span className="text-red-600">{t('results.riskGauge.thresholdCritical', 'Critical (>75)')}</span>
             </div>
             <Progress
               value={risk.risk_score}
@@ -90,7 +112,9 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-3.5 rounded-lg border border-border bg-card">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground font-medium">Acute Kidney Injury (AKI)</span>
+              <span className="text-muted-foreground font-medium">
+                {t('results.riskGauge.aki', 'Acute Kidney Injury (AKI)')}
+              </span>
               <span className="font-bold text-red-600 font-mono">{risk.aki_risk_percentage || 84}%</span>
             </div>
             <Progress
@@ -99,13 +123,15 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
               indicatorClassName="bg-red-600"
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              Renal hemodynamic uncoupling
+              {t('results.riskGauge.akiDesc', 'Renal hemodynamic uncoupling')}
             </p>
           </div>
 
           <div className="p-3.5 rounded-lg border border-border bg-card">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground font-medium">Gastrointestinal Bleeding</span>
+              <span className="text-muted-foreground font-medium">
+                {t('results.riskGauge.giBleed', 'Gastrointestinal Bleeding')}
+              </span>
               <span className="font-bold text-amber-600 font-mono">{risk.gi_bleed_risk_percentage || 68}%</span>
             </div>
             <Progress
@@ -114,13 +140,15 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
               indicatorClassName="bg-amber-500"
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              COX-1 inhibition &gt; 5 days
+              {t('results.riskGauge.giBleedDesc', 'COX-1 inhibition > 5 days')}
             </p>
           </div>
 
           <div className="p-3.5 rounded-lg border border-border bg-card">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-muted-foreground font-medium">Cardiovascular Event</span>
+              <span className="text-muted-foreground font-medium">
+                {t('results.riskGauge.cv', 'Cardiovascular Event')}
+              </span>
               <span className="font-bold text-blue-600 font-mono">{risk.cardiovascular_risk_percentage || 42}%</span>
             </div>
             <Progress
@@ -129,7 +157,7 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
               indicatorClassName="bg-blue-500"
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              BP blunting & fluid retention
+              {t('results.riskGauge.cvDesc', 'BP blunting & fluid retention')}
             </p>
           </div>
         </div>
@@ -138,8 +166,12 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
         <div className="p-3 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 text-xs text-amber-900 dark:text-amber-200 flex items-start space-x-2.5">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <div>
-            <span className="font-semibold">Model Calibration Disclosure: </span>
-            <span>{risk.calibrated_probability_note}</span>
+            <span className="font-semibold">{t('results.riskGauge.calibration', 'Model Calibration Disclosure:')} </span>
+            <span>
+              {isBn && risk.calibrated_probability_note?.includes('DEMO ESTIMATION — NOT CLINICALLY VALIDATED')
+                ? 'ডেমো মূল্যায়ন — চিকিৎসাগতভাবে যাচাইকৃত নয়। শুধুমাত্র প্রদর্শনের জন্য কৃত্রিম স্কোরিং। যে কোনো ক্লিনিক্যাল সিদ্ধান্তের জন্য চিকিৎসকের নিশ্চিতকরণ আবশ্যক।'
+                : risk.calibrated_probability_note}
+            </span>
           </div>
         </div>
       </CardContent>

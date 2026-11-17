@@ -1,0 +1,60 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "analyze": "Analyze Prescription",
+    "prescriptions": "Prescription Records",
+    "patients": "Patient Directory",
+    "drugInteractions": "Drug Interactions",
+    "clinicalRisk": "Clinical Risk Analysis",
+    "reports": "Clinical Reports",
+    "banglaCompanion": "Bangla Companion",
+    "pitchDeck": "Pitch Deck (10-Slide)",
+    "settings": "System Settings",
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
+  "header": {
+    "categories": {
+      "executive": "Executive Monitoring",
+      "diagnostic": "Diagnostic AI",
+      "records": "Clinical Records",
+      "patientCare": "Patient Care",
+      "pharmacovigilance": "Pharmacovigilance",
+      "intelligence": "AI Intelligence",
+      "documentation": "Documentation",
+      "literacy": "Patient Literacy",
+      "preferences": "Preferences"
+    },
+    "titles": {
+      "dashboard": "Clinical Overview Dashboard",
+      "analyze": "Prescription OCR & Safety Analysis",
+      "prescriptions": "Prescription Records & History",
+      "patients": "Patient Directory & Safety Profiles",
+      "drugInteractions": "Drug Interaction Monitoring Center",
+      "clinicalRisk": "Explainable Clinical Risk & SHAP Analysis",
+      "reports": "Verified Clinical Decision Reports",
+      "banglaCompanion": "Bangla Patient Companion (সহজ বাংলা নির্দেশিকা)",
+      "settings": "System Settings & Operational Preferences",
+      "default": "Clinical Decision Support System"
+    },
+    "notifications": {
+      "button": "Clinical safety notifications",
+      "title": "Critical Clinical Alerts",
+      "unreviewed": "{{count}} Unreviewed",
+      "highAkiTitle": "High AKI Risk: Ketorolac 14d + Olmesartan",
+      "highAkiDesc": "Patient: Md. Rafiqul Islam (CKD 3a, eGFR 34.5)",
+      "ceilingTitle": "Therapeutic Ceiling Warning",
+      "ceilingDesc": "Ketorolac protocol ceiling is 5 days maximum.",
+      "viewMonitor": "View Pharmacovigilance Monitor →"
+    },
+    "profile": {
+      "doctorName": "Dr. M. Ashraful Hoque",
+      "bmdcNumber": "BMDC #A-89412"
+    },
+    "theme": {
+      "toggle": "Toggle theme",
+      "dark": "Dark mode",
+      "light": "Light mode"
+    }
+  }
+}

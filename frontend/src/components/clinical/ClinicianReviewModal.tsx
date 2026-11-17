@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +31,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
   currentDecision,
   onReviewSaved,
 }) => {
+  const { t } = useTranslation(['reports', 'common']);
   const [reviewerName, setReviewerName] = useState('Dr. M. Ashraful Hoque');
   const [reviewerLicense, setReviewerLicense] = useState('BMDC #A-89412');
   const [decision, setDecision] = useState<'APPROVED' | 'MODIFIED' | 'REJECTED'>(
@@ -116,7 +118,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
                 }`}
               >
                 <CheckCircle2 className="h-4 w-4 mb-1 text-emerald-600" />
-                <span>Approved</span>
+                <span>{t('status.approved', { ns: 'common', defaultValue: 'Approved' })}</span>
               </button>
 
               <button
@@ -129,7 +131,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
                 }`}
               >
                 <Edit3 className="h-4 w-4 mb-1 text-amber-600" />
-                <span>Modified</span>
+                <span>{t('status.modified', { ns: 'common', defaultValue: 'Modified' })}</span>
               </button>
 
               <button
@@ -142,7 +144,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
                 }`}
               >
                 <AlertOctagon className="h-4 w-4 mb-1 text-red-600" />
-                <span>Rejected</span>
+                <span>{t('status.rejected', { ns: 'common', defaultValue: 'Rejected' })}</span>
               </button>
             </div>
           </div>
@@ -169,7 +171,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
 
           <DialogFooter className="pt-2">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>
-              Cancel
+              {t('actions.cancel', { ns: 'common', defaultValue: 'Cancel' })}
             </Button>
             <Button type="submit" size="sm" disabled={isSubmitting}>
               {isSubmitting ? 'Recording...' : 'Certify Decision'}

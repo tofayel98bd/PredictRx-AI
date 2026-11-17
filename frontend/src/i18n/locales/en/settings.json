@@ -1,0 +1,37 @@
+{
+  "title": "System Settings & Operational Preferences",
+  "subtitle": "Configure clinical display preferences, local API bridge status, and verified practitioner credentials.",
+  "appearance": {
+    "title": "Visual Appearance & Display Mode",
+    "description": "Toggle between clinical daylight mode and high-contrast dark environment.",
+    "light": "Clinical Light",
+    "dark": "Dark Environment",
+    "system": "System Default"
+  },
+  "language": {
+    "title": "Internationalization & Interface Language",
+    "description": "Select your preferred application language. Affects all clinical modules, reports, and error messages.",
+    "english": "English (Default)",
+    "bangla": "বাংলা (Bengali)",
+    "active": "Active Interface Language",
+    "savedSuccess": "Language preference updated and saved to profile."
+  },
+  "clinician": {
+    "title": "Clinician Identity & Licensing",
+    "description": "Verified physician credentials attached to CDSS audit logs and prescription sign-offs.",
+    "name": "Practitioner Full Name",
+    "bmdc": "BMDC Registration Number",
+    "hospital": "Hospital / Clinical Center Affiliation",
+    "btnSave": "Update Practitioner Profile",
+    "savedToast": "Clinician profile and licensing details updated."
+  },
+  "api": {
+    "title": "Backend API Bridge & Microservice Status",
+    "description": "Configure connection parameters for the local or hospital FastAPI decision engine.",
+    "url": "FastAPI Base URL",
+    "btnTest": "Test Connection",
+    "testing": "Testing Connection...",
+    "connected": "Connected to FastAPI backend",
+    "offline": "Backend offline. Running in Safe Demo/Mock Adapter mode."
+  }
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -71,6 +72,7 @@ const WORKFLOW_STAGES = [
 ];
 
 export const PrescriptionAnalysisPage: React.FC = () => {
+  const { t } = useTranslation(['analysis', 'common']);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -285,11 +287,11 @@ export const PrescriptionAnalysisPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center space-x-2">
-            <span>Prescription OCR & Clinical Safety Analysis</span>
-            <Badge variant="demo">Dual AI + Rules Engine</Badge>
+            <span>{t('title', 'Prescription OCR & Clinical Safety Analysis')}</span>
+            <Badge variant="demo">{t('scenarios.dualEngine', 'Dual AI + Rules Engine')}</Badge>
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Extract handwritten/printed BD prescriptions, validate dosing syntax, and predict patient-specific pharmacotherapy risks.
+            {t('subtitle', 'Extract handwritten/printed BD prescriptions, validate dosing syntax, and predict patient-specific pharmacotherapy risks.')}
           </p>
         </div>
 
@@ -301,7 +303,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           className="border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-xs flex items-center space-x-1.5 self-start"
         >
           <Sparkles className="h-3.5 w-3.5 text-teal-600" />
-          <span>Load Hackathon Demo Scenario (CKD 3 / Ketorolac)</span>
+          <span>{t('scenarios.loadDemoBtn', 'Load Hackathon Demo Scenario (CKD 3 / Ketorolac)')}</span>
         </Button>
       </div>
 
@@ -320,10 +322,10 @@ export const PrescriptionAnalysisPage: React.FC = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold flex items-center space-x-2">
                 <UploadCloud className="h-4 w-4 text-primary" />
-                <span>1. Upload Prescription Document</span>
+                <span>{t('upload.title', '1. Upload Prescription Document')}</span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Supports JPG, PNG, WEBP, or scanned clinical PDF (Max 10MB).
+                {t('upload.description', 'Supports JPG, PNG, WEBP, or scanned clinical PDF (Max 10MB).')}
               </CardDescription>
             </CardHeader>
 
@@ -345,10 +347,10 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                     <UploadCloud className="h-6 w-6" />
                   </div>
                   <p className="text-xs font-semibold text-foreground">
-                    Click to select or drag & drop prescription
+                    {t('upload.dropPrompt', 'Click to select or drag & drop prescription')}
                   </p>
                   <p className="text-[11px] text-muted-foreground mt-1">
-                    Bangla handwriting, printed hospital Rx, or camera snap
+                    {t('upload.description', 'Bangla handwriting, printed hospital Rx, or camera snap')}
                   </p>
                   <input
                     id="prescription-upload-input"
@@ -397,7 +399,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
               <div className="text-[11px] text-muted-foreground flex items-center space-x-1.5">
                 <FileCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                <span>Includes automated image contrast enhancement & rotation normalization.</span>
+                <span>{t('upload.enhancementNotice', 'Includes automated image contrast enhancement & rotation normalization.')}</span>
               </div>
             </CardContent>
           </Card>
@@ -407,25 +409,25 @@ export const PrescriptionAnalysisPage: React.FC = () => {
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-bold flex items-center space-x-2">
                 <Stethoscope className="h-4 w-4 text-primary" />
-                <span>2. Patient Baseline Clinical Profile</span>
+                <span>{t('patientForm.title', '2. Patient Baseline Clinical Profile')}</span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Essential for contraindication screening (renal eGFR, diabetic control, and comorbidities).
+                {t('patientForm.subtitle', 'Essential for contraindication screening (renal eGFR, diabetic control, and comorbidities).')}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Patient Identifier</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.patientId', 'Patient Identifier')}</label>
                   <Input {...register('patient_id')} className="mt-1 text-xs" placeholder="PRX-BD-..." />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Patient Name (Optional)</label>
-                  <Input {...register('name')} className="mt-1 text-xs" placeholder="Full Name" />
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.name', 'Patient Name')}</label>
+                  <Input {...register('name')} className="mt-1 text-xs" placeholder={t('patientForm.namePlaceholder', 'Full Name')} />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Age (Years) *</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.age', 'Age (Years)')} *</label>
                   <Input
                     type="number"
                     {...register('age')}
@@ -438,18 +440,18 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Gender</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.gender', 'Gender')}</label>
                   <select
                     {...register('gender')}
                     className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs"
                   >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
+                    <option value="Male">{t('patientForm.genderMale', 'Male')}</option>
+                    <option value="Female">{t('patientForm.genderFemale', 'Female')}</option>
+                    <option value="Other">{t('patientForm.genderOther', 'Other')}</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Creatinine (mg/dL)</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.creatinine', 'Creatinine (mg/dL)')}</label>
                   <Input
                     type="number"
                     step="0.1"
@@ -459,7 +461,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-foreground">eGFR (mL/min)</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.egfr', 'eGFR (mL/min)')}</label>
                   <Input
                     type="number"
                     step="0.1"
@@ -469,7 +471,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-foreground">HbA1c (%)</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.hba1c', 'HbA1c (%)')}</label>
                   <Input
                     type="number"
                     step="0.1"
@@ -481,29 +483,29 @@ export const PrescriptionAnalysisPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-foreground">Known Diagnoses / Conditions</label>
+                <label className="text-xs font-semibold text-foreground">{t('patientForm.conditions', 'Known Diagnoses / Conditions')}</label>
                 <Input
                   {...register('conditions_text')}
                   className="mt-1 text-xs"
-                  placeholder="Comma separated: CKD Stage 3, Hypertension, Type 2 Diabetes"
+                  placeholder={t('patientForm.conditionsPlaceholder', 'Comma separated: CKD Stage 3, Hypertension, Type 2 Diabetes')}
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Current Active Medications</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.currentMeds', 'Current Active Medications')}</label>
                   <Input
                     {...register('current_meds_text')}
                     className="mt-1 text-xs"
-                    placeholder="e.g. Metformin 500mg, Atorvastatin 10mg"
+                    placeholder={t('patientForm.currentMedsPlaceholder', 'e.g. Metformin 500mg, Atorvastatin 10mg')}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-foreground">Documented Drug Allergies</label>
+                  <label className="text-xs font-semibold text-foreground">{t('patientForm.allergies', 'Documented Drug Allergies')}</label>
                   <Input
                     {...register('allergies_text')}
                     className="mt-1 text-xs"
-                    placeholder="e.g. Penicillin, Sulfa"
+                    placeholder={t('patientForm.allergiesPlaceholder', 'e.g. Penicillin, Sulfa')}
                   />
                 </div>
               </div>
@@ -518,12 +520,12 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   {isAnalyzing ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>Executing Clinical Analysis Pipeline...</span>
+                      <span>{t('patientForm.btnAnalyzing', 'Executing Clinical Analysis Pipeline...')}</span>
                     </>
                   ) : (
                     <>
                       <Activity className="h-4 w-4" />
-                      <span>Run Full CDSS Safety Evaluation</span>
+                      <span>{t('patientForm.btnAnalyze', 'Run Full CDSS Safety Evaluation')}</span>
                     </>
                   )}
                 </Button>
@@ -610,7 +612,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 className="text-xs bg-primary text-primary-foreground font-semibold"
               >
                 <Stethoscope className="mr-1.5 h-3.5 w-3.5" />
-                Clinician Sign-Off & Audit
+                {t('results.review.button', 'Clinician Sign-Off & Audit')}
               </Button>
             </div>
           </div>
@@ -618,10 +620,10 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           {/* Tabbed Results Layout */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-4 w-full sm:w-[540px]">
-              <TabsTrigger value="clinical">Clinical Findings</TabsTrigger>
-              <TabsTrigger value="interactions">Interactions ({analysisResult.drug_interactions.length})</TabsTrigger>
-              <TabsTrigger value="risk">SHAP Explainability</TabsTrigger>
-              <TabsTrigger value="bangla">Bangla Companion</TabsTrigger>
+              <TabsTrigger value="clinical">{t('results.tabs.medications', 'Clinical Findings')}</TabsTrigger>
+              <TabsTrigger value="interactions">{t('results.tabs.interactions', 'Interactions')} ({analysisResult.drug_interactions.length})</TabsTrigger>
+              <TabsTrigger value="risk">{t('results.tabs.risk', 'SHAP Explainability')}</TabsTrigger>
+              <TabsTrigger value="bangla">{t('results.tabs.companion', 'Bangla Companion')}</TabsTrigger>
             </TabsList>
 
             {/* TAB 1: Clinical Findings & Normalization */}
@@ -632,10 +634,10 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-base font-bold">
-                        Prescription Medicines & Deterministic Syntax Checks
+                        {t('results.title', 'Prescription Medicines & Deterministic Syntax Checks')}
                       </CardTitle>
                       <CardDescription className="text-xs">
-                        Bangladesh brand name normalization, dosage syntax, and rule-based safety ceiling checks.
+                        {t('subtitle', 'Bangladesh brand name normalization, dosage syntax, and rule-based safety ceiling checks.')}
                       </CardDescription>
                     </div>
                     <Badge variant="outline">
@@ -649,12 +651,12 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                     <table className="w-full text-left text-xs">
                       <thead className="bg-muted/50 border-y border-border text-muted-foreground">
                         <tr>
-                          <th className="py-2.5 px-4 font-semibold">Brand (Written)</th>
-                          <th className="py-2.5 px-4 font-semibold">Generic Normalized</th>
-                          <th className="py-2.5 px-4 font-semibold">Dosage & Syntax</th>
-                          <th className="py-2.5 px-4 font-semibold">Duration</th>
-                          <th className="py-2.5 px-4 font-semibold">Safety Status</th>
-                          <th className="py-2.5 px-4 font-semibold">Issues Flagged</th>
+                          <th className="py-2.5 px-4 font-semibold">{t('results.medTable.brand', 'Brand (Written)')}</th>
+                          <th className="py-2.5 px-4 font-semibold">{t('results.medTable.generic', 'Generic Normalized')}</th>
+                          <th className="py-2.5 px-4 font-semibold">{t('results.medTable.syntax', 'Dosage & Syntax')}</th>
+                          <th className="py-2.5 px-4 font-semibold">{t('results.medTable.duration', 'Duration')}</th>
+                          <th className="py-2.5 px-4 font-semibold">{t('results.medTable.status', 'Safety Status')}</th>
+                          <th className="py-2.5 px-4 font-semibold">{t('common.actions', 'Issues Flagged')}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
@@ -722,10 +724,10 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center space-x-2">
                       <Stethoscope className="h-4 w-4 text-emerald-600" />
-                      <span>Safer Therapeutic Alternatives for Clinician Consideration</span>
+                      <span>{t('results.safer.title', 'Safer Therapeutic Alternatives for Clinician Consideration')}</span>
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Evidence-backed medication substitutions to resolve identified contraindications.
+                      {t('results.safer.subtitle', 'Evidence-backed medication substitutions to resolve identified contraindications.')}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">

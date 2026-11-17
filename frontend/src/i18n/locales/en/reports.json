@@ -1,0 +1,43 @@
+{
+  "title": "Official CDSS Clinical Audit Report",
+  "subtitle": "Prescription Ref: {{prescriptionId}} • Analysis: {{analysisId}}",
+  "actions": {
+    "banglaCompanion": "Bangla Leaflet",
+    "printReport": "Print Report",
+    "exportJson": "Export EHR JSON",
+    "downloadPdf": "Download PDF Report",
+    "switchLang": "Report Language"
+  },
+  "sections": {
+    "headerTitle": "CDSS Clinical Audit & Decision Report",
+    "centerName": "National Health Sciences Center, Dhaka",
+    "confidentialNotice": "Confidential & Privileged Clinical Healthcare Record",
+    "patientDetails": "Patient Profile & Laboratory Findings",
+    "prescribedMeds": "Prescribed Medications (DGDA Normalization)",
+    "drugCollisions": "Identified Drug Collisions & Safety Alerts",
+    "riskAssessment": "Risk Stratification & SHAP Drivers",
+    "saferAlternatives": "Evidence-Based Safer Recommendations",
+    "disclaimer": "Medical Safety Notice",
+    "clinicianReview": "Clinician Review & Sign-Off"
+  },
+  "labels": {
+    "patientName": "Patient Name",
+    "ageGender": "Age / Gender",
+    "egfr": "eGFR (Kidney Function)",
+    "creatinine": "Serum Creatinine",
+    "bloodPressure": "Blood Pressure",
+    "conditions": "Clinical Conditions",
+    "overallRisk": "Overall Risk Score",
+    "akiRisk": "Acute Kidney Injury Risk",
+    "giBleedRisk": "GI Bleed Risk",
+    "cvStrain": "Cardiovascular Strain",
+    "reviewDecision": "Review Decision",
+    "reviewNotes": "Clinician Review Notes",
+    "signature": "Attending Clinician Signature & BMDC Seal"
+  },
+  "toasts": {
+    "jsonExported": "Clinical report exported as JSON for EHR archive.",
+    "pdfDownloading": "Generating clinical audit PDF report...",
+    "pdfDownloaded": "PDF report downloaded successfully."
+  }
+}

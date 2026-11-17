@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Menu,
   Sun,
   Moon,
   Bell,
-  Search,
-  CheckCircle2,
   AlertCircle,
   UserCheck,
   ShieldAlert,
@@ -15,26 +14,17 @@ import { useTheme } from '@/app/providers/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { checkBackendHealth } from '@/services/apiClient';
+import { LanguageToggle } from './LanguageToggle';
 
 interface TopNavProps {
   onOpenMobile: () => void;
 }
 
-const pageTitles: Record<string, { title: string; category: string }> = {
-  '/dashboard': { title: 'Clinical Overview Dashboard', category: 'Executive Monitoring' },
-  '/analyze': { title: 'Prescription OCR & Safety Analysis', category: 'Diagnostic AI' },
-  '/prescriptions': { title: 'Prescription Records & History', category: 'Clinical Records' },
-  '/patients': { title: 'Patient Directory & Safety Profiles', category: 'Patient Care' },
-  '/drug-interactions': { title: 'Drug Interaction Monitoring Center', category: 'Pharmacovigilance' },
-  '/risk-analysis': { title: 'Explainable Clinical Risk & SHAP Analysis', category: 'AI Intelligence' },
-  '/reports': { title: 'Verified Clinical Decision Reports', category: 'Documentation' },
-  '/bangla-companion': { title: 'Bangla Patient Companion (সহজ বাংলা নির্দেশিকা)', category: 'Patient Literacy' },
-  '/settings': { title: 'System Configuration & Safety Settings', category: 'Preferences' },
-};
-
 export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation(['navigation', 'common']);
+
   const [backendStatus, setBackendStatus] = useState<{ online: boolean; message: string }>({
     online: false,
     message: 'Checking backend status...',
@@ -50,7 +40,67 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
   }, []);
 
   const pathBase = '/' + location.pathname.split('/')[1];
-  const pageInfo = pageTitles[pathBase] || { title: 'Clinical Decision Support', category: 'PredictRx-AI' };
+
+  const getPageInfo = (base: string) => {
+    switch (base) {
+      case '/dashboard':
+        return {
+          title: t('header.titles.dashboard', { ns: 'navigation', defaultValue: 'Clinical Overview Dashboard' }),
+          category: t('header.categories.executive', { ns: 'navigation', defaultValue: 'Executive Monitoring' }),
+        };
+      case '/analyze':
+      case '/prescription-analysis':
+        return {
+          title: t('header.titles.analyze', { ns: 'navigation', defaultValue: 'Prescription OCR & Safety Analysis' }),
+          category: t('header.categories.diagnostic', { ns: 'navigation', defaultValue: 'Diagnostic AI' }),
+        };
+      case '/prescriptions':
+        return {
+          title: t('header.titles.prescriptions', { ns: 'navigation', defaultValue: 'Prescription Records & History' }),
+          category: t('header.categories.records', { ns: 'navigation', defaultValue: 'Clinical Records' }),
+        };
+      case '/patients':
+        return {
+          title: t('header.titles.patients', { ns: 'navigation', defaultValue: 'Patient Directory & Safety Profiles' }),
+          category: t('header.categories.patientCare', { ns: 'navigation', defaultValue: 'Patient Care' }),
+        };
+      case '/drug-interactions':
+        return {
+          title: t('header.titles.drugInteractions', { ns: 'navigation', defaultValue: 'Drug Interaction Monitoring Center' }),
+          category: t('header.categories.pharmacovigilance', { ns: 'navigation', defaultValue: 'Pharmacovigilance' }),
+        };
+      case '/risk-analysis':
+        return {
+          title: t('header.titles.clinicalRisk', { ns: 'navigation', defaultValue: 'Explainable Clinical Risk & SHAP Analysis' }),
+          category: t('header.categories.intelligence', { ns: 'navigation', defaultValue: 'AI Intelligence' }),
+        };
+      case '/reports':
+        return {
+          title: t('header.titles.reports', { ns: 'navigation', defaultValue: 'Verified Clinical Decision Reports' }),
+          category: t('header.categories.documentation', { ns: 'navigation', defaultValue: 'Documentation' }),
+        };
+      case '/bangla-companion':
+        return {
+          title: t('header.titles.banglaCompanion', { ns: 'navigation', defaultValue: 'Bangla Patient Companion (সহজ বাংলা নির্দেশিকা)' }),
+          category: t('header.categories.literacy', { ns: 'navigation', defaultValue: 'Patient Literacy' }),
+        };
+      case '/settings':
+        return {
+          title: t('header.titles.settings', { ns: 'navigation', defaultValue: 'System Settings & Operational Preferences' }),
+          category: t('header.categories.preferences', { ns: 'navigation', defaultValue: 'Preferences' }),
+        };
+      default:
+        return {
+          title: t('header.titles.default', { ns: 'navigation', defaultValue: 'Clinical Decision Support System' }),
+          category: 'PredictRx-AI',
+        };
+    }
+  };
+
+  const pageInfo = getPageInfo(pathBase);
+  const titleStr = typeof pageInfo?.title === 'string' && pageInfo.title ? pageInfo.title : 'PredictRx-AI';
+  const categoryStr = typeof pageInfo?.category === 'string' && pageInfo.category ? pageInfo.category : 'PredictRx';
+  const firstWord = titleStr.split(' ')[0] || '';
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-card/90 px-4 backdrop-blur-md sm:px-6">
@@ -59,25 +109,28 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
         <button
           onClick={onOpenMobile}
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground lg:hidden hover:bg-muted"
-          aria-label="Open navigation menu"
+          aria-label={t('sidebar.expand', { ns: 'navigation', defaultValue: 'Open navigation menu' })}
         >
           <Menu className="h-5 w-5" />
         </button>
 
         <div className="flex flex-col">
           <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-            <span>{pageInfo.category}</span>
+            <span>{categoryStr}</span>
             <span>/</span>
-            <span className="font-medium text-foreground">{pageInfo.title.split(' ')[0]}</span>
+            <span className="font-medium text-foreground truncate max-w-[220px]">{titleStr}</span>
           </div>
           <h1 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
-            {pageInfo.title}
+            {titleStr}
           </h1>
         </div>
       </div>
 
-      {/* Right controls: Backend Status, Notifications, Theme, Profile */}
+      {/* Right controls: Language Toggle, Backend Status, Notifications, Theme, Profile */}
       <div className="flex items-center space-x-2 sm:space-x-3">
+        {/* Global Language Toggle */}
+        <LanguageToggle />
+
         {/* API Connection Indicator */}
         <div
           className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs border font-medium cursor-default"
@@ -86,12 +139,16 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
           {backendStatus.online ? (
             <>
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-emerald-700 dark:text-emerald-400">FastAPI Live</span>
+              <span className="text-emerald-700 dark:text-emerald-400">
+                {t('safety.fastapiLive', { ns: 'common', defaultValue: 'FastAPI Live' })}
+              </span>
             </>
           ) : (
             <>
               <span className="h-2 w-2 rounded-full bg-blue-500" />
-              <span className="text-blue-700 dark:text-blue-300">Safe Demo Adapter</span>
+              <span className="text-blue-700 dark:text-blue-300">
+                {t('safety.safeDemoAdapter', { ns: 'common', defaultValue: 'Safe Demo Adapter' })}
+              </span>
             </>
           )}
         </div>
@@ -103,7 +160,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
             size="icon"
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative"
-            aria-label="Clinical safety notifications"
+            aria-label={t('header.notifications.button', { ns: 'navigation', defaultValue: 'Clinical safety notifications' })}
           >
             <Bell className="h-5 w-5 text-muted-foreground" />
             <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
@@ -118,9 +175,13 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div className="flex items-center space-x-2">
                   <ShieldAlert className="h-4 w-4 text-red-600" />
-                  <span className="font-semibold text-sm">Critical Clinical Alerts</span>
+                  <span className="font-semibold text-sm">
+                    {t('header.notifications.title', { ns: 'navigation' })}
+                  </span>
                 </div>
-                <Badge variant="critical">2 Unreviewed</Badge>
+                <Badge variant="critical">
+                  {t('header.notifications.unreviewed', { ns: 'navigation', count: 2 })}
+                </Badge>
               </div>
 
               <div className="py-2 space-y-2.5 max-h-72 overflow-y-auto">
@@ -133,10 +194,10 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
                     <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-semibold text-red-900 dark:text-red-300">
-                        High AKI Risk: Ketorolac 14d + Olmesartan
+                        {t('header.notifications.highAkiTitle', { ns: 'navigation' })}
                       </p>
                       <p className="text-[11px] text-red-700/80 dark:text-red-400 mt-0.5">
-                        Patient: Md. Rafiqul Islam (CKD 3a, eGFR 34.5)
+                        {t('header.notifications.highAkiDesc', { ns: 'navigation' })}
                       </p>
                     </div>
                   </div>
@@ -147,10 +208,10 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
                     <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-semibold text-amber-900 dark:text-amber-300">
-                        Therapeutic Ceiling Warning
+                        {t('header.notifications.ceilingTitle', { ns: 'navigation' })}
                       </p>
                       <p className="text-[11px] text-amber-700/80 dark:text-amber-400 mt-0.5">
-                        Ketorolac protocol ceiling is 5 days maximum.
+                        {t('header.notifications.ceilingDesc', { ns: 'navigation' })}
                       </p>
                     </div>
                   </div>
@@ -163,7 +224,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
                   onClick={() => setShowNotifications(false)}
                   className="text-xs text-primary font-medium hover:underline"
                 >
-                  View Pharmacovigilance Monitor →
+                  {t('header.notifications.viewMonitor', { ns: 'navigation' })}
                 </Link>
               </div>
             </div>
@@ -175,7 +236,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-          aria-label="Toggle theme"
+          aria-label={t('header.theme.toggle', { ns: 'navigation', defaultValue: 'Toggle theme' })}
         >
           {theme === 'dark' ? (
             <Sun className="h-5 w-5 text-amber-400 transition-transform rotate-0" />
@@ -190,8 +251,12 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
             <UserCheck className="h-4 w-4" />
           </div>
           <div className="hidden xl:flex flex-col text-left">
-            <span className="text-xs font-semibold text-foreground">Dr. M. Ashraful Hoque</span>
-            <span className="text-[10px] text-muted-foreground">BMDC #A-89412</span>
+            <span className="text-xs font-semibold text-foreground">
+              {t('header.profile.doctorName', { ns: 'navigation' })}
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {t('header.profile.bmdcNumber', { ns: 'navigation' })}
+            </span>
           </div>
         </div>
       </div>

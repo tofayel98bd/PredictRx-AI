@@ -1,7 +1,7 @@
 """Authentication and user management schemas."""
 
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
@@ -22,6 +22,13 @@ class UserCreate(BaseModel):
     role: str = Field("doctor", description="doctor, clinical_pharmacist, reviewer, admin")
     bmdc_number: Optional[str] = Field(None, max_length=50)
     department: Optional[str] = Field(None, max_length=100)
+    preferred_language: Literal["en", "bn"] = Field("en", description="Preferred interface language (en or bn)")
+
+
+class PreferencesUpdate(BaseModel):
+    """Payload for updating user preferences."""
+
+    preferred_language: Literal["en", "bn"] = Field(..., description="Preferred interface language (en or bn)")
 
 
 class UserResponse(BaseModel):
@@ -35,6 +42,7 @@ class UserResponse(BaseModel):
     role: str
     bmdc_number: Optional[str] = None
     department: Optional[str] = None
+    preferred_language: str = "en"
     is_active: bool
     created_at: datetime
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Settings as SettingsIcon,
   Moon,
@@ -11,7 +12,7 @@ import {
   AlertCircle,
   RefreshCw,
   Sliders,
-  Info,
+  Check,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,11 +20,15 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { useTheme } from '@/app/providers/ThemeProvider';
-import { checkBackendHealth } from '@/services/apiClient';
+import { checkBackendHealth, apiClient } from '@/services/apiClient';
+import { setLanguage, getCurrentLanguage, SupportedLanguage } from '@/i18n';
 import { toast } from 'sonner';
 
 export const SettingsPage: React.FC = () => {
   const { theme, setTheme } = useTheme();
+  const { t, i18n } = useTranslation(['settings', 'common']);
+  const currentLang = (i18n.language && i18n.language.startsWith('bn')) ? 'bn' : 'en';
+
   const [clinicianName, setClinicianName] = useState('Dr. M. Ashraful Hoque');
   const [bmdcNumber, setBmdcNumber] = useState('BMDC #A-89412');
   const [hospitalAffiliation, setHospitalAffiliation] = useState('Dhaka Medical College & Hospital');
@@ -46,9 +51,25 @@ export const SettingsPage: React.FC = () => {
     setIsTesting(false);
   };
 
+  const handleLanguageChange = async (targetLang: SupportedLanguage) => {
+    if (targetLang === currentLang) return;
+    await setLanguage(targetLang);
+    try {
+      // Sync with backend if user session is active
+      await apiClient.patch('/api/v1/auth/me/preferences', { preferred_language: targetLang });
+    } catch {
+      // Graceful offline fallback
+    }
+    toast.success(
+      targetLang === 'bn'
+        ? 'ইন্টারফেস ভাষা বাংলায় সফলভাবে পরিবর্তন করা হয়েছে।'
+        : 'Interface language updated to English.'
+    );
+  };
+
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Clinician profile and licensing details updated.');
+    toast.success(t('clinician.savedToast', 'Clinician profile and licensing details updated.'));
   };
 
   return (
@@ -56,22 +77,86 @@ export const SettingsPage: React.FC = () => {
       <div>
         <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center space-x-2">
           <SettingsIcon className="h-5 w-5 text-primary" />
-          <span>System Settings & Operational Preferences</span>
+          <span>{t('title', 'System Settings & Operational Preferences')}</span>
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Configure clinical display preferences, local API bridge status, and verified practitioner credentials.
+          {t('subtitle', 'Configure clinical display preferences, local API bridge status, and verified practitioner credentials.')}
         </p>
       </div>
 
-      {/* 1. Interface Theme & Language Preferences */}
+      {/* 1. Internationalization & Language Selection Card */}
+      <Card className="border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-bold flex items-center space-x-2">
+            <Globe className="h-4 w-4 text-primary" />
+            <span>{t('language.title', 'Internationalization & Interface Language')}</span>
+          </CardTitle>
+          <CardDescription className="text-xs">
+            {t('language.description', 'Select your preferred application language. Affects all clinical modules, reports, and error messages.')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* English Selector */}
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('en')}
+              className={`p-4 rounded-xl border flex items-center justify-between transition text-left ${
+                currentLang === 'en'
+                  ? 'border-primary bg-primary/5 text-primary ring-2 ring-primary/20'
+                  : 'border-border hover:bg-muted text-muted-foreground'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 rounded-lg bg-card flex items-center justify-center font-bold text-xs border border-border">
+                  EN
+                </div>
+                <div>
+                  <span className="font-bold text-sm block text-foreground">
+                    {t('language.english', 'English (Default)')}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">Standard Medical English</span>
+                </div>
+              </div>
+              {currentLang === 'en' && <Check className="h-4 w-4 text-primary shrink-0" />}
+            </button>
+
+            {/* Bangla Selector */}
+            <button
+              type="button"
+              onClick={() => handleLanguageChange('bn')}
+              className={`p-4 rounded-xl border flex items-center justify-between transition text-left ${
+                currentLang === 'bn'
+                  ? 'border-primary bg-primary/5 text-primary ring-2 ring-primary/20'
+                  : 'border-border hover:bg-muted text-muted-foreground'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <div className="h-8 w-8 rounded-lg bg-card flex items-center justify-center font-bold text-xs border border-border font-bangla">
+                  বাং
+                </div>
+                <div>
+                  <span className="font-bold text-sm block text-foreground font-bangla">
+                    {t('language.bangla', 'বাংলা (Bengali)')}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">ক্লিনিক্যাল বাংলা ও রোগীর নির্দেশিকা</span>
+                </div>
+              </div>
+              {currentLang === 'bn' && <Check className="h-4 w-4 text-primary shrink-0" />}
+            </button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 2. Visual Appearance Mode */}
       <Card className="border-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-bold flex items-center space-x-2">
             <Sliders className="h-4 w-4 text-primary" />
-            <span>Visual Appearance & Display Mode</span>
+            <span>{t('appearance.title', 'Visual Appearance & Display Mode')}</span>
           </CardTitle>
           <CardDescription className="text-xs">
-            Toggle between clinical daylight mode and high-contrast dark environment.
+            {t('appearance.description', 'Toggle between clinical daylight mode and high-contrast dark environment.')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -86,7 +171,7 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <Sun className="h-5 w-5" />
-              <span>Light Clinical</span>
+              <span>{t('appearance.light', 'Light Clinical')}</span>
             </button>
 
             <button
@@ -99,7 +184,7 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <Moon className="h-5 w-5" />
-              <span>Dark Surface</span>
+              <span>{t('appearance.dark', 'Dark Environment')}</span>
             </button>
 
             <button
@@ -112,28 +197,30 @@ export const SettingsPage: React.FC = () => {
               }`}
             >
               <Sliders className="h-5 w-5" />
-              <span>Match System</span>
+              <span>{t('appearance.system', 'Match System')}</span>
             </button>
           </div>
         </CardContent>
       </Card>
 
-      {/* 2. Clinician Profile and Digital Stamp */}
+      {/* 3. Clinician Profile and Digital Stamp */}
       <Card className="border-border">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-bold flex items-center space-x-2">
             <UserCheck className="h-4 w-4 text-primary" />
-            <span>Clinician Verification & BMDC Registry Details</span>
+            <span>{t('clinician.title', 'Clinician Verification & BMDC Registry Details')}</span>
           </CardTitle>
           <CardDescription className="text-xs">
-            Credentials embedded onto finalized patient reports and pharmacological sign-offs.
+            {t('clinician.description', 'Credentials embedded onto finalized patient reports and pharmacological sign-offs.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="font-semibold text-foreground">Practitioner Full Name</label>
+                <label className="font-semibold text-foreground">
+                  {t('clinician.name', 'Practitioner Full Name')}
+                </label>
                 <Input
                   value={clinicianName}
                   onChange={(e) => setClinicianName(e.target.value)}
@@ -142,7 +229,9 @@ export const SettingsPage: React.FC = () => {
               </div>
 
               <div>
-                <label className="font-semibold text-foreground">BMDC Registration Number</label>
+                <label className="font-semibold text-foreground">
+                  {t('clinician.bmdc', 'BMDC Registration Number')}
+                </label>
                 <Input
                   value={bmdcNumber}
                   onChange={(e) => setBmdcNumber(e.target.value)}
@@ -152,7 +241,9 @@ export const SettingsPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="font-semibold text-foreground">Hospital / Clinic Affiliation</label>
+              <label className="font-semibold text-foreground">
+                {t('clinician.hospital', 'Hospital / Clinic Affiliation')}
+              </label>
               <Input
                 value={hospitalAffiliation}
                 onChange={(e) => setHospitalAffiliation(e.target.value)}
@@ -162,20 +253,22 @@ export const SettingsPage: React.FC = () => {
 
             <div className="flex justify-end">
               <Button type="submit" size="sm" className="text-xs">
-                Save Clinician Profile
+                {t('clinician.btnSave', 'Save Clinician Profile')}
               </Button>
             </div>
           </form>
         </CardContent>
       </Card>
 
-      {/* 3. API Connection Status & Backend Configuration */}
+      {/* 4. API Connection Status & Backend Configuration */}
       <Card className="border-border">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Server className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-bold">FastAPI Backend Integration</CardTitle>
+              <CardTitle className="text-sm font-bold">
+                {t('api.title', 'FastAPI Backend Integration')}
+              </CardTitle>
             </div>
             <Button
               variant="outline"
@@ -185,16 +278,16 @@ export const SettingsPage: React.FC = () => {
               className="text-xs h-7"
             >
               <RefreshCw className={`mr-1 h-3 w-3 ${isTesting ? 'animate-spin' : ''}`} />
-              Test Connection
+              {isTesting ? t('api.testing', 'Testing Connection...') : t('api.btnTest', 'Test Connection')}
             </Button>
           </div>
           <CardDescription className="text-xs">
-            Configurable Python FastAPI endpoint for OCR parsing and deterministic rules execution.
+            {t('api.description', 'Configurable Python FastAPI endpoint for OCR parsing and deterministic rules execution.')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-xs">
           <div>
-            <label className="font-semibold text-foreground">Configured API Base URL</label>
+            <label className="font-semibold text-foreground">{t('api.url', 'Configured API Base URL')}</label>
             <Input
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
@@ -237,7 +330,7 @@ export const SettingsPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* 4. Application Information & Version Specs */}
+      {/* 5. Platform Specification & Version Metadata */}
       <Card className="border-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-bold flex items-center space-x-2">

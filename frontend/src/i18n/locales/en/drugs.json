@@ -1,0 +1,24 @@
+{
+  "title": "Bangladesh DGDA Drug Catalog",
+  "subtitle": "Directorate General of Drug Administration (DGDA) approved pharmaceutical database with brand-generic mappings.",
+  "searchPlaceholder": "Search brand name, generic name, manufacturer, or DGDA DAR...",
+  "filterClass": "All Therapeutic Classes",
+  "colBrand": "Brand Name",
+  "colGeneric": "Generic Name",
+  "colStrengthForm": "Strength & Form",
+  "colManufacturer": "Manufacturer",
+  "colDar": "DGDA DAR #",
+  "colRenalAdjustment": "Renal Dose Adjustment",
+  "colActions": "Details",
+  "badgeControlled": "Controlled Substance",
+  "badgeActive": "DGDA Active",
+  "modal": {
+    "title": "Medicine Monograph & Safety Specifications",
+    "indications": "Approved Indications",
+    "contraindications": "Contraindications & Black Box Warnings",
+    "standardDose": "Standard Adult Dosage",
+    "maxDose": "Maximum Daily Dose Ceiling",
+    "renalAdjust": "Renal Impairment Guidance",
+    "hepaticAdjust": "Hepatic Impairment Guidance"
+  }
+}

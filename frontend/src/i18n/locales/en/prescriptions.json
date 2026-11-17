@@ -1,0 +1,24 @@
+{
+  "title": "Prescription Records & Clinical Archive",
+  "subtitle": "Comprehensive record of evaluated prescriptions, safety classifications, and review decisions.",
+  "searchPlaceholder": "Search by Prescription ID, Patient Name, or Generic Drug...",
+  "filterRisk": "All Risk Levels",
+  "filterReview": "All Review States",
+  "colPrescription": "Prescription Ref",
+  "colPatient": "Patient Details",
+  "colRisk": "Risk Level",
+  "colCollisions": "Interactions",
+  "colDate": "Date & Time",
+  "colReview": "Review Status",
+  "colActions": "Actions",
+  "btnAnalyzeNew": "Upload New Prescription",
+  "btnViewReport": "Audit Report",
+  "btnOpenReview": "Review Decision",
+  "emptyState": "No prescription records matching your filter criteria.",
+  "stats": {
+    "total": "Total Records",
+    "critical": "Critical Risk",
+    "reviewed": "Reviewed",
+    "pending": "Pending Review"
+  }
+}

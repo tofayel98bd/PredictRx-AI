@@ -93,6 +93,10 @@ export default {
           '50%': { opacity: '0.8', transform: 'scale(1.02)' },
         },
       },
+      fontFamily: {
+        sans: ['Inter', '"Hind Siliguri"', '"Noto Sans Bengali"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        bangla: ['"Hind Siliguri"', '"Noto Sans Bengali"', 'sans-serif'],
+      },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',

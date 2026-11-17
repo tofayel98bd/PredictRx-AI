@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Sparkles, Zap, AlertOctagon, User, ArrowRight, Check } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,17 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
   onSelectScenario,
   isLoading = false,
 }) => {
+  const { t, i18n } = useTranslation(['analysis', 'common']);
+  const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
+
+  const getBadgeText = (badge: string) => {
+    if (!isBn) return badge;
+    return badge
+      .replace('86% AKI RISK', '৮৬% AKI ঝুঁকি')
+      .replace('78% COLLAPSE RISK', '৭৮% কলাপস ঝুঁকি')
+      .replace("84% REYE'S SYNDROME", '৮৪% রে সিন্ড্রোম');
+  };
+
   return (
     <div className="space-y-2.5">
       <div className="flex items-center justify-between">
@@ -25,15 +37,15 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
           </div>
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-              <span>1-Click Hackathon Golden Demo Scenarios</span>
+              <span>{t('scenarios.title', '1-Click Hackathon Golden Demo Scenarios')}</span>
               <span className="text-[10px] font-medium text-muted-foreground lowercase">
-                (Fail-safe sub-15ms fast-path)
+                {t('scenarios.fastPath', '(Fail-safe sub-15ms fast-path)')}
               </span>
             </h3>
           </div>
         </div>
         <span className="text-[11px] font-medium text-muted-foreground hidden sm:inline-block">
-          Select any case to auto-fill or execute instant evaluation
+          {t('scenarios.subtitle', 'Select any case to auto-fill or execute instant evaluation')}
         </span>
       </div>
 
@@ -64,7 +76,7 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
                     className="shrink-0 text-[10px] font-bold tracking-tight bg-red-50 text-red-700 border-red-200 dark:bg-red-950/60 dark:text-red-300 dark:border-red-800"
                   >
                     <AlertOctagon className="h-2.5 w-2.5 mr-1 inline" />
-                    {scenario.badge}
+                    {getBadgeText(scenario.badge)}
                   </Badge>
                 </div>
 
@@ -97,10 +109,10 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
                   {isActive ? (
                     <>
                       <Check className="h-3 w-3 mr-1 text-white" />
-                      Loaded
+                      <span>{t('scenarios.loaded', 'Loaded')}</span>
                     </>
                   ) : (
-                    'Autofill'
+                    <span>{t('scenarios.autofill', 'Autofill')}</span>
                   )}
                 </Button>
 
@@ -115,7 +127,7 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
                   title="Run instant analysis in < 15ms"
                 >
                   <Zap className="h-3 w-3 text-amber-600 dark:text-amber-400 shrink-0 fill-amber-500" />
-                  <span>Instant Run</span>
+                  <span>{t('scenarios.instantRun', 'Instant Run')}</span>
                 </Button>
               </div>
             </Card>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   FileSearch,
   AlertTriangle,
@@ -33,9 +34,10 @@ import {
 import { getPrescriptionHistory } from '@/services/prescriptionService';
 import { PrescriptionAnalysisResult } from '@/types';
 import { DEMO_PATIENTS_LIST, MEDICAL_SAFETY_DISCLAIMER } from '@/constants';
-import { formatDate } from '@/lib/utils';
+import { formatDate, formatNumber } from '@/lib/utils';
 
 export const DashboardPage: React.FC = () => {
+  const { t, i18n } = useTranslation(['dashboard', 'common']);
   const [prescriptions, setPrescriptions] = useState<PrescriptionAnalysisResult[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -52,21 +54,23 @@ export const DashboardPage: React.FC = () => {
   const interactionsDetected = 37;
   const patientsReviewed = 89;
 
+  const isBn = i18n.language && i18n.language.startsWith('bn');
+
   const riskData = [
-    { name: 'Low Risk', value: 74, color: '#10b981' },
-    { name: 'Moderate Risk', value: 38, color: '#f59e0b' },
-    { name: 'High Risk', value: 12, color: '#f97316' },
-    { name: 'Critical Adverse', value: 18, color: '#ef4444' },
+    { name: isBn ? 'কম ঝুঁকি' : 'Low Risk', value: 74, color: '#10b981' },
+    { name: isBn ? 'মাঝারি ঝুঁকি' : 'Moderate Risk', value: 38, color: '#f59e0b' },
+    { name: isBn ? 'উচ্চ ঝুঁকি' : 'High Risk', value: 12, color: '#f97316' },
+    { name: isBn ? 'মারাত্মক প্রতিকূল' : 'Critical Adverse', value: 18, color: '#ef4444' },
   ];
 
   const activityData = [
-    { day: 'Mon', analyzed: 18, alerts: 3 },
-    { day: 'Tue', analyzed: 24, alerts: 5 },
-    { day: 'Wed', analyzed: 21, alerts: 4 },
-    { day: 'Thu', analyzed: 32, alerts: 8 },
-    { day: 'Fri', analyzed: 28, alerts: 6 },
-    { day: 'Sat', analyzed: 12, alerts: 2 },
-    { day: 'Sun', analyzed: 7, alerts: 1 },
+    { day: isBn ? 'সোম' : 'Mon', analyzed: 18, alerts: 3 },
+    { day: isBn ? 'মঙ্গল' : 'Tue', analyzed: 24, alerts: 5 },
+    { day: isBn ? 'বুধ' : 'Wed', analyzed: 21, alerts: 4 },
+    { day: isBn ? 'বৃহঃ' : 'Thu', analyzed: 32, alerts: 8 },
+    { day: isBn ? 'শুক্র' : 'Fri', analyzed: 28, alerts: 6 },
+    { day: isBn ? 'শনি' : 'Sat', analyzed: 12, alerts: 2 },
+    { day: isBn ? 'রবি' : 'Sun', analyzed: 7, alerts: 1 },
   ];
 
   return (
@@ -77,14 +81,19 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center space-x-2">
             <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-xs font-semibold uppercase tracking-wider text-teal-300">
-              Bangladesh CDSS Intelligence Hub
+              {t('hubBanner.badge', isBn ? 'বাংলাদেশ সিডিএসএস ইনটেলিজেন্স হাব' : 'Bangladesh CDSS Intelligence Hub')}
             </span>
           </div>
           <h2 className="mt-1 text-2xl font-bold tracking-tight">
-            PredictRx Clinical Dashboard
+            {isBn ? 'প্রেডিক্ট-আরএক্স ক্লিনিক্যাল ড্যাশবোর্ড' : 'PredictRx Clinical Dashboard'}
           </h2>
           <p className="mt-1 text-xs text-teal-200/90 max-w-xl">
-            Continuous pharmacovigilance, multimodal prescription OCR, and explainable safety analysis for Bangladesh healthcare institutions.
+            {t(
+              'hubBanner.description',
+              isBn
+                ? 'সার্বক্ষণিক ফার্মাকোভিজিল্যান্স, মাল্টিমোডাল প্রেসক্রিপশন ওসিআর এবং বাংলাদেশের স্বাস্থ্যসেবা প্রতিষ্ঠানের জন্য ব্যাখ্যামূলক সুরক্ষা বিশ্লেষণ।'
+                : 'Continuous pharmacovigilance, multimodal prescription OCR, and explainable safety analysis for Bangladesh healthcare institutions.'
+            )}
           </p>
         </div>
 
@@ -92,13 +101,13 @@ export const DashboardPage: React.FC = () => {
           <Button asChild size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 font-medium">
             <Link to="/analyze">
               <FileSearch className="mr-2 h-4 w-4" />
-              Analyze Prescription
+              {t('hubBanner.ctaAnalyze', isBn ? 'প্রেসক্রিপশন বিশ্লেষণ' : 'Analyze Prescription')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="sm" className="bg-teal-800/60 border-teal-700 text-teal-100 hover:bg-teal-700">
             <Link to="/drug-interactions">
               <ShieldAlert className="mr-2 h-4 w-4 text-amber-400" />
-              Drug Interaction Center
+              {t('hubBanner.ctaInteractions', isBn ? 'ওষুধের পারস্পরিক প্রতিক্রিয়া' : 'Drug Interaction Center')}
             </Link>
           </Button>
         </div>
@@ -110,18 +119,20 @@ export const DashboardPage: React.FC = () => {
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Total Prescriptions</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('metrics.totalPrescriptions', isBn ? 'মোট প্রেসক্রিপশন' : 'Total Prescriptions')}
+              </span>
               <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-950/60 text-teal-600">
                 <FileSearch className="h-5 w-5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline space-x-2">
-              <span className="text-2xl font-bold text-foreground">{totalAnalyzed}</span>
+              <span className="text-2xl font-bold text-foreground">{formatNumber(totalAnalyzed)}</span>
               <span className="text-xs text-emerald-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-0.5" /> +14% this week
+                <TrendingUp className="h-3 w-3 mr-0.5" /> {isBn ? '+১৪% এই সপ্তাহে' : '+14% this week'}
               </span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Across Dhaka & regional clinics</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{isBn ? 'ঢাকা ও আঞ্চলিক ক্লিনিক সমূহে' : 'Across Dhaka & regional clinics'}</p>
           </CardContent>
         </Card>
 
@@ -129,18 +140,20 @@ export const DashboardPage: React.FC = () => {
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Critical Adverse Risks</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('metrics.criticalAlerts', isBn ? 'মারাত্মক প্রতিকূল ঝুঁকি' : 'Critical Adverse Risks')}
+              </span>
               <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/60 text-red-600">
                 <AlertTriangle className="h-5 w-5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline space-x-2">
-              <span className="text-2xl font-bold text-red-600">{criticalRiskCount}</span>
+              <span className="text-2xl font-bold text-red-600">{formatNumber(criticalRiskCount)}</span>
               <Badge variant="critical" className="text-[10px]">
-                Requires Review
+                {isBn ? 'পর্যালোচনা আবশ্যক' : 'Requires Review'}
               </Badge>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Contraindicated NSAIDs, overdose, duplications</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{isBn ? 'নিষিদ্ধ NSAIDs, অতিরিক্ত ডোজ ও পুনরাবৃত্তি' : 'Contraindicated NSAIDs, overdose, duplications'}</p>
           </CardContent>
         </Card>
 
@@ -148,16 +161,18 @@ export const DashboardPage: React.FC = () => {
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Drug Interactions Flagged</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('metrics.interactionsPrevented', isBn ? 'চিহ্নিত ড্রাগ ইন্টারঅ্যাকশন' : 'Drug Interactions Flagged')}
+              </span>
               <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600">
                 <ShieldAlert className="h-5 w-5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline space-x-2">
-              <span className="text-2xl font-bold text-amber-600">{interactionsDetected}</span>
-              <span className="text-xs text-muted-foreground">26.1% of volume</span>
+              <span className="text-2xl font-bold text-amber-600">{formatNumber(interactionsDetected)}</span>
+              <span className="text-xs text-muted-foreground">{isBn ? 'মোট প্রেসক্রিপশনের ২৬.১%' : '26.1% of volume'}</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">Pharmacodynamic & pharmacokinetic clashes</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{isBn ? 'ফার্মাকোডাইনামিক ও গতিশীল সংঘাত' : 'Pharmacodynamic & pharmacokinetic clashes'}</p>
           </CardContent>
         </Card>
 
@@ -165,16 +180,18 @@ export const DashboardPage: React.FC = () => {
         <Card className="border-border">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">Patients Monitored</span>
+              <span className="text-xs font-medium text-muted-foreground">
+                {t('metrics.reviewedPatients', isBn ? 'নজরদারিকৃত রোগী' : 'Patients Monitored')}
+              </span>
               <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600">
                 <Users className="h-5 w-5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline space-x-2">
-              <span className="text-2xl font-bold text-foreground">{patientsReviewed}</span>
-              <span className="text-xs text-blue-600">100% profile linked</span>
+              <span className="text-2xl font-bold text-foreground">{formatNumber(patientsReviewed)}</span>
+              <span className="text-xs text-blue-600">{isBn ? '১০০% প্রোফাইল সংযুক্ত' : '100% profile linked'}</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">With baseline eGFR / lab histories</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{isBn ? 'বেসলাইন eGFR ও ল্যাব ইতিহাস সহ' : 'With baseline eGFR / lab histories'}</p>
           </CardContent>
         </Card>
       </div>
@@ -185,11 +202,13 @@ export const DashboardPage: React.FC = () => {
         <Card className="border-border lg:col-span-1">
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-bold">Risk Distribution</CardTitle>
+              <CardTitle className="text-base font-bold">
+                {t('charts.riskDistribution', 'Risk Distribution')}
+              </CardTitle>
               <Badge variant="outline" className="text-[10px]">Cohort</Badge>
             </div>
             <CardDescription className="text-xs">
-              Categorization of analyzed prescriptions by safety severity.
+              {t('charts.riskDistributionSub', 'Categorization of analyzed prescriptions by safety severity.')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -219,7 +238,7 @@ export const DashboardPage: React.FC = () => {
                 <div key={idx} className="flex items-center space-x-2">
                   <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                   <span className="text-muted-foreground truncate">{item.name}:</span>
-                  <span className="font-semibold text-foreground">{item.value}</span>
+                  <span className="font-semibold text-foreground">{formatNumber(item.value)}</span>
                 </div>
               ))}
             </div>
@@ -231,12 +250,14 @@ export const DashboardPage: React.FC = () => {
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base font-bold">Analysis Activity & Safety Alerts</CardTitle>
+                <CardTitle className="text-base font-bold">
+                  {t('charts.weeklyActivity', 'Analysis Activity & Safety Alerts')}
+                </CardTitle>
                 <CardDescription className="text-xs">
-                  Daily throughput of prescription OCR parses vs clinical alerts.
+                  {t('charts.weeklyActivitySub', 'Daily throughput of prescription OCR parses vs clinical alerts.')}
                 </CardDescription>
               </div>
-              <Badge variant="demo">Simulated 7-Day Trend</Badge>
+              <Badge variant="demo">{isBn ? 'সিমুলেটেড ৭ দিনের ধারা' : 'Simulated 7-Day Trend'}</Badge>
             </div>
           </CardHeader>
           <CardContent>
@@ -247,8 +268,8 @@ export const DashboardPage: React.FC = () => {
                   <XAxis dataKey="day" fontSize={11} />
                   <YAxis fontSize={11} />
                   <RechartsTooltip />
-                  <Bar dataKey="analyzed" name="Analyzed" fill="#0f766e" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="alerts" name="Safety Alerts" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="analyzed" name={t('charts.analyzed', isBn ? 'বিশ্লেষিত' : 'Analyzed')} fill="#0f766e" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="alerts" name={t('charts.alerts', isBn ? 'নিরাপত্তা সতর্কতা' : 'Safety Alerts')} fill="#ef4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -256,11 +277,11 @@ export const DashboardPage: React.FC = () => {
             <div className="mt-3 flex items-center justify-center space-x-6 text-xs text-muted-foreground">
               <span className="flex items-center space-x-1.5">
                 <span className="h-3 w-3 rounded bg-teal-700" />
-                <span>Prescriptions Processed</span>
+                <span>{isBn ? 'প্রক্রিয়াকৃত প্রেসক্রিপশন' : 'Prescriptions Processed'}</span>
               </span>
               <span className="flex items-center space-x-1.5">
                 <span className="h-3 w-3 rounded bg-red-500" />
-                <span>Critical / Warning Alerts</span>
+                <span>{isBn ? 'জরুরি / সতর্কতামূলক নোটিশ' : 'Critical / Warning Alerts'}</span>
               </span>
             </div>
           </CardContent>
@@ -273,13 +294,15 @@ export const DashboardPage: React.FC = () => {
         <Card className="border-border lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
             <div>
-              <CardTitle className="text-base font-bold">Recent Prescription Analyses</CardTitle>
+              <CardTitle className="text-base font-bold">
+                {t('recentTable.title', isBn ? 'সাম্প্রতিক প্রেসক্রিপশন মূল্যায়ন' : 'Recent Prescription Analyses')}
+              </CardTitle>
               <CardDescription className="text-xs">
-                Most recent OCR syntax and pharmacovigilance evaluations.
+                {t('recentTable.description', isBn ? 'সর্বশেষ ওসিআর সিনট্যাক্স ও ফার্মাকোভিজিল্যান্স মূল্যায়ন তালিকা।' : 'Most recent OCR syntax and pharmacovigilance evaluations.')}
               </CardDescription>
             </div>
             <Button asChild variant="outline" size="sm" className="text-xs">
-              <Link to="/prescriptions">View All Records</Link>
+              <Link to="/prescriptions">{t('recentTable.viewAll', isBn ? 'সকল রেকর্ড দেখুন' : 'View All Records')}</Link>
             </Button>
           </CardHeader>
           <CardContent className="p-0">
@@ -287,11 +310,11 @@ export const DashboardPage: React.FC = () => {
               <table className="w-full text-left text-xs">
                 <thead className="bg-muted/50 border-y border-border text-muted-foreground">
                   <tr>
-                    <th className="py-2.5 px-4 font-semibold">Prescription ID</th>
-                    <th className="py-2.5 px-4 font-semibold">Patient</th>
-                    <th className="py-2.5 px-4 font-semibold">Key Drugs</th>
-                    <th className="py-2.5 px-4 font-semibold">Risk Level</th>
-                    <th className="py-2.5 px-4 font-semibold text-right">Actions</th>
+                    <th className="py-2.5 px-4 font-semibold">{t('recentTable.colId', isBn ? 'প্রেসক্রিপশন আইডি' : 'Prescription ID')}</th>
+                    <th className="py-2.5 px-4 font-semibold">{t('recentTable.colPatient', isBn ? 'রোগী' : 'Patient')}</th>
+                    <th className="py-2.5 px-4 font-semibold">{isBn ? 'মূল ওষুধসমূহ' : 'Key Drugs'}</th>
+                    <th className="py-2.5 px-4 font-semibold">{t('recentTable.colRisk', isBn ? 'ঝুঁকির মাত্রা' : 'Risk Level')}</th>
+                    <th className="py-2.5 px-4 font-semibold text-right">{t('recentTable.colAction', isBn ? 'পদক্ষেপ' : 'Actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -307,10 +330,10 @@ export const DashboardPage: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           <span className="font-semibold text-foreground">
-                            {p.patient_context.name || 'Anonymous Patient'}
+                            {p.patient_context.name || (isBn ? 'নামবিহীন রোগী' : 'Anonymous Patient')}
                           </span>
                           <span className="block text-[10px] text-muted-foreground">
-                            Age: {p.patient_context.age} • eGFR: {p.patient_context.egfr ?? 'N/A'}
+                            {isBn ? `বয়স: ${formatNumber(p.patient_context.age)} বছর • eGFR: ${p.patient_context.egfr ?? 'N/A'}` : `Age: ${formatNumber(p.patient_context.age)} • eGFR: ${p.patient_context.egfr ?? 'N/A'}`}
                           </span>
                         </td>
                         <td className="py-3 px-4 text-muted-foreground">
@@ -318,13 +341,15 @@ export const DashboardPage: React.FC = () => {
                         </td>
                         <td className="py-3 px-4">
                           <Badge variant={isCritical ? 'critical' : 'success'}>
-                            {p.clinical_risk.risk_classification} ({p.clinical_risk.risk_score}/100)
+                            {isBn
+                              ? (isCritical ? `মারাত্মক ঝুঁকি (${formatNumber(p.clinical_risk.risk_score)}/১০০)` : `স্বাভাবিক (${formatNumber(p.clinical_risk.risk_score)}/১০০)`)
+                              : `${p.clinical_risk.risk_classification} (${p.clinical_risk.risk_score}/100)`}
                           </Badge>
                         </td>
                         <td className="py-3 px-4 text-right">
                           <Button asChild size="sm" variant="ghost" className="h-7 px-2 text-xs text-primary">
                             <Link to={`/reports/${p.analysis_id}`}>
-                              Details <ArrowUpRight className="ml-1 h-3 w-3" />
+                              {t('recentTable.viewReport', isBn ? 'বিস্তারিত' : 'Details')} <ArrowUpRight className="ml-1 h-3 w-3" />
                             </Link>
                           </Button>
                         </td>
@@ -343,32 +368,36 @@ export const DashboardPage: React.FC = () => {
             <CardHeader className="pb-3">
               <div className="flex items-center space-x-2 text-red-600">
                 <AlertCircle className="h-4 w-4" />
-                <CardTitle className="text-sm font-bold">Active Patient Safety Flags</CardTitle>
+                <CardTitle className="text-sm font-bold">{isBn ? 'সক্রিয় রোগী নিরাপত্তা সতর্কতা' : 'Active Patient Safety Flags'}</CardTitle>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="p-3 rounded-lg border border-red-200 bg-red-50/70 dark:bg-red-950/30 text-xs">
                 <div className="flex items-center justify-between font-semibold text-red-900 dark:text-red-300">
-                  <span>NSAID + CKD Contraindication</span>
-                  <Badge variant="critical" className="text-[9px]">CRITICAL</Badge>
+                  <span>{isBn ? 'NSAID + CKD ক্ষতিকর মিথস্ক্রিয়া' : 'NSAID + CKD Contraindication'}</span>
+                  <Badge variant="critical" className="text-[9px]">{isBn ? 'মারাত্মক ঝুঁকি' : 'CRITICAL'}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] text-red-800/80 dark:text-red-400">
-                  Ketorolac (Rolac 10) 14 days in Patient Md. Rafiqul Islam (eGFR 34.5). Immediate intervention recommended.
+                  {isBn
+                    ? 'রোগী মো. রফিকুল ইসলাম (eGFR ৩৪.৫)-এর জন্য ১৪ দিনের Ketorolac (Rolac 10) প্রেসক্রাইব করা হয়েছে। অবিলম্বে চিকিৎসাগত হস্তক্ষেপ প্রয়োজন।'
+                    : 'Ketorolac (Rolac 10) 14 days in Patient Md. Rafiqul Islam (eGFR 34.5). Immediate intervention recommended.'}
                 </p>
                 <div className="mt-2 flex justify-end">
                   <Button asChild size="sm" variant="critical" className="h-6 text-[10px] px-2">
-                    <Link to="/risk-analysis/AN-2026-0941">Inspect Risk</Link>
+                    <Link to="/risk-analysis/AN-2026-0941">{isBn ? 'ঝুঁকি পরীক্ষা করুন' : 'Inspect Risk'}</Link>
                   </Button>
                 </div>
               </div>
 
               <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/70 dark:bg-amber-950/30 text-xs">
                 <div className="flex items-center justify-between font-semibold text-amber-900 dark:text-amber-300">
-                  <span>Therapeutic Duration Alert</span>
-                  <Badge variant="warning" className="text-[9px]">WARNING</Badge>
+                  <span>{isBn ? 'থেরাপিউটিক সময়সীমা সতর্কতা' : 'Therapeutic Duration Alert'}</span>
+                  <Badge variant="warning" className="text-[9px]">{isBn ? 'সতর্কতা' : 'WARNING'}</Badge>
                 </div>
                 <p className="mt-1 text-[11px] text-amber-800/80 dark:text-amber-400">
-                  Prescription course exceeds DGDA approved 5-day ceiling for acute injectable/oral ketorolac.
+                  {isBn
+                    ? 'প্রেসক্রিপশনে নির্দেশিত কোর্স ডিজিডিএ অনুমোদিত তীব্র ইনজেকশন/ওরাল কেটোরোলাকের সর্বোচ্চ ৫ দিনের সময়সীমা অতিক্রম করেছে।'
+                    : 'Prescription course exceeds DGDA approved 5-day ceiling for acute injectable/oral ketorolac.'}
                 </p>
               </div>
             </CardContent>
@@ -379,14 +408,16 @@ export const DashboardPage: React.FC = () => {
             <CardContent className="p-4 space-y-2">
               <div className="flex items-center space-x-1.5 text-xs font-bold text-teal-900 dark:text-teal-200">
                 <Sparkles className="h-4 w-4 text-teal-600" />
-                <span>Hackathon Demo Scenario Ready</span>
+                <span>{isBn ? 'হ্যাকথন ডেমো সিনারিও প্রস্তুত' : 'Hackathon Demo Scenario Ready'}</span>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                Test with 62yo CKD Stage 3 patient taking Bizoran 5/20 and Rolac 10 for 14 days. Click below to load pre-filled analysis.
+                {isBn
+                  ? '৬২ বছর বয়সী CKD Stage 3 রোগীর জন্য Bizoran 5/20 এবং Rolac 10 (১৪ দিন) প্রেসক্রিপশন পরীক্ষা করুন। স্বয়ংক্রিয়ভাবে পূরণকৃত বিশ্লেষণ দেখতে নিচে ক্লিক করুন।'
+                  : 'Test with 62yo CKD Stage 3 patient taking Bizoran 5/20 and Rolac 10 for 14 days. Click below to load pre-filled analysis.'}
               </p>
               <Button asChild size="sm" variant="outline" className="w-full text-xs border-teal-300 text-teal-800 dark:text-teal-300">
                 <Link to="/analyze?demo=true">
-                  Load Hackathon Demo Scenario →
+                  {isBn ? 'হ্যাকথন ডেমো সিনারিও লোড করুন →' : 'Load Hackathon Demo Scenario →'}
                 </Link>
               </Button>
             </CardContent>
@@ -398,16 +429,18 @@ export const DashboardPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-1.5 text-xs font-bold text-emerald-950 dark:text-emerald-200">
                   <HeartHandshake className="h-4 w-4 text-emerald-600" />
-                  <span>সহজ বাংলা রোগী নির্দেশিকা</span>
+                  <span>{isBn ? 'সহজ বাংলা রোগী নির্দেশিকা' : 'Bangla Patient Companion'}</span>
                 </div>
-                <Badge variant="success" className="text-[10px]">অডিও সহ</Badge>
+                <Badge variant="success" className="text-[10px]">{isBn ? 'অডিও সহ' : 'With Audio'}</Badge>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                রোগী এবং স্বজনদের জন্য সহজ ভাষায় প্রেসক্রিপশন নির্দেশিকা, খাওয়ার নিয়ম ও অডিও স্পিচ শুনুন।
+                {isBn
+                  ? 'রোগী এবং স্বজনদের জন্য সহজ ভাষায় প্রেসক্রিপশন নির্দেশিকা, খাওয়ার নিয়ম ও অডিও স্পিচ শুনুন।'
+                  : 'Patient and caregiver prescription instructions in plain Bengali, dosing schedules and text-to-speech audio.'}
               </p>
               <Button asChild size="sm" className="w-full text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-medium">
                 <Link to="/bangla-companion">
-                  বাংলা নির্দেশিকা খুলুন (Open Companion) →
+                  {isBn ? 'বাংলা নির্দেশিকা খুলুন →' : 'Open Bangla Companion →'}
                 </Link>
               </Button>
             </CardContent>

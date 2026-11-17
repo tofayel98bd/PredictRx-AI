@@ -108,8 +108,12 @@ export const BanglaCompanionPage: React.FC = () => {
 
       {/* Primary Bangla Patient Companion Component */}
       <BanglaPatientCompanion
-        data={selectedAnalysis.bangla_companion}
-        patientName={selectedAnalysis.patient_context.name}
+        data={
+          selectedAnalysis?.bangla_companion?.medicines?.length
+            ? selectedAnalysis.bangla_companion
+            : DEMO_ANALYSIS_RESULT.bangla_companion
+        }
+        patientName={selectedAnalysis?.patient_context?.name || 'মোঃ রফিকুল ইসলাম'}
       />
 
       {/* Clinical Guidance Notice for Healthcare Workers */}

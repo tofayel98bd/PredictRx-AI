@@ -2,7 +2,7 @@
 
 from typing import Generator, Optional
 from uuid import UUID
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.core.exceptions import AuthenticationError
 from app.core.security import decode_access_token
 from app.db.session import get_db
+from app.i18n.translator import translator
 from app.models.user import User
 from app.repositories.user_repo import UserRepository
 
@@ -66,3 +67,17 @@ def get_optional_user(
         return user_repo.get_by_id(user_id)
     except Exception:
         return None
+
+
+def get_language(
+    request: Request,
+    user: Optional[User] = Depends(get_optional_user),
+) -> str:
+    """
+    Resolve requested language ('en' or 'bn') using the four-tier strategy:
+    1. Explicit supported request parameter / X-Language header
+    2. Accept-Language header
+    3. User's saved preference
+    4. English default ('en')
+    """
+    return translator.resolve_language(request, user)

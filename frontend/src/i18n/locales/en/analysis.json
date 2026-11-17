@@ -1,0 +1,142 @@
+{
+  "title": "Prescription OCR & Clinical Safety Analysis",
+  "subtitle": "Multimodal Vision OCR extraction, Bangladesh DGDA brand normalization, and ML risk evaluation.",
+  "workflow": {
+    "title": "Safety Pipeline Execution Stages",
+    "stage1": "Prescription Uploaded & Validated",
+    "stage2": "Vision OCR Text Extraction",
+    "stage3": "Prescription Syntax Validation",
+    "stage4": "Bangladesh Medicine Normalization",
+    "stage5": "Drug-Drug Interaction Detection",
+    "stage6": "Clinical Evidence Retrieval (KDIGO/BNF)",
+    "stage7": "Risk Prediction Assessment",
+    "stage8": "Explainability & SHAP Analysis",
+    "stage9": "Clinician Decision Support Report"
+  },
+  "upload": {
+    "title": "1. Upload Prescription Document",
+    "description": "Drag and drop prescription photo or scan (PNG, JPG, PDF up to 10MB)",
+    "dropPrompt": "Click to select or drag & drop prescription",
+    "browse": "Browse Files",
+    "selectedFile": "Selected Document",
+    "remove": "Remove file",
+    "syntheticDemoButton": "Load Golden Hackathon Demo Scenario",
+    "syntheticDemoDesc": "Loads Md. Rafiqul Islam (68M, CKD 3a) with high-risk Ketorolac + Olmesartan prescription.",
+    "enhancementNotice": "Includes automated image contrast enhancement & rotation normalization."
+  },
+  "scenarios": {
+    "title": "1-Click Hackathon Golden Demo Scenarios",
+    "fastPath": "(Fail-safe sub-15ms fast-path)",
+    "subtitle": "Select any case to auto-fill or execute instant evaluation",
+    "loaded": "Loaded",
+    "autofill": "Autofill",
+    "instantRun": "Instant Run",
+    "loadDemoBtn": "Load Hackathon Demo Scenario (CKD 3 / Ketorolac)",
+    "dualEngine": "Dual AI + Rules Engine"
+  },
+  "patientForm": {
+    "title": "2. Patient Baseline Clinical Profile",
+    "subtitle": "Provide clinical parameters for personalized pharmacovigilance screening",
+    "patientId": "Patient Identifier",
+    "name": "Patient Name",
+    "namePlaceholder": "e.g., Mohammad Abdul Karim",
+    "age": "Age (Years)",
+    "gender": "Gender",
+    "genderMale": "Male",
+    "genderFemale": "Female",
+    "genderOther": "Other",
+    "weight": "Weight (kg)",
+    "creatinine": "Serum Creatinine (mg/dL)",
+    "egfr": "eGFR (mL/min/1.73m²)",
+    "hba1c": "HbA1c (%)",
+    "systolicBp": "Systolic BP (mmHg)",
+    "diastolicBp": "Diastolic BP (mmHg)",
+    "conditions": "Known Clinical Conditions (comma separated)",
+    "conditionsPlaceholder": "e.g., CKD Stage 4, Type 2 Diabetes, Hypertension",
+    "currentMeds": "Current Ongoing Medications",
+    "currentMedsPlaceholder": "e.g., Ramipril 5mg OD, Metformin 500mg BD",
+    "allergies": "Known Drug Allergies",
+    "allergiesPlaceholder": "e.g., Penicillin, Sulfa drugs",
+    "btnAnalyze": "Run Full CDSS Safety Evaluation",
+    "btnAnalyzing": "Processing Clinical Pipeline..."
+  },
+  "results": {
+    "title": "CDSS Safety Evaluation Results",
+    "analysisId": "Analysis ID",
+    "prescriptionId": "Prescription ID",
+    "tabs": {
+      "summary": "Clinical Summary",
+      "medications": "Extracted Medicines",
+      "interactions": "Drug Interactions",
+      "risk": "Risk & SHAP (XAI)",
+      "alternatives": "Safer Alternatives",
+      "companion": "Bangla Companion"
+    },
+    "medTable": {
+      "brand": "Brand Name",
+      "generic": "Generic Name",
+      "formStrength": "Form & Strength",
+      "syntax": "Dosage Syntax",
+      "duration": "Duration",
+      "timing": "Timing",
+      "confidence": "OCR Confidence",
+      "status": "Syntax Status"
+    },
+    "alerts": {
+      "criticalTitle": "Critical Pharmacovigilance Hazard Detected",
+      "highRiskTitle": "High Clinical Risk Identified",
+      "moderateTitle": "Moderate Cautionary Notice",
+      "safeTitle": "Prescription Appears Within Standard Safety Margins"
+    },
+    "riskGauge": {
+      "title": "Prescription Risk Assessment",
+      "demoBadge": "DEMO — NOT CLINICALLY VALIDATED",
+      "scoreTitle": "Composite Adverse Drug Event Probability Score",
+      "scoreDesc": "Estimated index combining pharmacodynamic drug-drug interaction, patient renal clearance, and duration ceilings.",
+      "threshold": "Threshold:",
+      "thresholdCritical": "Critical (>75)",
+      "aki": "Acute Kidney Injury (AKI)",
+      "akiDesc": "Renal hemodynamic uncoupling",
+      "giBleed": "Gastrointestinal Bleeding",
+      "giBleedDesc": "COX-1 inhibition > 5 days",
+      "cv": "Cardiovascular Event",
+      "cvDesc": "BP blunting & fluid retention",
+      "calibration": "Model Calibration Disclosure:",
+      "riskSuffix": "RISK"
+    },
+    "shap": {
+      "title": "Explainable AI (XAI): SHAP Risk Factor Contributions",
+      "demoBadge": "DEMO — NOT CLINICALLY VALIDATED",
+      "subtitle": "Shapley Additive Explanations decompose the overall adverse clinical risk into patient-specific factor weights.",
+      "increasesRisk": "Increases Risk (+)",
+      "protective": "Protective / Dampener (-)",
+      "breakdownHeader": "Clinician Factor Interpretability Breakdown",
+      "category": "Category:",
+      "observed": "Observed:",
+      "riskShift": "Risk Shift:",
+      "value": "Value:",
+      "adverseContribution": "+{{score}}% adverse risk contribution",
+      "riskAttenuation": "{{score}}% risk attenuation",
+      "riskBadge": "+{{score}}% Risk",
+      "shieldBadge": "{{score}}% Shield",
+      "guideTitle": "Understanding SHAP Values in Clinical Practice",
+      "guideDesc": "SHAP values quantify each patient variable's contribution relative to baseline cohort incidence. Red bars represent risk escalators (such as off-label duration or acute renal impairment), whereas green bars represent stabilizing baseline buffers."
+    },
+    "safer": {
+      "title": "Evidence-Based Safer Therapeutic Alternatives",
+      "subtitle": "Recommended pharmacological substitutes with reduced organ toxicity burden",
+      "originalDrug": "Original High-Risk Drug",
+      "recommendedAlternative": "Recommended Substitute",
+      "rationale": "Clinical Rationale & Evidence",
+      "guideline": "Clinical Guideline Reference"
+    },
+    "review": {
+      "button": "Clinician Review & Approval",
+      "status": "Review Status",
+      "unreviewed": "Unreviewed",
+      "approved": "Approved by Clinician",
+      "rejected": "Rejected / Overridden",
+      "modified": "Therapy Modified"
+    }
+  }
+}

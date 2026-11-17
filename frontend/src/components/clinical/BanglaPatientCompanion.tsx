@@ -156,66 +156,76 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({ data, p
         <div className="space-y-4">
           <h4 className="text-sm font-bold text-foreground flex items-center space-x-2">
             <span>ওষুধের তালিকা ও খাওয়ার সঠিক নিয়ম</span>
-            <span className="text-xs font-normal text-muted-foreground">({data.medicines.length}টি ঔষধ)</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              ({data?.medicines?.length || 0}টি ওষুধ)
+            </span>
           </h4>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {data.medicines.map((med, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-xl border border-border bg-card shadow-sm hover:border-teal-300 transition-colors"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h5 className="font-bold text-base text-foreground">
-                      {med.bengali_brand_name || med.brand_name}
-                    </h5>
-                    <p className="text-xs text-muted-foreground">{med.generic_name}</p>
+          {(!data?.medicines || data.medicines.length === 0) ? (
+            <div className="p-6 rounded-xl border border-dashed border-border text-center text-muted-foreground text-xs space-y-1">
+              <p className="font-semibold text-foreground">কোনো ওষুধ তালিকাভুক্ত পাওয়া যায়নি</p>
+              <p>প্রেসক্রিপশনটি পুনরায় স্ক্যান করুন অথবা উপরের ড্রপডাউন থেকে গোল্ডেন ডেমো প্রেসক্রিপশন নির্বাচন করুন।</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {data.medicines.map((med, idx) => (
+                <div
+                  key={idx}
+                  className="p-4 rounded-xl border border-border bg-card shadow-sm hover:border-teal-300 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h5 className="font-bold text-base text-foreground">
+                        {med.bengali_brand_name || med.brand_name}
+                      </h5>
+                      <p className="text-xs text-muted-foreground">{med.generic_name}</p>
+                    </div>
+                    <Badge variant="outline" className="text-xs border-teal-300 text-teal-800 dark:text-teal-300">
+                      ওষুধ {idx + 1}
+                    </Badge>
                   </div>
-                  <Badge variant="outline" className="text-xs border-teal-300 text-teal-800 dark:text-teal-300">
-                    ঔষধ {idx + 1}
-                  </Badge>
-                </div>
 
-                <div className="mt-3 space-y-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-muted">
-                    <span className="text-muted-foreground">খাওয়ার নিয়ম:</span>
-                    <span className="font-semibold text-foreground text-right">{med.dosage_bengali}</span>
+                  <div className="mt-3 space-y-2 text-xs">
+                    <div className="flex justify-between py-1 border-b border-muted">
+                      <span className="text-muted-foreground">খাওয়ার নিয়ম:</span>
+                      <span className="font-semibold text-foreground text-right">{med.dosage_bengali}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-muted">
+                      <span className="text-muted-foreground">সেবন সময়:</span>
+                      <span className="font-medium text-foreground text-right">{med.timing_bengali}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-muted">
+                      <span className="text-muted-foreground">কতোদিন খাবেন:</span>
+                      <span className="font-medium text-amber-700 dark:text-amber-400 text-right">{med.duration_bengali}</span>
+                    </div>
+                    <div className="flex justify-between py-1 border-b border-muted">
+                      <span className="text-muted-foreground">ওষুধটির উদ্দেশ্য:</span>
+                      <span className="font-medium text-teal-700 dark:text-teal-400 text-right">{med.purpose_bengali}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-muted">
-                    <span className="text-muted-foreground">সেবন সময়:</span>
-                    <span className="font-medium text-foreground text-right">{med.timing_bengali}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-muted">
-                    <span className="text-muted-foreground">কতোদিন খাবেন:</span>
-                    <span className="font-medium text-amber-700 dark:text-amber-400 text-right">{med.duration_bengali}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b border-muted">
-                    <span className="text-muted-foreground">ওষুধটির উদ্দেশ্য:</span>
-                    <span className="font-medium text-teal-700 dark:text-teal-400 text-right">{med.purpose_bengali}</span>
-                  </div>
-                </div>
 
-                {med.safety_warnings_bengali.length > 0 && (
-                  <div className="mt-3 pt-2 border-t border-border/60">
-                    <span className="text-[11px] font-semibold text-red-700 dark:text-red-400">বিশেষ সতর্কতা:</span>
-                    <ul className="mt-1 space-y-1 text-[11px] text-muted-foreground list-disc list-inside">
-                      {med.safety_warnings_bengali.map((w, wIdx) => (
-                        <li key={wIdx} className="leading-snug">{w}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  {med.safety_warnings_bengali && med.safety_warnings_bengali.length > 0 && (
+                    <div className="mt-3 pt-2 border-t border-border/60">
+                      <span className="text-[11px] font-semibold text-red-700 dark:text-red-400">বিশেষ সতর্কতা:</span>
+                      <ul className="mt-1 space-y-1 text-[11px] text-muted-foreground list-disc list-inside">
+                        {med.safety_warnings_bengali.map((w, wIdx) => (
+                          <li key={wIdx} className="leading-snug">{w}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Emergency Instructions */}
         <div className="p-3.5 rounded-lg border border-border bg-muted/40 text-xs">
           <p className="text-muted-foreground leading-relaxed">
             <span className="font-semibold text-foreground">জরুরী পরামর্শ: </span>
-            {data.emergency_instructions_bengali}
+            {data?.emergency_instructions_bengali ||
+              'যদি তীব্র পেট ব্যথা, কালো পায়খানা, বমি, শ্বাসকষ্ট বা শরীরে কোনো অস্বাভাবিক অ্যালার্জি দেখা দেয়, তবে অবিলম্বে নিকটস্থ জরুরি বিভাগে বা রেজিস্টার্ড চিকিৎসকের সাথে যোগাযোগ করুন।'}
           </p>
         </div>
       </CardContent>

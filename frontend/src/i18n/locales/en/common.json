@@ -1,0 +1,80 @@
+{
+  "appName": "PredictRx-AI",
+  "appTagline": "Clinical Decision Support System",
+  "brandSubtitle": "CDSS Bangladesh",
+  "language": {
+    "en": "English",
+    "bn": "বাংলা",
+    "select": "Select Language",
+    "switch": "Switch language"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "refresh": "Refresh",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "print": "Print",
+    "download": "Download",
+    "upload": "Upload",
+    "view": "View",
+    "viewDetails": "View Details",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "submit": "Submit",
+    "reset": "Reset",
+    "copy": "Copy",
+    "copied": "Copied to clipboard"
+  },
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "completed": "Completed",
+    "failed": "Failed",
+    "loading": "Loading...",
+    "processing": "Processing...",
+    "safe": "Safe",
+    "caution": "Caution Required",
+    "warning": "Warning",
+    "critical": "Critical",
+    "high": "High",
+    "moderate": "Moderate",
+    "low": "Low",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "modified": "Modified"
+  },
+  "pagination": {
+    "page": "Page {{current}} of {{total}}",
+    "showing": "Showing {{from}} to {{to}} of {{count}} records",
+    "rowsPerPage": "Rows per page"
+  },
+  "empty": {
+    "noData": "No data available",
+    "noResults": "No matching records found",
+    "tryDifferent": "Try adjusting your search or filter parameters"
+  },
+  "error": {
+    "generic": "An unexpected error occurred. Please try again.",
+    "network": "Network error. Unable to reach the server.",
+    "notFound": "Requested resource not found."
+  },
+  "safety": {
+    "advisoryNotice": "Advisory Notice",
+    "advisoryDescription": "Assists clinician evaluation. Never replaces qualified medical assessment.",
+    "fastapiLive": "FastAPI Live",
+    "safeDemoAdapter": "Safe Demo Adapter"
+  },
+  "safetyDisclaimer": "PredictRx-AI is a clinical decision support tool. It does not replace professional medical judgment. All clinical decisions must be reviewed by a qualified healthcare professional.",
+  "footer": {
+    "protocol": "CDSS Protocol v1.4",
+    "alignment": "Bangladesh Pharmacovigilance Alignment"
+  }
+}

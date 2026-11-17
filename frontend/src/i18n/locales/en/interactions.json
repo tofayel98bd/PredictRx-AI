@@ -1,0 +1,46 @@
+{
+  "title": "Drug Interaction Monitoring Center",
+  "subtitle": "Traceable pharmacokinetic and pharmacodynamic drug-drug collision database aligned with Bangladesh Formulary & international guidelines.",
+  "checkTool": {
+    "title": "Quick Pair Interaction Screener",
+    "subtitle": "Test any two medications on-the-fly for immediate contraindication screening.",
+    "drugAPlaceholder": "Drug A (e.g. Ketorolac / Rolac)",
+    "drugBPlaceholder": "Drug B (e.g. Olmesartan / Bizoran)",
+    "btnCheck": "Screen Drug Pair",
+    "finding": "Screening Finding: ",
+    "screening": "Cross-referencing pharmacodynamic collision matrix..."
+  },
+  "searchPlaceholder": "Search by drug name (e.g. Ketorolac, Metformin, Warfarin), mechanism, or clinical effect...",
+  "filter": {
+    "all": "All Severities",
+    "critical": "Critical Severity",
+    "high": "High Severity",
+    "moderate": "Moderate Severity",
+    "low": "Low Severity"
+  },
+  "card": {
+    "mechanism": "Pharmacodynamic Mechanism:",
+    "significance": "Clinical Significance:",
+    "recommendedAction": "Recommended Clinician Action:",
+    "evidence": "Evidence:",
+    "ruleId": "Rule ID:"
+  },
+  "severityLevels": {
+    "critical": "Critical Hazard",
+    "high": "High Risk",
+    "moderate": "Moderate Interaction",
+    "low": "Minor / Advisory"
+  },
+  "matrix": {
+    "title": "Monitored Drug Collision Matrix",
+    "colPair": "Interacting Generic Agents",
+    "colSeverity": "Hazard Level",
+    "colMechanism": "Pharmacological Mechanism",
+    "colManagement": "Clinical Management Protocol",
+    "colEvidence": "Clinical Evidence Source"
+  },
+  "tripleWhammy": {
+    "bannerTitle": "Triple Whammy Collision Alert",
+    "bannerText": "Concurrent prescription of an ACEi/ARB + Diuretic + NSAID creates acute hemodynamic collapse and triggers emergency dialysis risk."
+  }
+}
