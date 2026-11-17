@@ -22,28 +22,28 @@ export const AppLayout: React.FC = () => {
       />
 
       {/* Main Content Column */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <TopNav onOpenMobile={() => setMobileOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+        <main className="flex-1 overflow-y-auto px-3 py-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>
         </main>
 
         {/* Global Medical Safety Disclaimer Bar */}
-        <footer className="no-print border-t border-border bg-card/95 px-4 py-2 text-xs text-muted-foreground backdrop-blur-sm">
-          <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left">
-            <div className="flex items-center space-x-1.5 text-[11px] text-amber-800 dark:text-amber-300">
+        <footer className="no-print border-t border-border bg-card/95 px-3 py-1.5 sm:py-2 text-xs text-muted-foreground backdrop-blur-sm shrink-0">
+          <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-1 text-center sm:text-left text-[10px] sm:text-[11px]">
+            <div className="flex items-center space-x-1.5 text-amber-800 dark:text-amber-300">
               <Info className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-              <span>
+              <span className="leading-tight">
                 {t(
                   'safetyDisclaimer',
                   'PredictRx-AI is a clinical decision support tool. It does not replace professional medical judgment. All clinical decisions must be reviewed by a qualified healthcare professional.'
                 )}
               </span>
             </div>
-            <div className="flex items-center space-x-2 text-[10px] text-muted-foreground shrink-0">
+            <div className="hidden sm:flex items-center space-x-2 text-[10px] text-muted-foreground shrink-0">
               <span className="flex items-center space-x-1">
                 <ShieldCheck className="h-3 w-3 text-primary" />
                 <span>{t('footer.protocol', 'CDSS Protocol v1.4')}</span>

@@ -619,11 +619,11 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
           {/* Tabbed Results Layout */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid grid-cols-4 w-full sm:w-[540px]">
-              <TabsTrigger value="clinical">{t('results.tabs.medications', 'Clinical Findings')}</TabsTrigger>
-              <TabsTrigger value="interactions">{t('results.tabs.interactions', 'Interactions')} ({analysisResult.drug_interactions.length})</TabsTrigger>
-              <TabsTrigger value="risk">{t('results.tabs.risk', 'SHAP Explainability')}</TabsTrigger>
-              <TabsTrigger value="bangla">{t('results.tabs.companion', 'Bangla Companion')}</TabsTrigger>
+            <TabsList className="grid grid-cols-2 sm:grid-cols-4 h-auto w-full sm:w-[540px] gap-1 p-1">
+              <TabsTrigger value="clinical" className="text-xs py-1.5">{t('results.tabs.medications', 'Clinical Findings')}</TabsTrigger>
+              <TabsTrigger value="interactions" className="text-xs py-1.5">{t('results.tabs.interactions', 'Interactions')} ({analysisResult.drug_interactions.length})</TabsTrigger>
+              <TabsTrigger value="risk" className="text-xs py-1.5">{t('results.tabs.risk', 'SHAP Explainability')}</TabsTrigger>
+              <TabsTrigger value="bangla" className="text-xs py-1.5">{t('results.tabs.companion', 'Bangla Companion')}</TabsTrigger>
             </TabsList>
 
             {/* TAB 1: Clinical Findings & Normalization */}

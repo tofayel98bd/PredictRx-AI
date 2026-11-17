@@ -103,37 +103,37 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
   const firstWord = titleStr.split(' ')[0] || '';
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-border bg-card/90 px-4 backdrop-blur-md sm:px-6">
+    <header className="sticky top-0 z-30 flex h-14 sm:h-16 w-full items-center justify-between border-b border-border bg-card/95 px-2.5 sm:px-6 backdrop-blur-md">
       {/* Left: Mobile trigger & Page title */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 mr-1.5 sm:mr-3">
         <button
           onClick={onOpenMobile}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground lg:hidden hover:bg-muted"
+          className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-lg border border-border text-muted-foreground lg:hidden hover:bg-muted"
           aria-label={t('sidebar.expand', { ns: 'navigation', defaultValue: 'Open navigation menu' })}
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
         </button>
 
-        <div className="flex flex-col">
-          <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+        <div className="flex flex-col min-w-0">
+          <div className="hidden md:flex items-center space-x-2 text-xs text-muted-foreground">
             <span>{categoryStr}</span>
             <span>/</span>
             <span className="font-medium text-foreground truncate max-w-[220px]">{titleStr}</span>
           </div>
-          <h1 className="text-base sm:text-lg font-bold text-foreground tracking-tight">
+          <h1 className="text-sm sm:text-base md:text-lg font-bold text-foreground tracking-tight truncate">
             {titleStr}
           </h1>
         </div>
       </div>
 
       {/* Right controls: Language Toggle, Backend Status, Notifications, Theme, Profile */}
-      <div className="flex items-center space-x-2 sm:space-x-3">
+      <div className="flex items-center space-x-1 sm:space-x-2.5 shrink-0">
         {/* Global Language Toggle */}
         <LanguageToggle />
 
         {/* API Connection Indicator */}
         <div
-          className="hidden md:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs border font-medium cursor-default"
+          className="hidden lg:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-xs border font-medium cursor-default"
           title={backendStatus.message}
         >
           {backendStatus.online ? (
@@ -159,11 +159,11 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
             variant="ghost"
             size="icon"
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative"
+            className="relative h-8 w-8 sm:h-9 sm:w-9"
             aria-label={t('header.notifications.button', { ns: 'navigation', defaultValue: 'Clinical safety notifications' })}
           >
-            <Bell className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+            <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+            <span className="absolute top-1 right-1 sm:top-1.5 sm:right-1.5 flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
@@ -171,7 +171,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
 
           {/* Notifications Flyout */}
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-border bg-card p-4 shadow-xl z-50 animate-in fade-in-50 zoom-in-95">
+            <div className="fixed sm:absolute inset-x-2 sm:inset-x-auto sm:right-0 top-14 sm:top-auto sm:mt-2 w-auto sm:w-96 rounded-xl border border-border bg-card p-4 shadow-xl z-50 animate-in fade-in-50 zoom-in-95">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div className="flex items-center space-x-2">
                   <ShieldAlert className="h-4 w-4 text-red-600" />
@@ -236,19 +236,20 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
           variant="ghost"
           size="icon"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="h-8 w-8 sm:h-9 sm:w-9"
           aria-label={t('header.theme.toggle', { ns: 'navigation', defaultValue: 'Toggle theme' })}
         >
           {theme === 'dark' ? (
-            <Sun className="h-5 w-5 text-amber-400 transition-transform rotate-0" />
+            <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400 transition-transform rotate-0" />
           ) : (
-            <Moon className="h-5 w-5 text-slate-700 transition-transform rotate-0" />
+            <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-700 transition-transform rotate-0" />
           )}
         </Button>
 
         {/* Clinician Profile Chip */}
-        <div className="flex items-center space-x-2 pl-2 border-l border-border">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20">
-            <UserCheck className="h-4 w-4" />
+        <div className="hidden sm:flex items-center space-x-2 pl-1.5 sm:pl-2 border-l border-border">
+          <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20">
+            <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
           <div className="hidden xl:flex flex-col text-left">
             <span className="text-xs font-semibold text-foreground">
