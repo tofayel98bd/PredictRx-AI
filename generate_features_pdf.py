@@ -13,7 +13,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
   @page {
     size: A4 portrait;
-    margin: 10mm 12mm 12mm 12mm;
+    margin: 8mm 10mm 10mm 10mm;
     @bottom-right {
       content: "Page " counter(page) " of " counter(pages);
       font-size: 8pt;
@@ -21,7 +21,7 @@ HTML_CONTENT = """<!DOCTYPE html>
       color: #64748b;
     }
     @bottom-left {
-      content: "PredictRx BD • Architectural & Feature Specification";
+      content: "PredictRx BD • Architecture & Feature Specification Master Guide";
       font-size: 8pt;
       font-family: 'Plus Jakarta Sans', sans-serif;
       color: #64748b;
@@ -40,74 +40,74 @@ HTML_CONTENT = """<!DOCTYPE html>
     font-family: 'Plus Jakarta Sans', 'Segoe UI', 'Nirmala UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     color: #1e293b;
     background: #ffffff;
-    font-size: 9pt;
-    line-height: 1.5;
+    font-size: 8.5pt;
+    line-height: 1.45;
   }
 
   .header {
     background: linear-gradient(135deg, #070b14 0%, #0f172a 100%);
     color: #ffffff;
-    padding: 18px 22px;
-    border-radius: 8px;
-    margin-bottom: 14px;
+    padding: 12px 18px;
+    border-radius: 6px;
+    margin-bottom: 10px;
     border-left: 5px solid #06b6d4;
   }
   .header-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .header-badge {
     background: rgba(6, 182, 212, 0.2);
     border: 1px solid #06b6d4;
     color: #38bdf8;
-    font-size: 7.5pt;
+    font-size: 7pt;
     font-weight: 800;
-    padding: 2px 8px;
+    padding: 2px 7px;
     border-radius: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
   .header-date {
-    font-size: 8pt;
+    font-size: 7.5pt;
     color: #94a3b8;
     font-family: 'JetBrains Mono', monospace;
   }
   .header-title {
-    font-size: 17pt;
+    font-size: 15pt;
     font-weight: 800;
     letter-spacing: -0.5px;
     color: #ffffff;
     line-height: 1.2;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
   }
   .header-subtitle {
-    font-size: 9pt;
+    font-size: 8.5pt;
     color: #94a3b8;
-    line-height: 1.4;
+    line-height: 1.35;
   }
 
   .section {
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
   .section-title {
-    font-size: 11.5pt;
+    font-size: 10.5pt;
     font-weight: 800;
     color: #0f172a;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 4px;
-    margin-bottom: 10px;
+    border-bottom: 1.5px solid #e2e8f0;
+    padding-bottom: 3px;
+    margin-bottom: 8px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   .section-title .step-badge {
     background: #0284c7;
     color: #ffffff;
-    font-size: 7.5pt;
+    font-size: 7pt;
     font-weight: 800;
-    padding: 2px 7px;
+    padding: 2px 6px;
     border-radius: 4px;
   }
 
@@ -115,25 +115,23 @@ HTML_CONTENT = """<!DOCTYPE html>
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 6px;
-    padding: 10px 14px;
-    margin-bottom: 10px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   .callout {
-    border-left: 4px solid #0284c7;
+    border-left: 3.5px solid #0284c7;
     background: #f0f9ff;
-    padding: 8px 12px;
-    border-radius: 0 6px 6px 0;
-    font-size: 8.5pt;
-    margin: 8px 0;
+    padding: 6px 10px;
+    border-radius: 0 5px 5px 0;
+    font-size: 8pt;
+    margin: 5px 0;
   }
   .callout-success {
     border-left-color: #10b981;
     background: #ecfdf5;
-  }
-  .callout-warning {
-    border-left-color: #f59e0b;
-    background: #fffbeb;
   }
   .callout-danger {
     border-left-color: #ef4444;
@@ -143,25 +141,32 @@ HTML_CONTENT = """<!DOCTYPE html>
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 8.5pt;
-    margin: 8px 0;
+    font-size: 8pt;
+    margin: 6px 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   th, td {
     border: 1px solid #cbd5e1;
-    padding: 6px 8px;
+    padding: 5px 7px;
     text-align: left;
+    vertical-align: top;
   }
   th {
     background: #f1f5f9;
     font-weight: 700;
     color: #0f172a;
   }
+  tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
 
   .badge {
     display: inline-block;
-    padding: 2px 6px;
+    padding: 1px 5px;
     border-radius: 4px;
-    font-size: 7.5pt;
+    font-size: 7pt;
     font-weight: 700;
   }
   .badge-p0 { background: #fee2e2; color: #991b1b; }
@@ -169,18 +174,9 @@ HTML_CONTENT = """<!DOCTYPE html>
   .badge-p2 { background: #dcfce7; color: #166534; }
   .badge-cyan { background: #cffafe; color: #155e75; }
 
-  .page-break {
-    page-break-after: always;
-  }
-
   .grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
   }
 
@@ -188,37 +184,45 @@ HTML_CONTENT = """<!DOCTYPE html>
     background: #ffffff;
     border: 1px solid #cbd5e1;
     border-left: 4px solid #0284c7;
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
+    border-radius: 5px;
+    padding: 7px 10px;
+    margin-bottom: 6px;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
   .layer-title {
-    font-size: 9.5pt;
+    font-size: 8.8pt;
     font-weight: 700;
     color: #0f172a;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
   .layer-desc {
-    font-size: 8.5pt;
+    font-size: 8pt;
     color: #475569;
-    line-height: 1.45;
+    line-height: 1.4;
+  }
+
+  /* Natural page break only when strictly necessary between major sections */
+  .clean-break {
+    page-break-before: always;
+    break-before: page;
   }
 </style>
 </head>
 <body>
 
-  <!-- ================= PAGE 1: EXECUTIVE & PHILOSOPHY ================= -->
+  <!-- ================= PAGE 1 ================= -->
   <div class="header">
     <div class="header-top">
       <span class="header-badge">HEALTHCARE CDSS SPECIFICATION</span>
       <span class="header-date">International AI Builders Congress 2026</span>
     </div>
-    <h1 class="header-title">PredictRx BD: Architecture & Feature Specification Guide</h1>
+    <h1 class="header-title">PredictRx BD: Complete Architecture & Feature Guide</h1>
     <p class="header-subtitle">
-      নিউরো-সিম্বলিক আর্কিটেকচার, ড্রাগ কলিশন রোধ, ডিজিডিএ ডেটাবেস, এক্সপোজড রিস্ক মডেল এবং ফ্রন্টএন্ড কন্ট্রোলের পূর্ণাঙ্গ কাজের বিবরণী।
+      নিউরো-সিম্বলিক আর্কিটেকচার, ড্রাগ কলিশন রোধ, ডিজিডিএ ড্রাগ ডেটাবেস, এক্সপোজড রিস্ক মডেল এবং ফ্রন্টএন্ড কন্ট্রোলের পূর্ণাঙ্গ কাজের বিবরণী।
     </p>
   </div>
 
@@ -227,20 +231,20 @@ HTML_CONTENT = """<!DOCTYPE html>
       <span class="step-badge">১</span> কোর দর্শন: "AI Reads, Rules Decide" (AI পড়বে, কিন্তু সিদ্ধান্ত নেবে রুলস)
     </h2>
     <div class="card">
-      <p style="margin-bottom: 8px;">
-        ক্লিনিক্যাল মেডিকেশনে শুধুমাত্র জেনারেটিভ এআই বা পিওর এলএলএম (যেমন ChatGPT বা Claude)-এর ওপর সম্পূর্ণ নির্ভর করা অত্যন্ত ঝুঁকিপূর্ণ। কারণ এলএলএম মাঝে মাঝে <strong>হ্যালুসিনেশন (তথ্য বানিয়ে বলা)</strong> করে। ওষুধের ক্ষেত্রে একটি সামান্য ভুল ডোজ বা ড্রাগ ইন্টারঅ্যাকশন মিস হওয়া রোগীর কিডনি ফেইলিউর বা মৃত্যুর কারণ হতে পারে।
+      <p style="margin-bottom: 6px;">
+        ক্লিনিক্যাল মেডিকেশনে শুধুমাত্র জেনারেটিভ এআই বা পিওর এলএলএম (যেমন ChatGPT বা Claude)-এর ওপর সম্পূর্ণ নির্ভর করা বিপজ্জনক। কারণ এলএলএম মাঝে মাঝে <strong>হ্যালুসিনেশন (তথ্য বানিয়ে বলা)</strong> করে। ওষুধের ক্ষেত্রে একটি সামান্য ভুল ডোজ বা ড্রাগ ইন্টারঅ্যাকশন মিস হওয়া রোগীর কিডনি ফেইলিউর বা মৃত্যুর কারণ হতে পারে।
       </p>
 
-      <div class="callout callout-danger" style="margin-bottom: 8px;">
+      <div class="callout callout-danger">
         <strong>❌ পিওর এলএলএম ব্যবহারের ঝুঁকি:</strong> ডোজের সীমা বানিয়ে ফেলা, একই রোগীর জন্য ভিন্ন ভিন্ন সময়ে ভিন্ন মতামত দেওয়া, এবং আমেরিকার ড্রাগ ক্যাটালগ অনুসরণ করায় বাংলাদেশি ব্র্যান্ড (যেমন: বিজোরান, রোলাক, নাপা) না চেনা।
       </div>
 
       <div class="callout callout-success">
-        <strong>✅ PredictRx BD সমাধান:</strong> আমরা এআই এবং মেডিকেল রুলসকে আলাদা দুটি স্তরে ভাগ করেছি:
-        <ul style="padding-left: 20px; margin-top: 4px;">
-          <li><strong>Perception (AI):</strong> ভিশন এআই ডাক্তারের হাতের লেখা বা প্রেসক্রিপশন ইমেজ থেকে টেক্সট ও ওষুধ ডিজিটাইজ করে।</li>
-          <li><strong>Safety Decision (Deterministic Rules):</strong> কিন্তু কোন ওষুধ কার সাথে নিষিদ্ধ বা কোন ওষুধের সর্বোচ্চ মেয়াদ কত দিন—সেই সিদ্ধান্ত নেয় ডিজিডিএ (DGDA) ও কেডিগো (KDIGO) অনুমোদিত ১০০% অপরিবর্তনীয় রুলস ইঞ্জিন (<strong>০% হ্যালুসিনেশন গ্যারান্টি</strong>)।</li>
-        </ul>
+        <strong>✅ PredictRx BD হাইব্রিড সমাধান:</strong> আমরা এআই এবং মেডিকেল রুলসকে দুটি স্তরে ভাগ করেছি:
+        <div style="margin-top: 3px;">
+          • <strong>Perception (AI):</strong> ভিশন এআই ডাক্তারের হাতের লেখা বা প্রেসক্রিপশন ইমেজ থেকে টেক্সট ও ওষুধ ডিজিটাইজ করে।<br>
+          • <strong>Safety Decision (Deterministic Rules):</strong> কিন্তু কোন ওষুধ কার সাথে নিষিদ্ধ বা কোন ওষুধের সর্বোচ্চ মেয়াদ কত দিন—সেই সিদ্ধান্ত নেয় ডিজিডিএ (DGDA) ও কেডিগো (KDIGO) অনুমোদিত ১০০% অপরিবর্তনীয় রুলস ইঞ্জিন (<strong>০% হ্যালুসিনেশন গ্যারান্টি</strong>)।
+        </div>
       </div>
     </div>
   </div>
@@ -257,7 +261,7 @@ HTML_CONTENT = """<!DOCTYPE html>
       </div>
       <div class="layer-desc">
         <strong>উদ্দেশ্য:</strong> প্রেসক্রিপশন স্ক্যান বা মোবাইল ক্যামেরার ছবি থেকে টেক্সট ও মেডিকেশন ডাটা বের করা।<br>
-        <strong>কীভাবে কাজ করে:</strong> প্রেসক্রিপশনের ছবি থেকে রোগীর বয়স, লিঙ্গ, ওজন, ওষুধের নাম, খাওয়ার নিয়ম (<code>১+০+১</code>, <code>1-0-1</code>) এবং মেয়াদ ডিজিটাইজ করে। যদি ক্লাউড এআই এপিআই বন্ধ থাকে বা ইন্টারনেট না থাকে, তবে সিস্টেম ক্র্যাশ না করে স্বয়ংক্রিয় ক্লিনিক্যাল ফলব্যাক মডেলে শিফট করে।
+        <strong>কীভাবে কাজ করে:</strong> রোগীর বয়স, লিঙ্গ, ওজন, ওষুধের নাম, খাওয়ার নিয়ম (<code>১+০+১</code>, <code>1-0-1</code>) এবং মেয়াদ ডিজিটাইজ করে। ক্লাউড এআই বা ইন্টারনেট না থাকলে স্বয়ংক্রিয় অফলাইন ফলব্যাক মডেলে শিফট করে।
       </div>
     </div>
 
@@ -268,7 +272,7 @@ HTML_CONTENT = """<!DOCTYPE html>
       </div>
       <div class="layer-desc">
         <strong>উদ্দেশ্য:</strong> স্থানীয় বাংলাদেশি ব্র্যান্ডের নামগুলোকে আন্তর্জাতিক জেনেরিক কেমিক্যালে কনভার্ট করা।<br>
-        <strong>কীভাবে কাজ করে:</strong> ডেটাবেসে <strong>২৬০+ জেনুইন ডিজিডিএ ওষুধ</strong> (যেমন: Bizoran, Rolac, Napa Extend, Seclo, Lasix ইত্যাদি) সংরক্ষিত আছে। OCR যদি বানান ভুল পড়ে (যেমন: "Rolac"-কে "Rolak" বা "Relac"), তবে এটি <code>difflib</code> ও ফোনেটিক অ্যালগরিদম দিয়ে আসল ওষুধ <em>Ketorolac Tromethamine</em> এবং এর থেরাপিউটিক ক্লাস শনাক্ত করে ফেলে।
+        <strong>কীভাবে কাজ করে:</strong> ডেটাবেসে <strong>২৬০+ জেনুইন ডিজিডিএ ওষুধ</strong> (Bizoran, Rolac, Napa Extend, Seclo, Lasix ইত্যাদি) সংরক্ষিত আছে। OCR যদি বানান ভুল পড়ে (যেমন: "Rolak" বা "Relac"), তবে এটি <code>difflib</code> অ্যালগরিদম দিয়ে আসল ওষুধ <em>Ketorolac Tromethamine</em> শনাক্ত করে।
       </div>
     </div>
 
@@ -280,9 +284,9 @@ HTML_CONTENT = """<!DOCTYPE html>
       <div class="layer-desc">
         <strong>উদ্দেশ্য:</strong> প্রাণঘাতী মেডিকেল ভুল ও ওভারডোজ ১০০% আটকে দেওয়া।<br>
         <strong>কীভাবে কাজ করে:</strong><br>
-        • <em>৫ দিনের মেয়াদী সিলিং:</em> রোলাক (Ketorolac) কোনোভাবেই ৫ দিনের বেশি প্রেসক্রাইব করা আন্তর্জাতিকভাবে নিষিদ্ধ। ডাক্তার ১৪ দিন দিলে এটি সাথে সাথে <strong>CRITICAL RED ALERT</strong> দিয়ে থামিয়ে দেয়।<br>
-        • <em>অর্গান ক্ল্যাশ (Nephrotoxicity):</em> কিডনি রোগী (CKD-3)-কে ARB (Bizoran) এবং NSAID (Rolac) দিলে কিডনি বিকল হওয়ার ঝুঁকি ৮০%+ বেড়ে যায়—সিস্টেম তা তৎক্ষণাৎ ফ্ল্যাগ করে।<br>
-        • <em>পেডিয়াট্রিক অ্যালার্ট:</em> শিশুদের ভাইরাল জ্বরে অ্যাসপিরিন (Ecosprin) দিলে লিভার ও ব্রেন ড্যামেজকারী Reye's syndrome হয়—রুলস ইঞ্জিন এটি কঠোরভাবে ব্লক করে।
+        • <em>৫ দিনের সিলিং:</em> রোলাক (Ketorolac) কোনোভাবেই ৫ দিনের বেশি দেওয়া নিষিদ্ধ। ১৪ দিন দিলে এটি <strong>CRITICAL RED ALERT</strong> দেয়।<br>
+        • <em>অর্গান ক্ল্যাশ (Nephrotoxicity):</em> কিডনি রোগী (CKD-3)-কে ARB (Bizoran) + NSAID (Rolac) দিলে তীব্র কিডনি ফেইলিউর ঝুঁকি সৃষ্টি হয়।<br>
+        • <em>পেডিয়াট্রিক অ্যালার্ট:</em> শিশুদের ভাইরাল জ্বরে অ্যাসপিরিন দিলে মারাত্মক Reye's syndrome হয়—রুলস ইঞ্জিন এটি ব্লক করে।
       </div>
     </div>
 
@@ -293,7 +297,7 @@ HTML_CONTENT = """<!DOCTYPE html>
       </div>
       <div class="layer-desc">
         <strong>উদ্দেশ্য:</strong> ব্ল্যাক-বক্স নয়; ডাক্তারদের চোখের সামনে রিস্কের শতকরা হিসাব প্রমাণ করা।<br>
-        <strong>কীভাবে কাজ করে:</strong> ৫,০০০ ক্লিনিক্যাল রেকর্ডের ওপর ট্রেইন করা XGBoost মডেল নির্ভুল রিস্ক ক্যালকুলেট করে। <strong>SHAP Waterfall চার্টের</strong> মাধ্যমে ডাক্তার দেখতে পান কোন ফ্যাক্টরের কারণে ঝুঁকি কত বেড়েছে (যেমন: বেইজ রিস্ক ১২% + রোলাক ১৪ দিন নেওয়ার কারণে +৩৮% + কম eGFR +২৪% + বিজোরান +১২% = <strong>মোট ৮৬% AKI রিস্ক</strong>)।
+        <strong>কীভাবে কাজ করে:</strong> ৫,০০০ ক্লিনিক্যাল রেকর্ডে ট্রেইন করা XGBoost মডেল রিস্ক ক্যালকুলেট করে। <strong>SHAP Waterfall চার্টে</strong> দেখা যায় কোন কারণে ঝুঁকি বেড়েছে (বেইজ রিস্ক ১২% + রোলাক ১৪ দিন +৩৮% + কম eGFR +২৪% + বিজোরান +১২% = <strong>মোট ৮৬% AKI রিস্ক</strong>)।
       </div>
     </div>
 
@@ -309,19 +313,21 @@ HTML_CONTENT = """<!DOCTYPE html>
     </div>
   </div>
 
-  <div class="page-break"></div>
+  <!-- ================= PAGE 2 ================= -->
+  <div class="section clean-break">
+    <div class="header" style="padding: 10px 16px; margin-bottom: 10px;">
+      <div class="header-top">
+        <span class="header-badge">LIVE CLINICAL SCENARIOS & COMPONENT MAPPING</span>
+        <span class="header-date">International AI Builders Congress 2026</span>
+      </div>
+      <h1 class="header-title" style="font-size: 13pt;">৩টি উইনিং গোল্ডেন ক্লিনিক্যাল ডেমো সিনারিও ও সিস্টেম মডিউল</h1>
+    </div>
 
-  <!-- ================= PAGE 2: CORE FEATURES & SCENARIOS ================= -->
-  <div class="header" style="padding: 12px 18px; margin-bottom: 12px;">
-    <h1 class="header-title" style="font-size: 14pt;">৩টি উইনিং গোল্ডেন ক্লিনিক্যাল ডেমো সিনারিও</h1>
-  </div>
-
-  <div class="section">
     <h2 class="section-title">
       <span class="step-badge">৩</span> ফ্রন্টএন্ডে ১-ক্লিক ৩টি গোল্ডেন সিনারিও (The 3 Winning Cases)
     </h2>
-    <div class="card">
-      <p style="margin-bottom: 6px;">জাজদের সামনে কোনো এলোমেলো ডাটা টাইপ না করে সরাসরি ফ্রন্টএন্ডের উপরে থাকা ১-ক্লিক সুইচিং বাটন দিয়ে এই ৩টি কেস লাইভ দেখানো হয়:</p>
+    <div class="card" style="margin-bottom: 10px;">
+      <p style="margin-bottom: 4px;">জাজদের সামনে কোনো এলোমেলো ডাটা টাইপ না করে সরাসরি ফ্রন্টএন্ডের উপরে থাকা ১-ক্লিক সুইচিং বাটন দিয়ে এই ৩টি কেস লাইভ দেখানো হয়:</p>
 
       <table>
         <thead>
@@ -392,9 +398,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         </tbody>
       </table>
     </div>
-  </div>
 
-  <div class="section">
     <h2 class="section-title">
       <span class="step-badge">৪</span> ডিরেক্টরি স্ট্রাকচার ও কোন ফোল্ডার কী কাজ করছে
     </h2>
@@ -402,20 +406,20 @@ HTML_CONTENT = """<!DOCTYPE html>
     <table>
       <thead>
         <tr>
-          <th style="width: 25%;">ফোল্ডার / ফাইল</th>
-          <th style="width: 25%;">ব্যবহৃত প্রযুক্তি</th>
-          <th style="width: 50%;">মূল দায়িত্ব ও ভূমিকা</th>
+          <th style="width: 22%;">ফোল্ডার / ফাইল</th>
+          <th style="width: 24%;">ব্যবহৃত প্রযুক্তি</th>
+          <th style="width: 54%;">মূল দায়িত্ব ও ভূমিকা</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><strong>`frontend/`</strong></td>
-          <td>React 19, TypeScript, Vite, Tailwind CSS</td>
-          <td>ক্লিনিক্যাল ড্যাশবোর্ড, ১-ক্লিক সিনারিও সুইচার, SHAP Waterfall রেন্ডারিং এবং বাংলা ভয়েস অডিও।</td>
+          <td>React 19, TypeScript, Vite, Tailwind</td>
+          <td>ক্লিনিক্যাল ড্যাশবোর্ড, ১-ক্লিক সিনারিও সুইচার, SHAP Waterfall চার্ট এবং বাংলা ভয়েস অডিও।</td>
         </tr>
         <tr>
           <td><strong>`backend/`</strong></td>
-          <td>FastAPI, SQLAlchemy, SQLite/PostgreSQL</td>
+          <td>FastAPI, SQLAlchemy, SQLite/Postgres</td>
           <td>২১টি কোর REST API এন্ডপয়েন্ট, সাব-১৫ms স্মার্ট লোকাল ক্যাশ, এবং ডিজিডিএ ড্রাগ ডেটাবেস।</td>
         </tr>
         <tr>
@@ -440,24 +444,22 @@ HTML_CONTENT = """<!DOCTYPE html>
         </tr>
       </tbody>
     </table>
-  </div>
 
-  <div class="section">
-    <h2 class="section-title">
+    <h2 class="section-title" style="margin-top: 10px;">
       <span class="step-badge">৫</span> কেন PredictRx BD হ্যাকথনে ইউনিক ও উইনিং?
     </h2>
 
     <div class="grid-2">
-      <div class="card" style="border-left: 3px solid #10b981;">
+      <div class="card" style="border-left: 3px solid #10b981; margin-bottom: 0;">
         <strong>১. জিরো-হ্যালুসিনেশন গ্যারান্টি:</strong> পিওর এলএলএম যেখানে বিপজ্জনক, সেখানে আমাদের নিউরো-সিম্বলিক আর্কিটেকচার ১০০% নিরাপদ ও অপরিবর্তনীয়।
       </div>
-      <div class="card" style="border-left: 3px solid #3b82f6;">
+      <div class="card" style="border-left: 3px solid #3b82f6; margin-bottom: 0;">
         <strong>২. বাংলাদেশের বাস্তব ড্রাগ ডেটাবেস:</strong> ইউএসএ ড্রাগ নয়; ডিজিডিএ অনুমোদিত ২৬০+ জেনুইন বাংলাদেশি ওষুধ (Bizoran, Rolac, Napa ইত্যাদি)।
       </div>
-      <div class="card" style="border-left: 3px solid #f59e0b;">
+      <div class="card" style="border-left: 3px solid #f59e0b; margin-bottom: 0;">
         <strong>৩. অবিশ্বাস্য গতি (১৪.২ms):</strong> ক্লাউড ল্যাটেন্সি ছাড়াই লোকাল ক্যাশ দিয়ে চোখের পলকে কাজ করে ($০.০০ ক্লাউড খরচ)।
       </div>
-      <div class="card" style="border-left: 3px solid #8b5cf6;">
+      <div class="card" style="border-left: 3px solid #8b5cf6; margin-bottom: 0;">
         <strong>৪. ১০০% গ্রিন টেস্ট কাভারেজ:</strong> সর্বমোট <strong>৬৯/৬৯টি স্বয়ংক্রিয় টেস্ট</strong> (৩৬ ব্যাকএন্ড, ১৮ ফ্রন্টএন্ড, ১৫ এআই) সম্পূর্ণ পাস করা।
       </div>
     </div>
@@ -503,7 +505,6 @@ def generate_pdf():
             shutil.copy2(temp_pdf, output_pdf_artifact)
             print(f"Artifact PDF copied: {output_pdf_artifact}")
         
-        # Pop open Windows Explorer selecting the PDF
         try:
             subprocess.Popen(["explorer.exe", f"/select,{output_pdf_root}"])
         except Exception:
