@@ -9,7 +9,7 @@ export const CLINICAL_CAUTION_BANNER =
 export const DEMO_PATIENT_CONTEXT: PatientContext = {
   id: 'PT-DEMO-629',
   patient_id: 'PRX-BD-2026-081',
-  name: 'Md. Rafiqul Islam (Demo)',
+  name: 'Mohammad Abdul Karim',
   age: 62,
   gender: 'Male',
   weight_kg: 68,
@@ -279,7 +279,7 @@ export const DEMO_ANALYSIS_RESULT: PrescriptionAnalysisResult = {
 export const DEMO_PATIENTS_LIST: Patient[] = [
   {
     id: 'PRX-BD-2026-081',
-    name: 'Md. Rafiqul Islam (Demo)',
+    name: 'Mohammad Abdul Karim',
     age: 62,
     gender: 'Male',
     phone: '+880 1712-345678',

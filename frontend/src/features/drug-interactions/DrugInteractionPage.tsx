@@ -342,6 +342,13 @@ export const DrugInteractionPage: React.FC = () => {
               </button>
               <button
                 type="button"
+                onClick={() => handlePairCheck(undefined, 'Warfarin', 'Aspirin')}
+                className="text-[10px] px-2 py-0.5 rounded bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-900 hover:bg-red-200 transition"
+              >
+                Warfarin + Aspirin ({isBn ? 'রক্তক্ষরণ' : 'Bleed Risk'})
+              </button>
+              <button
+                type="button"
                 onClick={() => handlePairCheck(undefined, 'Ketorolac', 'Olmesartan')}
                 className="text-[10px] px-2 py-0.5 rounded bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-900 hover:bg-red-200 transition"
               >

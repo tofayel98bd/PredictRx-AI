@@ -822,7 +822,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                               <span className="block text-[10px] text-muted-foreground">{translateTimingText(med.timing || undefined, isBn)}</span>
                             </td>
                             <td className="py-3 px-4">
-                              <span className={med.duration_days && med.duration_days > 5 && med.brand_name.toLowerCase().includes('rolac') ? 'font-bold text-red-600' : ''}>
+                              <span className={med.duration_days && med.duration_days > 5 && (med.generic_name?.toLowerCase().includes('ketorolac') || /rolac|torax|ketonic/i.test(med.brand_name)) ? 'font-bold text-red-600 dark:text-red-400' : ''}>
                                 {med.duration_days ? `${med.duration_days} ${isBn ? 'দিন' : 'days'}` : (isBn ? 'চলমান' : 'Continue')}
                               </span>
                             </td>

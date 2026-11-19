@@ -33,7 +33,7 @@ describe('PrescriptionAnalysisPage', () => {
 
       // Verify inputs populated
       expect(screen.getByDisplayValue(/PRX-BD-2026-081/i)).toBeInTheDocument();
-      expect(screen.getByDisplayValue(/Md. Rafiqul Islam \(Demo\)/i)).toBeInTheDocument();
+      expect(screen.getByDisplayValue(/Mohammad Abdul Karim/i)).toBeInTheDocument();
 
       const submitBtn = screen.getByRole('button', {
         name: /Run Full CDSS Safety Evaluation/i,
