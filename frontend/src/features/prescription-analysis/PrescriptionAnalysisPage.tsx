@@ -39,6 +39,14 @@ import { DemoScenarioSwitcher } from '@/components/clinical/DemoScenarioSwitcher
 import { analyzePrescription, fetchScenarioAnalysis } from '@/services/prescriptionService';
 import { PatientContext, PrescriptionAnalysisResult } from '@/types';
 import { MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario, DEMO_PATIENTS_LIST } from '@/constants';
+import {
+  translateIssueCode,
+  translateIssueMessage,
+  translateFormText,
+  translateTimingText,
+  CLINICAL_INTERACTIONS_MAP_BN,
+  CLINICAL_ALTERNATIVES_MAP_BN,
+} from '@/utils/clinicalTranslations';
 import { toast } from 'sonner';
 
 // Validation schema for patient context form
@@ -703,10 +711,18 @@ export const PrescriptionAnalysisPage: React.FC = () => {
             <Alert variant="critical">
               <ShieldAlert className="h-5 w-5 text-red-600" />
               <AlertTitle className="text-sm font-bold text-red-900 dark:text-red-200">
-                Critical Safety Alert: High-Risk Prescription Detected
+                {isBn
+                  ? 'গুরুতর নিরাপত্তা সতর্কতা: উচ্চ ঝুঁকিপূর্ণ প্রেসক্রিপশন শনাক্ত হয়েছে'
+                  : 'Critical Safety Alert: High-Risk Prescription Detected'}
               </AlertTitle>
               <AlertDescription className="text-xs text-red-800 dark:text-red-300 mt-1">
-                Ketorolac (Rolac 10) 14-day duration exceeds safety ceilings and is contraindicated in patient's CKD Stage 3 (eGFR 34.5). Concomitant Olmesartan increases Acute Kidney Injury hazard. Immediate clinician substitution required.
+                {isBn
+                  ? (analysisResult.prescription_id?.includes('TRIPLE') || (analysisResult as any).alerts?.some((a: any) => a.code?.includes('TRIPLE'))
+                      ? 'জরুরি সতর্কতা: প্রেসক্রিপশনে উচ্চ রক্তচাপের ওষুধ (Ramipril), পানির ওষুধ (Lasix) এবং ব্যথার ওষুধ (Diclofenac) একত্রে রয়েছে। চিকিৎসাবিজ্ঞানে একে "ট্রিপল হোয়ামি" বলা হয়—যা আকস্মিকভাবে কিডনি অকেজো করে দেয়। ব্যথার ওষুধটি বাদ দিয়ে নিরাপদ বিকল্প ব্যবহার আবশ্যক।'
+                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
+                      ? 'গুরুতর সতর্কতা: ভাইরাল জ্বরে আক্রান্ত শিশুর ক্ষেত্রে অ্যাসপিরিন সেবনে প্রাণঘাতী রে সিন্ড্রোমের মারাত্মক ঝুঁকি রয়েছে। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।'
+                      : 'কিটোরোলাক (Rolac 10) ১৪ দিনের মেয়াদ সর্বোচ্চ সুরক্ষা সীমা অতিক্রম করেছে এবং রোগীর সিকেডি স্টেজ ৩ (eGFR 34.5)-এর ক্ষেত্রে সম্পূর্ণ নিষিদ্ধ। একই সাথে ওলমেসারটান সেবনে তীব্র কিডনি ক্ষতির (AKI) ঝুঁকি বাড়িয়ে দেয়। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।')
+                  : "Ketorolac (Rolac 10) 14-day duration exceeds safety ceilings and is contraindicated in patient's CKD Stage 3 (eGFR 34.5). Concomitant Olmesartan increases Acute Kidney Injury hazard. Immediate clinician substitution required."}
               </AlertDescription>
             </Alert>
           )}
@@ -718,7 +734,11 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 {analysisResult.prescription_id}
               </Badge>
               <span className="text-xs text-muted-foreground">
-                Evaluated: {new Date(analysisResult.timestamp).toLocaleTimeString()} • Engine: {analysisResult.meta.ocr_engine}
+                {isBn ? 'মূল্যায়িত:' : 'Evaluated:'} {new Date(analysisResult.timestamp).toLocaleTimeString()}{' '}
+                • {isBn ? 'ইঞ্জিন:' : 'Engine:'}{' '}
+                {isBn && analysisResult.meta.ocr_engine.includes('PredictRx Smart Offline Cache')
+                  ? 'প্রেডিক্ট-আরএক্স স্মার্ট অফলাইন ক্যাশ (ফেল-সেফ)'
+                  : analysisResult.meta.ocr_engine}
               </span>
             </div>
 
@@ -730,7 +750,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 className="text-xs"
               >
                 <Printer className="mr-1.5 h-3.5 w-3.5" />
-                Print CDSS Card
+                {isBn ? 'সিডিএসএস কার্ড প্রিন্ট করুন' : 'Print CDSS Card'}
               </Button>
               <Button
                 size="sm"
@@ -782,7 +802,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                           <th className="py-2.5 px-4 font-semibold">{t('results.medTable.syntax', 'Dosage & Syntax')}</th>
                           <th className="py-2.5 px-4 font-semibold">{t('results.medTable.duration', 'Duration')}</th>
                           <th className="py-2.5 px-4 font-semibold">{t('results.medTable.status', 'Safety Status')}</th>
-                          <th className="py-2.5 px-4 font-semibold">{t('common.actions', 'Issues Flagged')}</th>
+                          <th className="py-2.5 px-4 font-semibold">{isBn ? 'শনাক্তকৃত সমস্যা / সতর্কতা' : 'Issues Flagged'}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
@@ -791,7 +811,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                             <td className="py-3 px-4 font-semibold text-foreground">
                               {med.brand_name}
                               <span className="block text-[10px] text-muted-foreground">
-                                Form: {med.form || 'Tab'} • Strength: {med.strength || 'N/A'}
+                                {isBn ? 'ধরন:' : 'Form:'} {translateFormText(med.form || undefined, isBn)} • {isBn ? 'মাত্রা:' : 'Strength:'} {med.strength || (isBn ? 'প্রযোজ্য নয়' : 'N/A')}
                               </span>
                             </td>
                             <td className="py-3 px-4 font-medium text-teal-800 dark:text-teal-300">
@@ -799,27 +819,27 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                             </td>
                             <td className="py-3 px-4">
                               <span className="font-mono font-semibold">{med.dosage_syntax || 'N/A'}</span>
-                              <span className="block text-[10px] text-muted-foreground">{med.timing}</span>
+                              <span className="block text-[10px] text-muted-foreground">{translateTimingText(med.timing || undefined, isBn)}</span>
                             </td>
                             <td className="py-3 px-4">
                               <span className={med.duration_days && med.duration_days > 5 && med.brand_name.toLowerCase().includes('rolac') ? 'font-bold text-red-600' : ''}>
-                                {med.duration_days ? `${med.duration_days} days` : 'Continue'}
+                                {med.duration_days ? `${med.duration_days} ${isBn ? 'দিন' : 'days'}` : (isBn ? 'চলমান' : 'Continue')}
                               </span>
                             </td>
                             <td className="py-3 px-4">
                               {med.syntax_valid ? (
                                 <Badge variant="success" className="text-[10px]">
-                                  Valid Syntax
+                                  {isBn ? 'সঠিক গঠন' : 'Valid Syntax'}
                                 </Badge>
                               ) : (
                                 <Badge variant="critical" className="text-[10px]">
-                                  Ceiling Exceeded
+                                  {isBn ? 'সীমা অতিক্রান্ত' : 'Ceiling Exceeded'}
                                 </Badge>
                               )}
                             </td>
                             <td className="py-3 px-4 space-y-1">
                               {med.issues.length === 0 ? (
-                                <span className="text-muted-foreground">None</span>
+                                <span className="text-muted-foreground">{isBn ? 'কোনো সমস্যা নেই' : 'None'}</span>
                               ) : (
                                 med.issues.map((issue, iIdx) => (
                                   <div
@@ -830,8 +850,8 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                                         : 'bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-200'
                                     }`}
                                   >
-                                    <strong className="block font-semibold">{issue.code}:</strong>
-                                    <span>{issue.message}</span>
+                                    <strong className="block font-semibold">{translateIssueCode(issue.code, isBn)}:</strong>
+                                    <span>{translateIssueMessage(issue.message, isBn)}</span>
                                   </div>
                                 ))
                               )}
@@ -857,32 +877,37 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {analysisResult.safer_alternatives.map((alt, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-card"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div>
-                            <span className="text-xs text-red-600 line-through mr-2 font-medium">
-                              Replace: {alt.original_brand}
-                            </span>
-                            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
-                              → Recommended: {alt.alternative_brand} ({alt.alternative_generic})
-                            </span>
+                    {analysisResult.safer_alternatives.map((alt, idx) => {
+                      const bnAlt = isBn ? CLINICAL_ALTERNATIVES_MAP_BN[alt.original_brand] : null;
+                      return (
+                        <div
+                          key={idx}
+                          className="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-card"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                              <span className="text-xs text-red-600 line-through mr-2 font-medium">
+                                {isBn ? 'বিকল্প নির্ধারণ:' : 'Replace:'} {alt.original_brand}
+                              </span>
+                              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                                → {isBn ? 'সুপারিশকৃত:' : 'Recommended:'} {alt.alternative_brand} ({alt.alternative_generic})
+                              </span>
+                            </div>
+                            <Badge variant="success" className="text-[10px]">
+                              {isBn ? 'কিডনি-বান্ধব (Renal-sparing)' : 'Renal-sparing'}
+                            </Badge>
                           </div>
-                          <Badge variant="success" className="text-[10px]">
-                            Renal-sparing
-                          </Badge>
+                          <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+                            <strong>{isBn ? 'চিকিৎসাগত কারণ: ' : 'Rationale: '}</strong>
+                            {bnAlt?.rationale || alt.clinical_rationale}
+                          </p>
+                          <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-1">
+                            <strong>{isBn ? 'সুরক্ষাগত সুবিধা: ' : 'Safety Benefit: '}</strong>
+                            {bnAlt?.safetyBenefit || alt.safety_benefit}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-                          <strong>Rationale: </strong>{alt.clinical_rationale}
-                        </p>
-                        <p className="text-xs text-emerald-800 dark:text-emerald-300 mt-1">
-                          <strong>Safety Benefit: </strong>{alt.safety_benefit}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </CardContent>
                 </Card>
               )}
@@ -894,49 +919,60 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 <CardHeader>
                   <CardTitle className="text-base font-bold flex items-center space-x-2">
                     <ShieldAlert className="h-4 w-4 text-amber-600" />
-                    <span>Detected Drug Interactions & Pharmacovigilance Advisories</span>
+                    <span>
+                      {isBn
+                        ? 'শনাক্তকৃত ওষুধের মিথস্ক্রিয়া ও ফার্মাকোভিজিল্যান্স নির্দেশনা'
+                        : 'Detected Drug Interactions & Pharmacovigilance Advisories'}
+                    </span>
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Interplay between prescribed agents and patient's baseline medications.
+                    {isBn
+                      ? 'প্রেসক্রাইবকৃত ওষুধ এবং রোগীর পূর্ববর্তী নিয়মিত ওষুধের মধ্যকার পারস্পরিক প্রভাব।'
+                      : "Interplay between prescribed agents and patient's baseline medications."}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {analysisResult.drug_interactions.map((interaction) => (
-                    <div
-                      key={interaction.id}
-                      className="p-4 rounded-xl border border-border bg-card shadow-sm space-y-3"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-bold text-sm text-foreground">
-                            {interaction.drug_a} ↔ {interaction.drug_b}
-                          </span>
+                  {analysisResult.drug_interactions.map((interaction) => {
+                    const bnInter = isBn ? CLINICAL_INTERACTIONS_MAP_BN[interaction.id] : null;
+                    return (
+                      <div
+                        key={interaction.id}
+                        className="p-4 rounded-xl border border-border bg-card shadow-sm space-y-3"
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-bold text-sm text-foreground">
+                              {interaction.drug_a} ↔ {interaction.drug_b}
+                            </span>
+                          </div>
+                          <Badge variant={interaction.severity === 'CRITICAL' ? 'critical' : 'warning'}>
+                            {isBn
+                              ? (interaction.severity === 'CRITICAL' ? 'গুরুতর প্রতিক্রিয়া (CRITICAL)' : 'সতর্কতামূলক (WARNING)')
+                              : `${interaction.severity} SEVERITY`}
+                          </Badge>
                         </div>
-                        <Badge variant={interaction.severity === 'CRITICAL' ? 'critical' : 'warning'}>
-                          {interaction.severity} SEVERITY
-                        </Badge>
-                      </div>
 
-                      <div className="text-xs space-y-1.5">
-                        <p className="text-muted-foreground">
-                          <strong className="text-foreground">Mechanism: </strong>
-                          {interaction.mechanism}
-                        </p>
-                        <p className="text-muted-foreground">
-                          <strong className="text-foreground">Clinical Consequence: </strong>
-                          {interaction.clinical_significance}
-                        </p>
-                        <p className="text-amber-800 dark:text-amber-300">
-                          <strong>Recommended Action: </strong>
-                          {interaction.recommended_action}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
-                          <strong>Evidence Source: </strong>
-                          {interaction.evidence_source}
-                        </p>
+                        <div className="text-xs space-y-1.5">
+                          <p className="text-muted-foreground">
+                            <strong className="text-foreground">{isBn ? 'প্রক্রিয়া / মেকানিজম: ' : 'Mechanism: '}</strong>
+                            {bnInter?.mechanism || interaction.mechanism}
+                          </p>
+                          <p className="text-muted-foreground">
+                            <strong className="text-foreground">{isBn ? 'ক্লিনিক্যাল ঝুঁকি / ফলাফল: ' : 'Clinical Consequence: '}</strong>
+                            {bnInter?.significance || interaction.clinical_significance}
+                          </p>
+                          <p className="text-amber-800 dark:text-amber-300">
+                            <strong>{isBn ? 'প্রস্তাবিত পদক্ষেপ: ' : 'Recommended Action: '}</strong>
+                            {bnInter?.action || interaction.recommended_action}
+                          </p>
+                          <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
+                            <strong>{isBn ? 'প্রমাণের উৎস: ' : 'Evidence Source: '}</strong>
+                            {bnInter?.source || interaction.evidence_source}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </CardContent>
               </Card>
             </TabsContent>

@@ -15,6 +15,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { HelpCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 
+import {
+  translateFeatureName,
+  translateClinicalExplanation,
+  translateCategoryName,
+  translateObservedValue,
+} from '@/utils/clinicalTranslations';
+
 interface ShapChartProps {
   features: ShapContribution[];
   isDemo?: boolean;
@@ -24,62 +31,17 @@ export const ShapWaterfallChart: React.FC<ShapChartProps> = ({ features, isDemo 
   const { t, i18n } = useTranslation(['analysis', 'common']);
   const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
 
-  const translateFeature = (name: string) => {
-    if (!isBn) return name;
-    const featureMap: Record<string, string> = {
-      'Ketorolac Duration (14 days vs 5 day limit)': 'Ketorolac গ্রহণের মেয়াদ (৫ দিনের বিপরীতে ১৪ দিন)',
-      'Baseline eGFR (34.5 mL/min/1.73m²)': 'বেসলাইন eGFR (34.5 mL/min/1.73m²)',
-      'ARB + NSAID Interaction': 'ARB + NSAID মিথস্ক্রিয়া',
-      'Controlled Statin Therapy': 'নিয়ন্ত্রিত স্ট্যাটিন থেরাপি',
-      'Patient Age (62 years)': 'রোগীর বয়স (৬২ বছর)',
-      'Triple Whammy Collision (ACEi + Diuretic + NSAID)': 'ট্রিপল হোয়ামি তীব্র ঝুঁকি (ACEi + Diuretic + NSAID)',
-      'Moderate Renal Impairment (eGFR 52 mL/min)': 'মাঝারি কিডনি বৈকল্য (eGFR 52 mL/min)',
-      'Pediatric Age Vulnerability (8 Years)': 'শিশুর বয়স সংক্রান্ত ঝুঁকি (৮ বছর)',
-      'Inappropriate Salicylate Exposure': 'অনুপযুক্ত স্যালিসিলেট সেবন',
-    };
-    return featureMap[name] || name;
-  };
-
-  const translateExplanation = (exp: string) => {
-    if (!isBn) return exp;
-    const expMap: Record<string, string> = {
-      'Excess course duration is the primary driver of catastrophic nephrotoxic and peptic ulcer risk.': 'অতিরিক্ত সময় ওষুধ ব্যবহারের ফলে মারাত্মক নেফ্রোটক্সিক এবং পেপটিক আলসারের চরম ঝুঁকি তৈরি হয়।',
-      'Stage 3b CKD leaves virtually no functional renal reserve to absorb prostaglandin inhibition.': 'স্টেজ 3b CKD থাকার কারণে প্রোস্টাগ্ল্যান্ডিন বাধা শোষণ করার মতো কিডনির কোনো কার্যকরী সক্ষমতা অবশিষ্ট থাকে না।',
-      'Dual assault on renal perfusion: ARB impairs efferent tone while NSAID blocks afferent prostaglandins.': 'কিডনির রক্ত সঞ্চালনে দ্বৈত আঘাত: ARB ইফারেন্ট টোন ব্যাহত করে এবং NSAID অ্যাফারেন্ট প্রোস্টাগ্ল্যান্ডিন ব্লক করে।',
-      'Long-term statin use stabilizes vascular endothelium, providing minor systemic protective buffering.': 'দীর্ঘমেয়াদী স্ট্যাটিন ব্যবহার ভাস্কুলার এন্ডোথেলিয়াম স্থিতিশীল রাখে, যা সামান্য পদ্ধতিগত সুরক্ষামূলক বাফার প্রদান করে।',
-      'Moderate geriatric vulnerability increases susceptibility to acute toxic nephropathy.': 'বয়োবৃদ্ধির কারণে তীব্র বিষাক্ত নেফ্রোপ্যাথি হওয়ার সংবেদনশীলতা বৃদ্ধি পায়।',
-      'Simultaneous afferent vasoconstriction, efferent vasodilation, and volume contraction causes acute GFR collapse.': 'একই সাথে অ্যাফারেন্ট ভাসোকনস্ট্রিকশন, ইফারেন্ট ভাসোডিলেশন এবং তরল হ্রাস কিডনির কার্যক্ষমতায় তীব্র পতন ঘটায়।',
-      'Reduced baseline nephron clearance diminishes renal reserve.': 'হ্রাসপ্রাপ্ত কিডনি ক্লিয়ারেন্স রেনাল রিজার্ভ কমিয়ে দেয়।',
-      'Immature hepatic mitochondrial clearance makes salicylates lethal during viral infection.': 'অপূর্ণাঙ্গ লিভার কার্যক্ষমতার কারণে ভাইরাল সংক্রমণের সময় স্যালিসিলেট মারাত্মক বিপজ্জনক রূপ নেয়।',
-      "Aspirin during viral flu triggers Reye's syndrome with acute encephalopathy.": "ভাইরাল ফ্লুর সময় অ্যাসপিরিন তীব্র এনসেফালোপ্যাথি সহ রে সিন্ড্রোম সৃষ্টি করতে পারে।",
-    };
-    return expMap[exp] || exp;
-  };
-
-  const translateCategory = (cat: string) => {
-    if (!isBn) return cat;
-    const catMap: Record<string, string> = {
-      'Duration': 'সময়সীমা',
-      'Renal': 'কিডনি সংক্রান্ত',
-      'Interaction': 'ওষুধের পারস্পরিক ক্রিয়া',
-      'Protective': 'সুরক্ষামূলক',
-      'Age': 'বয়স',
-      'Dosage': 'ডোজের মাত্রা',
-    };
-    return catMap[cat] || cat;
-  };
-
   // Sort descending by magnitude of impact
   const sortedData = [...features].sort((a, b) => Math.abs(b.impact_score) - Math.abs(a.impact_score));
 
   const chartData = sortedData.map((f) => ({
-    name: translateFeature(f.feature),
+    name: translateFeatureName(f.feature, isBn),
     originalName: f.feature,
     score: Number((f.impact_score * 100).toFixed(1)),
-    category: f.category,
+    category: translateCategoryName(f.category, isBn),
     rawScore: f.impact_score,
-    explanation: translateExplanation(f.clinical_explanation),
-    value: f.value,
+    explanation: translateClinicalExplanation(f.clinical_explanation, isBn),
+    value: translateObservedValue(f.value, isBn),
   }));
 
   return (
@@ -189,7 +151,7 @@ export const ShapWaterfallChart: React.FC<ShapChartProps> = ({ features, isDemo 
               >
                 <div>
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-xs text-foreground">{translateFeature(f.feature)}</span>
+                    <span className="font-semibold text-xs text-foreground">{translateFeatureName(f.feature, isBn)}</span>
                     <Badge
                       variant={f.impact_score > 0 ? 'critical' : 'success'}
                       className="text-[10px] font-mono"
@@ -200,12 +162,12 @@ export const ShapWaterfallChart: React.FC<ShapChartProps> = ({ features, isDemo 
                     </Badge>
                   </div>
                   <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
-                    {translateExplanation(f.clinical_explanation)}
+                    {translateClinicalExplanation(f.clinical_explanation, isBn)}
                   </p>
                 </div>
                 <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground">
-                  <span>{t('results.shap.category', 'Category:')} {translateCategory(f.category)}</span>
-                  <span>{t('results.shap.observed', 'Observed:')} <strong className="text-foreground">{String(f.value)}</strong></span>
+                  <span>{t('results.shap.category', 'Category:')} {translateCategoryName(f.category, isBn)}</span>
+                  <span>{t('results.shap.observed', 'Observed:')} <strong className="text-foreground">{translateObservedValue(f.value, isBn)}</strong></span>
                 </div>
               </div>
             ))}
