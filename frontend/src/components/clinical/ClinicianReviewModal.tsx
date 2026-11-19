@@ -31,7 +31,8 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
   currentDecision,
   onReviewSaved,
 }) => {
-  const { t } = useTranslation(['reports', 'common']);
+  const { t, i18n } = useTranslation(['reports', 'common']);
+  const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
   const [reviewerName, setReviewerName] = useState('Dr. M. Ashraful Hoque');
   const [reviewerLicense, setReviewerLicense] = useState('BMDC #A-89412');
   const [decision, setDecision] = useState<'APPROVED' | 'MODIFIED' | 'REJECTED'>(
@@ -45,7 +46,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewerName.trim()) {
-      toast.error('Clinician name is required for legal and clinical traceability.');
+      toast.error(isBn ? 'আইনি ও ক্লিনিক্যাল প্রমাণের জন্য চিকিৎসকের নাম আবশ্যক।' : 'Clinician name is required for legal and clinical traceability.');
       return;
     }
 
@@ -57,11 +58,11 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
         decision,
         notes,
       });
-      toast.success('Clinical decision recorded and locked with BMDC verification timestamp.');
+      toast.success(isBn ? 'ক্লিনিক্যাল সিদ্ধান্ত সফলভাবে সংরক্ষিত এবং বিএমডিসি ভেরিফিকেশনে লক করা হয়েছে।' : 'Clinical decision recorded and locked with BMDC verification timestamp.');
       onReviewSaved();
       onClose();
     } catch {
-      toast.error('Failed to submit clinical review. Please try again.');
+      toast.error(isBn ? 'ক্লিনিক্যাল পর্যালোচনা জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Failed to submit clinical review. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -73,10 +74,10 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
         <DialogHeader>
           <div className="flex items-center space-x-2 text-primary">
             <UserCheck className="h-5 w-5" />
-            <DialogTitle>Clinician Decision & Audit Sign-Off</DialogTitle>
+            <DialogTitle>{isBn ? 'চিকিৎসকের চূড়ান্ত সিদ্ধান্ত ও অনুমোদন অডিট' : 'Clinician Decision & Audit Sign-Off'}</DialogTitle>
           </div>
           <DialogDescription className="text-xs">
-            Review the CDSS AI safety findings and certify the final therapeutic course.
+            {isBn ? 'সিডিএসএস এআই নিরাপত্তা ফলাফল পর্যালোচনা করুন এবং চূড়ান্ত চিকিৎসা পদ্ধতি সত্যায়িত করুন।' : 'Review the CDSS AI safety findings and certify the final therapeutic course.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -84,17 +85,17 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
           {/* Clinician Credentials */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-foreground">Clinician Name</label>
+              <label className="text-xs font-semibold text-foreground">{isBn ? 'চিকিৎসকের নাম' : 'Clinician Name'}</label>
               <Input
                 value={reviewerName}
                 onChange={(e) => setReviewerName(e.target.value)}
                 className="mt-1 text-xs"
-                placeholder="Dr. Full Name"
+                placeholder={isBn ? 'ডা. পূর্ণ নাম' : 'Dr. Full Name'}
                 required
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-foreground">License / BMDC Reg.</label>
+              <label className="text-xs font-semibold text-foreground">{isBn ? 'বিএমডিসি লাইসেন্স নম্বর' : 'License / BMDC Reg.'}</label>
               <Input
                 value={reviewerLicense}
                 onChange={(e) => setReviewerLicense(e.target.value)}
@@ -106,7 +107,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
 
           {/* Decision Selector */}
           <div>
-            <label className="text-xs font-semibold text-foreground">Clinical Determination</label>
+            <label className="text-xs font-semibold text-foreground">{isBn ? 'ক্লিনিক্যাল সিদ্ধান্ত' : 'Clinical Determination'}</label>
             <div className="grid grid-cols-3 gap-2 mt-1.5">
               <button
                 type="button"
@@ -118,7 +119,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
                 }`}
               >
                 <CheckCircle2 className="h-4 w-4 mb-1 text-emerald-600" />
-                <span>{t('status.approved', { ns: 'common', defaultValue: 'Approved' })}</span>
+                <span>{isBn ? 'অনুমোদিত' : 'Approved'}</span>
               </button>
 
               <button
@@ -131,7 +132,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
                 }`}
               >
                 <Edit3 className="h-4 w-4 mb-1 text-amber-600" />
-                <span>{t('status.modified', { ns: 'common', defaultValue: 'Modified' })}</span>
+                <span>{isBn ? 'সংশোধিত' : 'Modified'}</span>
               </button>
 
               <button
@@ -144,7 +145,7 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
                 }`}
               >
                 <AlertOctagon className="h-4 w-4 mb-1 text-red-600" />
-                <span>{t('status.rejected', { ns: 'common', defaultValue: 'Rejected' })}</span>
+                <span>{isBn ? 'বাতিলকৃত' : 'Rejected'}</span>
               </button>
             </div>
           </div>
@@ -152,29 +153,29 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
           {/* Clinical Rationale & Modification Notes */}
           <div>
             <label className="text-xs font-semibold text-foreground">
-              Clinical Rationale / Prescription Adjustments
+              {isBn ? 'চিকিৎসাগত কারণ ও প্রেসক্রিপশন সমন্বয়' : 'Clinical Rationale / Prescription Adjustments'}
             </label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="mt-1 text-xs"
               rows={3}
-              placeholder="State rationale for override, substitution, or therapeutic plan..."
+              placeholder={isBn ? 'ওষুধ পরিবর্তন, বিকল্প নির্ধারণ বা চিকিৎসা পরিকল্পনার কারণ উল্লেখ করুন...' : 'State rationale for override, substitution, or therapeutic plan...'}
             />
           </div>
 
           {/* Legal Sign-Off Notice */}
           <div className="p-2.5 rounded-lg bg-muted text-[11px] text-muted-foreground flex items-center space-x-2">
             <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-            <span>Digital stamp will be permanently appended to the clinical audit trail.</span>
+            <span>{isBn ? 'ডিজিটাল সিলটি স্থায়ীভাবে ক্লিনিক্যাল অডিট ট্রেইলে যুক্ত হবে।' : 'Digital stamp will be permanently appended to the clinical audit trail.'}</span>
           </div>
 
           <DialogFooter className="pt-2">
             <Button type="button" variant="outline" size="sm" onClick={onClose}>
-              {t('actions.cancel', { ns: 'common', defaultValue: 'Cancel' })}
+              {isBn ? 'বাতিল' : 'Cancel'}
             </Button>
             <Button type="submit" size="sm" disabled={isSubmitting}>
-              {isSubmitting ? 'Recording...' : 'Certify Decision'}
+              {isSubmitting ? (isBn ? 'রেকর্ড হচ্ছে...' : 'Recording...') : (isBn ? 'সিদ্ধান্ত সত্যায়িত করুন' : 'Certify Decision')}
             </Button>
           </DialogFooter>
         </form>
