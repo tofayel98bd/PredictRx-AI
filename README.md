@@ -23,7 +23,7 @@
 4. [Full-Stack System Architecture](#-4-full-stack-system-architecture)
 5. [Single-Command Docker Quick Start](#-5-single-command-docker-quick-start)
 6. [Application Access Directory & Port Map](#-6-application-access-directory--port-map)
-7. [The 30-Second "Wow Moment" Hackathon Demo](#-7-the-30-second-wow-moment-hackathon-demo)
+7. [The 30-Second "Wow Moment" Clinical Demonstration](#-7-the-30-second-wow-moment-clinical-demonstration)
 8. [Complete REST API Reference (21 Endpoints)](#-8-complete-rest-api-reference-21-endpoints)
 9. [Primary CDSS Analysis Contract (JSON Spec)](#-9-primary-cdss-analysis-contract-json-spec)
 10. [Database Architecture & Master Seed Data](#-10-database-architecture--master-seed-data)
@@ -221,9 +221,9 @@ docker compose down
 
 ---
 
-## 🎯 7. The 30-Second "Wow Moment" Hackathon Demo
+## 🎯 7. The 30-Second "Wow Moment" Clinical Demonstration
 
-Follow this exact walkthrough to demonstrate the system to judges or clinical evaluators:
+Follow this exact walkthrough to evaluate the system in real time:
 
 ```
 Step 1: Open [http://localhost:5173/analyze](http://localhost:5173/analyze)

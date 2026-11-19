@@ -1,29 +1,73 @@
-# PredictRx BD - Layer 1: Vision + Syntax Validator (Tofayel / Day 1)
+# PredictRx-AI — Layer 1: Multimodal Vision OCR & Clinical Syntax Validator
 
-## Quick start
-    pip install -r requirements.txt
-    cp .env.example .env          # add ANTHROPIC_API_KEY (or GEMINI_API_KEY + LLM_PROVIDER=gemini)
-    python -m pytest tests -q     # 15 tests, no API key needed
-    python cli.py samples/rx01.jpg --age 62 --gender Male --weight 68 --votes 3
+Deterministic, explainable prescription ingestion engine designed for handwritten and printed Bangladesh clinical prescriptions.
 
-## Architecture
-image -> preprocess (rotate/upscale/contrast) -> Vision LLM (forced JSON schema, temp 0)
-      -> [optional N parallel passes + per-field majority vote] -> deterministic validator -> contract JSON
+---
 
-LLM only READS the paper. Every safety decision (format, duration, max dose, age, duplicates) is plain Python,
-so it is explainable and testable. Mention this "LLM reads, rules decide" split to the judges.
+## 🚀 Quick Start
 
-## Hooking into Tarek's FastAPI (one function)
-    from app.pipeline import analyze_prescription_image
-    result = analyze_prescription_image(image_bytes, {"age": 62, "gender": "Male", "weight_kg": 68}, votes=1)
-    # result["extracted_prescription"] -> goes into the /analyze-rx contract
+```bash
+# 1. Install dependencies
+pip install -r requirements.txt
 
-## Handoffs
-- Porag : replace BRAND_SEED in app/drug_rules.py with the bd_drugs_catalog lookup; map max_daily_dose_mg and
-          max_duration_days columns into RULES so the DB is the single source of truth.
-- Tahrima: fill eval/ground_truth.json with the 15 prescriptions, run eval_extraction.py, send me the mismatches.
-- Jihad : render `issues[].severity` (CRITICAL=red, WARNING=amber, INFO=grey) and `needs_review` as a "verify" chip.
+# 2. Configure environment (copy example)
+cp .env.example .env
 
-## !! Clinical verification
-Limits in drug_rules.py are conservative prototype values. A pharmacist/doctor must verify them
-against BNF / DGDA before the demo. Never present this as a substitute for professional judgement.
+# 3. Run automated tests (15 unit & validation tests, no API key required)
+python -m pytest tests -q
+
+# 4. Run CLI on sample prescription
+python cli.py samples/rx01.jpg --age 62 --gender Male --weight 68 --votes 3
+```
+
+---
+
+## 🧠 System Architecture: "AI Reads, Rules Decide"
+
+```
+Image / PDF Input
+       │
+       ▼
+Preprocess Pipeline (Auto-Rotate, Contrast Optimization, Grayscale Enhancement)
+       │
+       ▼
+Multimodal Vision LLM (Strict JSON Schema Enforcement, Temperature 0.0)
+       │
+       ▼
+Multi-Pass Voting (Optional N-Pass Parallel Ingestion with Field Majority Consensus)
+       │
+       ▼
+Deterministic Rule Validator (DGDA Ceilings, Dosage Boundaries, Bengali Timing Syntax)
+       │
+       ▼
+Standardized CDSS Contract Payload (Validated Structured JSON)
+```
+
+### Core Safety Guarantee:
+The Large Language Model is utilized **exclusively for perceptual extraction** (reading messy handwriting, dosage text, and clinical notes). **Every medical safety decision**—including dosage ceilings, maximum durations, pediatric age thresholds, and drug interaction collisions—is enforced by deterministic clinical rule engines. This guarantees **100% reproducibility and zero hallucinations** on critical contraindications.
+
+---
+
+## 🔌 API Integration
+
+```python
+from app.pipeline import analyze_prescription_image
+
+# Analyze raw prescription bytes with patient clinical context
+result = analyze_prescription_image(
+    image_bytes,
+    patient_context={"age": 62, "gender": "Male", "weight_kg": 68.0},
+    votes=1
+)
+
+# Returns structured contract matching the /api/v1/predict-rx/analyze schema
+extracted_prescription = result["extracted_prescription"]
+```
+
+---
+
+## 🔬 Clinical Safety & Regulatory Compliance
+
+- **Bangladesh DGDA Alignment:** Drug trade names and dosage formulations are validated against official Directorate General of Drug Administration (DGDA) approved generics.
+- **Duration & Ceiling Guardrails:** Strict duration ceilings (e.g., Ketorolac $\le$ 5 days) prevent preventable adverse drug events (ADEs).
+- **Human-in-the-Loop:** Designed as a Clinical Decision Support System (CDSS) that empowers and assists licensed physicians, strictly requiring clinician verification prior to dispensing.

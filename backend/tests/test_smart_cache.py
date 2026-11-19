@@ -20,7 +20,7 @@ def client():
 
 
 def test_golden_scenarios_preseeded():
-    """Verify that all 3 Hackathon Golden Scenarios are pre-loaded in cache."""
+    """Verify that all 3 Clinical Demo Golden Scenarios are pre-loaded in cache."""
     s1 = smart_cache.get_scenario("GOLDEN_01_CKD_KETOROLAC")
     s2 = smart_cache.get_scenario("GOLDEN_02_TRIPLE_WHAMMY")
     s3 = smart_cache.get_scenario("GOLDEN_03_PEDIATRIC_ASPIRIN")

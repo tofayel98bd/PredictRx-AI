@@ -131,7 +131,7 @@ export const DEMO_ANALYSIS_RESULT: PrescriptionAnalysisResult = {
   clinical_risk: {
     risk_score: 86,
     risk_classification: 'CRITICAL',
-    calibrated_probability_note: 'DEMO ESTIMATION — NOT CLINICALLY VALIDATED. Synthetic scoring for hackathon evaluation only. Predictions require physician confirmation.',
+    calibrated_probability_note: 'DEMO ESTIMATION — NOT CLINICALLY VALIDATED. Synthetic scoring for clinical evaluation only. Predictions require physician confirmation.',
     is_synthetic_demo: true,
     aki_risk_percentage: 84,
     gi_bleed_risk_percentage: 68,
@@ -513,7 +513,7 @@ export const COMMON_DRUG_INTERACTIONS: DrugInteraction[] = [
 ];
 
 // =========================================================================
-// 3 GOLDEN HACKATHON DEMONSTRATION SCENARIOS (P0)
+// 3 GOLDEN CLINICAL DEMONSTRATION SCENARIOS (P0)
 // =========================================================================
 
 export const DEMO_SCENARIO_2_ROKEYA_RESULT: PrescriptionAnalysisResult = {

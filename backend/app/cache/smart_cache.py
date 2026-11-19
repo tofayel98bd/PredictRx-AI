@@ -1,7 +1,7 @@
 """Smart Local Cache Layer for PredictRx-AI.
 
-Provides high-speed, sub-0.5s fail-safe caching for live hackathon demos.
-Pre-seeds the 3 Golden Hackathon Clinical Demo Scenarios and transparently
+Provides high-speed, sub-0.5s fail-safe caching for live clinical demonstration.
+Pre-seeds the 3 Golden Benchmark Clinical Demo Scenarios and transparently
 intercepts requests if network latency or API rate limits occur.
 """
 
@@ -34,7 +34,7 @@ logger = get_logger("app.cache.smart_cache")
 
 
 # --------------------------------------------------------------------------
-# Pre-computed Golden Demo Results (The 3 Winning Hackathon Prescriptions)
+# Pre-computed Golden Demo Results (The 3 Benchmark Clinical Prescriptions)
 # --------------------------------------------------------------------------
 
 GOLDEN_SCENARIO_1_CKD_KETOROLAC = {
@@ -474,7 +474,7 @@ class SmartCacheService:
         self._in_memory_cache["GOLDEN_01_CKD_KETOROLAC"] = GOLDEN_SCENARIO_1_CKD_KETOROLAC
         self._in_memory_cache["GOLDEN_02_TRIPLE_WHAMMY"] = GOLDEN_SCENARIO_2_TRIPLE_WHAMMY
         self._in_memory_cache["GOLDEN_03_PEDIATRIC_ASPIRIN"] = GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
-        logger.info("Initialized PredictRx Smart Cache with 3 Golden Hackathon Scenarios")
+        logger.info("Initialized PredictRx Smart Cache with 3 Golden Clinical Scenarios")
 
     def get_by_hash(self, file_hash: str) -> Optional[Dict[str, Any]]:
         """Look up pre-computed scenario by SHA-256 binary hash."""

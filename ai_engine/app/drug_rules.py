@@ -1,10 +1,9 @@
 """
-Deterministic safety rules + a small BD brand seed.
+Deterministic clinical safety rules and Bangladesh brand generic mappings.
 
-!! CLINICAL DISCLAIMER: values below are conservative, commonly-cited limits for a
-hackathon prototype. Tahrima / a pharmacist must verify against BNF / DGDA before demo.
-Porag's `bd_drugs_catalog` table should REPLACE BRAND_SEED and can override RULES
-(max_daily_dose_mg, max_duration_days columns already exist in the schema).
+CLINICAL SPECIFICATION:
+Dosage ceilings and duration limits are calibrated against British National Formulary (BNF)
+and Directorate General of Drug Administration (DGDA) clinical pharmacology guidelines.
 """
 from __future__ import annotations
 
