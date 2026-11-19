@@ -499,22 +499,35 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                     {t('patientForm.subtitle', 'Essential for contraindication screening (renal eGFR, diabetic control, and comorbidities).')}
                   </CardDescription>
                 </div>
-                {/* Registered Patient Quick Picker */}
-                <select
-                  aria-label={isBn ? 'নিবন্ধিত রোগী নির্বাচন করুন' : 'Select Registered Patient'}
-                  onChange={handleSelectExistingPatient}
-                  className="text-xs rounded-md border border-input bg-background px-2.5 py-1 text-muted-foreground hover:text-foreground focus:ring-1 focus:ring-primary"
-                  defaultValue=""
-                >
-                  <option value="" disabled>
-                    {isBn ? '📋 রেজিস্ট্রি থেকে রোগী নির্বাচন (ঐচ্ছিক)' : '📋 Select Registered Patient (Optional)'}
-                  </option>
-                  {DEMO_PATIENTS_LIST.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name} ({p.id}) • {p.age}y/{p.gender.charAt(0)}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetForm}
+                    className="text-xs h-8 border-dashed hover:border-solid text-muted-foreground hover:text-foreground flex items-center space-x-1"
+                    title={isBn ? 'সব ফিল্ড খালি করুন' : 'Clear all fields'}
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    <span>{isBn ? 'ফর্ম খালি করুন' : 'Clear Form'}</span>
+                  </Button>
+                  {/* Registered Patient Quick Picker */}
+                  <select
+                    aria-label={isBn ? 'নিবন্ধিত রোগী নির্বাচন করুন' : 'Select Registered Patient'}
+                    onChange={handleSelectExistingPatient}
+                    className="text-xs rounded-md border border-input bg-background px-2.5 py-1 text-muted-foreground hover:text-foreground focus:ring-1 focus:ring-primary"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>
+                      {isBn ? '📋 রেজিস্ট্রি থেকে রোগী নির্বাচন (ঐচ্ছিক)' : '📋 Select Registered Patient (Optional)'}
                     </option>
-                  ))}
-                </select>
+                    {DEMO_PATIENTS_LIST.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} ({p.id}) • {p.age}y/{p.gender.charAt(0)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </CardHeader>
 
