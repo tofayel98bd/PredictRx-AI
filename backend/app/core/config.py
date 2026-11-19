@@ -32,6 +32,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://localhost:8000",
+        "https://predict-rx-ai.vercel.app",
+        "*",
     ]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -44,6 +46,7 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     # Isolated PredictRx PostgreSQL Database (Host Port 5434)
+    DATABASE_URL: Optional[str] = None
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5434
     POSTGRES_USER: str = "predictrx_user"
@@ -55,6 +58,13 @@ class Settings(BaseSettings):
     @computed_field  # type: ignore[prop-decorator]
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
+        if self.DATABASE_URL:
+            url = self.DATABASE_URL
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql+psycopg://", 1)
+            elif url.startswith("postgresql://") and not url.startswith("postgresql+psycopg://"):
+                url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+            return url
         return (
             f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
             f"{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
