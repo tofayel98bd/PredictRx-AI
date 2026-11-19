@@ -202,7 +202,8 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     }
 
     // Silently pre-fetch TTS in background so clicking Play is instantaneous
-    fetch('/api/v1/predict-rx/tts', {
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+    fetch(`${apiBase}/api/v1/predict-rx/tts`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: speechText, lang: isBn ? 'bn' : 'en' }),
@@ -300,7 +301,8 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     setIsPlaying(true);
 
     try {
-      const response = await fetch('/api/v1/predict-rx/tts', {
+      const apiBase = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '');
+      const response = await fetch(`${apiBase}/api/v1/predict-rx/tts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: fullSpeechText, lang: isBn ? 'bn' : 'en' }),
@@ -344,11 +346,6 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
           v.name.toLowerCase().includes('bangla') ||
           v.name.toLowerCase().includes('bengali')
       );
-      if (!targetVoice) {
-        setIsPlaying(false);
-        toast.info('আপনার ব্রাউজার বা ডিভাইসে বাংলা ভয়েস প্যাক ইনস্টল করা নেই। নিচের কার্ডে সকল নিয়ম বাংলায় লেখা রয়েছে।');
-        return;
-      }
     } else {
       targetVoice = availableVoices.find(
         (v) =>
@@ -369,11 +366,20 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     utterance.pitch = 1.0;
 
     utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
+    utterance.onerror = () => {
+      setIsPlaying(false);
+      if (isBn && !targetVoice) {
+        toast.info('আপনার ব্রাউজারে বাংলা ভয়েস প্যাক নেই। Google Chrome বা Microsoft Edge এ শুনুন অথবা কার্ডের লেখাগুলো পড়ুন।');
+      }
+    };
 
-    window.speechSynthesis.speak(utterance);
-    setIsPlaying(true);
-    toast.success(isBn ? 'ভয়েস প্লে হচ্ছে...' : 'Voice playing...');
+    try {
+      window.speechSynthesis.speak(utterance);
+      setIsPlaying(true);
+      toast.success(isBn ? 'ভয়েস প্লে হচ্ছে...' : 'Voice playing...');
+    } catch {
+      setIsPlaying(false);
+    }
   };
 
   const handlePrint = () => {
