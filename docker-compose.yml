@@ -42,7 +42,7 @@ services:
       ENVIRONMENT: production
       DEBUG: "false"
       BACKEND_CORS_ORIGINS: '["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://localhost:8000"]'
-      GEMINI_API_KEY: ${GEMINI_API_KEY:-AQ.Ab8RN6K7yFjTCDWQuAXLl9QnOn5ytvI3wAN9CpYh-GL5CLZdTw}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
     ports:
