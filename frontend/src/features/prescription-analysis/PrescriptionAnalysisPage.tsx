@@ -932,47 +932,63 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {analysisResult.drug_interactions.map((interaction) => {
-                    const bnInter = isBn ? CLINICAL_INTERACTIONS_MAP_BN[interaction.id] : null;
-                    return (
-                      <div
-                        key={interaction.id}
-                        className="p-4 rounded-xl border border-border bg-card shadow-sm space-y-3"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-sm text-foreground">
-                              {interaction.drug_a} ↔ {interaction.drug_b}
-                            </span>
+                  {analysisResult.drug_interactions.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center border rounded-xl border-dashed border-emerald-500/30 bg-emerald-500/5 p-6">
+                      <CheckCircle2 className="h-10 w-10 text-emerald-500 mb-2" />
+                      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                        {isBn
+                          ? 'কোনো ক্ষতিকর ওষুধের মিথস্ক্রিয়া শনাক্ত হয়নি'
+                          : 'No Adverse Drug-Drug Interactions Detected'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1 max-w-md">
+                        {isBn
+                          ? 'প্রেসক্রিপশনভুক্ত ওষুধসমূহ এবং রোগীর পূর্ববর্তী নিয়মিত ওষুধগুলোর মধ্যে কোনো বিপজ্জনক পারস্পরিক সংঘাত নেই। এগুলো একসাথে গ্রহণ করা চিকিৎসাগতভাবে নিরাপদ।'
+                          : 'The prescribed medications and patient baseline therapy do not exhibit any documented adverse pharmacodynamic or pharmacokinetic collisions.'}
+                      </p>
+                    </div>
+                  ) : (
+                    analysisResult.drug_interactions.map((interaction) => {
+                      const bnInter = isBn ? CLINICAL_INTERACTIONS_MAP_BN[interaction.id] : null;
+                      return (
+                        <div
+                          key={interaction.id}
+                          className="p-4 rounded-xl border border-border bg-card shadow-sm space-y-3"
+                        >
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="font-bold text-sm text-foreground">
+                                {interaction.drug_a} ↔ {interaction.drug_b}
+                              </span>
+                            </div>
+                            <Badge variant={interaction.severity === 'CRITICAL' ? 'critical' : 'warning'}>
+                              {isBn
+                                ? (interaction.severity === 'CRITICAL' ? 'গুরুতর প্রতিক্রিয়া (CRITICAL)' : 'সতর্কতামূলক (WARNING)')
+                                : `${interaction.severity} SEVERITY`}
+                            </Badge>
                           </div>
-                          <Badge variant={interaction.severity === 'CRITICAL' ? 'critical' : 'warning'}>
-                            {isBn
-                              ? (interaction.severity === 'CRITICAL' ? 'গুরুতর প্রতিক্রিয়া (CRITICAL)' : 'সতর্কতামূলক (WARNING)')
-                              : `${interaction.severity} SEVERITY`}
-                          </Badge>
-                        </div>
 
-                        <div className="text-xs space-y-1.5">
-                          <p className="text-muted-foreground">
-                            <strong className="text-foreground">{isBn ? 'প্রক্রিয়া / মেকানিজম: ' : 'Mechanism: '}</strong>
-                            {bnInter?.mechanism || interaction.mechanism}
-                          </p>
-                          <p className="text-muted-foreground">
-                            <strong className="text-foreground">{isBn ? 'ক্লিনিক্যাল ঝুঁকি / ফলাফল: ' : 'Clinical Consequence: '}</strong>
-                            {bnInter?.significance || interaction.clinical_significance}
-                          </p>
-                          <p className="text-amber-800 dark:text-amber-300">
-                            <strong>{isBn ? 'প্রস্তাবিত পদক্ষেপ: ' : 'Recommended Action: '}</strong>
-                            {bnInter?.action || interaction.recommended_action}
-                          </p>
-                          <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
-                            <strong>{isBn ? 'প্রমাণের উৎস: ' : 'Evidence Source: '}</strong>
-                            {bnInter?.source || interaction.evidence_source}
-                          </p>
+                          <div className="text-xs space-y-1.5">
+                            <p className="text-muted-foreground">
+                              <strong className="text-foreground">{isBn ? 'প্রক্রিয়া / মেকানিজম: ' : 'Mechanism: '}</strong>
+                              {bnInter?.mechanism || interaction.mechanism}
+                            </p>
+                            <p className="text-muted-foreground">
+                              <strong className="text-foreground">{isBn ? 'ক্লিনিক্যাল ঝুঁকি / ফলাফল: ' : 'Clinical Consequence: '}</strong>
+                              {bnInter?.significance || interaction.clinical_significance}
+                            </p>
+                            <p className="text-amber-800 dark:text-amber-300">
+                              <strong>{isBn ? 'প্রস্তাবিত পদক্ষেপ: ' : 'Recommended Action: '}</strong>
+                              {bnInter?.action || interaction.recommended_action}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground pt-1 border-t border-border">
+                              <strong>{isBn ? 'প্রমাণের উৎস: ' : 'Evidence Source: '}</strong>
+                              {bnInter?.source || interaction.evidence_source}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
