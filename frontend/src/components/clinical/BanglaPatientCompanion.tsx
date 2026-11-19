@@ -49,7 +49,10 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({ data, p
       'ধন্যবাদ। চিকিৎসকের পরামর্শ অনুযায়ী ওষুধ সেবন করুন।',
     ].filter(Boolean);
 
-    const fullSpeechText = textParts.join(' ');
+    const fullSpeechText = textParts
+      .join(' ')
+      .replace(/([0-9০-৯]+)\s*[-–]\s*([0-9০-৯]+)/g, '$1 থেকে $2')
+      .replace(/\s*[-–]\s*/g, ' ');
 
     // 1. Primary Method: High-Quality Real Bengali TTS from PredictRx Backend
     try {

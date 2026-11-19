@@ -527,9 +527,16 @@ def generate_tts_endpoint(payload: TTSRequest):
     try:
         from gtts import gTTS
         import io
+        import re
         from fastapi.responses import StreamingResponse
 
-        tts = gTTS(text=payload.text, lang=payload.lang or "bn")
+        # Clean speech text: replace hyphens in number ranges with 'থেকে' so TTS says 'থেকে' instead of 'মাইনাস'
+        clean_text = payload.text
+        clean_text = re.sub(r'([0-9০-৯]+)\s*[-–]\s*([0-9০-৯]+)', r'\1 থেকে \2', clean_text)
+        # Avoid orphan hyphens being read as 'minus'
+        clean_text = re.sub(r'\s*[-–]\s*', ' ', clean_text)
+
+        tts = gTTS(text=clean_text, lang=payload.lang or "bn")
         buf = io.BytesIO()
         tts.write_to_fp(buf)
         buf.seek(0)

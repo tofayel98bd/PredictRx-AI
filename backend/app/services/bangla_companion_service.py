@@ -70,7 +70,7 @@ class BanglaCompanionService:
                     break
 
             dosage_str = DOSE_TO_BANGLA.get(med.dosage_syntax or "", f"ডাক্তারের নিয়ম অনুযায়ী ({med.dosage_syntax or 'নিয়মিত'})")
-            timing_str = "খাবার পরে ভরা পেটে খাবেন" if "after" in (med.timing or "").lower() else "খাবারের ২০-৩০ মিনিট আগে খাবেন"
+            timing_str = "খাবার পরে ভরা পেটে খাবেন" if "after" in (med.timing or "").lower() else "খাবারের ২০ থেকে ৩০ মিনিট আগে খাবেন"
 
             warnings: List[str] = []
             if "ketorolac" in gen_key:
