@@ -211,6 +211,42 @@ def seed_interactions(db: Session) -> None:
             "is_contraindicated": False,
             "citation_ids": ["AHA-QT-2020", "BNF-86-QT"],
         },
+        # Metformin + NSAID
+        {
+            "drug_a_generic": "metformin",
+            "drug_b_generic": "ketorolac tromethamine",
+            "severity": "high",
+            "clinical_effect": "Heightened risk of Metformin-Associated Lactic Acidosis (MALA) and acute toxic nephropathy.",
+            "mechanism": "NSAID-induced acute decline in renal glomerular clearance leads to systemic toxic accumulation of biguanides.",
+            "evidence_level": "A",
+            "management_recommendation": "Hold metformin or switch analgesia to paracetamol if renal function or eGFR fluctuates below 45 mL/min.",
+            "is_contraindicated": False,
+            "citation_ids": ["ADA-2025-MALA", "KDIGO-2024-METFORMIN"],
+        },
+        # Anticoagulant + Antiplatelet
+        {
+            "drug_a_generic": "warfarin",
+            "drug_b_generic": "aspirin",
+            "severity": "critical",
+            "clinical_effect": "Severe gastrointestinal and systemic hemorrhagic complications with catastrophic bleeding hazard.",
+            "mechanism": "Synergistic inhibition of coagulation factors and platelet aggregation with direct gastric mucosal erosion.",
+            "evidence_level": "A",
+            "management_recommendation": "Strictly contraindicated without specialized hematology justification and co-prescription of PPI gastroprotection.",
+            "is_contraindicated": True,
+            "citation_ids": ["CHEST-ANTITHROMBOTIC", "BNF-86-BLEED"],
+        },
+        # Clopidogrel + PPI
+        {
+            "drug_a_generic": "clopidogrel",
+            "drug_b_generic": "omeprazole",
+            "severity": "high",
+            "clinical_effect": "Significantly attenuated antiplatelet inhibition, elevating ischemic re-infarction and stent thrombosis risk.",
+            "mechanism": "Omeprazole competitively inhibits CYP2C19 bioactivation of prodrug clopidogrel into its active thiol metabolite.",
+            "evidence_level": "A",
+            "management_recommendation": "Substitute omeprazole with pantoprazole or famotidine, which have minimal CYP2C19 inhibitory affinity.",
+            "is_contraindicated": False,
+            "citation_ids": ["FDA-CLOPIDOGREL-PPI", "ACC-AHA-2023"],
+        },
     ]
 
     for item in interactions:

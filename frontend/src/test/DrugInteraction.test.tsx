@@ -20,7 +20,7 @@ describe('DrugInteractionPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/Screening Finding:/i)).toBeInTheDocument();
-      expect(screen.getByText(/CRITICAL/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/CRITICAL/i).length).toBeGreaterThan(0);
     });
   });
 
