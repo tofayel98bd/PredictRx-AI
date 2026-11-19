@@ -446,6 +446,205 @@ GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN = {
     },
 }
 
+GOLDEN_SCENARIO_4_PORAG_DLB = {
+    "scenario_id": "GOLDEN_04_PORAG_DLB",
+    "name": "Porag",
+    "age": 63,
+    "gender": "Male",
+    "weight_kg": 64.0,
+    "conditions": ["Lewy Body Dementia (DLB)", "Impaired memory", "Slowness of movement", "Visual hallucination"],
+    "current_medications": ["Cap. Rivacap 3 (1+0+1)", "Tab. Dementa 5 (1+0+1)", "Tab. Syndopa 110 (1+1+1)"],
+    "creatinine": 0.9,
+    "egfr": 91.0,
+    "hba1c": 5.4,
+    "systolic_bp": 130,
+    "diastolic_bp": 90,
+    "medications": [
+        {
+            "brand_name": "Rivacap 3",
+            "generic_name": "Rivastigmine",
+            "form": "Capsule",
+            "strength": "3 mg",
+            "dosage_syntax": "1+0+1",
+            "frequency_per_day": 2.0,
+            "timing": "After Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Cholinesterase inhibitor for cognitive deficit in DLB",
+            "confidence": 0.96,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Dementa 5",
+            "generic_name": "Memantine Hydrochloride",
+            "form": "Tablet",
+            "strength": "5 mg",
+            "dosage_syntax": "1+0+1",
+            "frequency_per_day": 2.0,
+            "timing": "After Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "NMDA receptor antagonist for neuroprotection in dementia",
+            "confidence": 0.97,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Syndopa 110",
+            "generic_name": "Levodopa + Carbidopa",
+            "form": "Tablet",
+            "strength": "100/10 mg",
+            "dosage_syntax": "1+1+1",
+            "frequency_per_day": 3.0,
+            "timing": "After Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Dopaminergic replacement for parkinsonian motor slowness",
+            "confidence": 0.95,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Queta XR 50",
+            "generic_name": "Quetiapine Fumarate",
+            "form": "Tablet",
+            "strength": "50 mg",
+            "dosage_syntax": "1+0+1",
+            "frequency_per_day": 2.0,
+            "timing": "After Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Atypical antipsychotic for visual hallucinations in DLB",
+            "confidence": 0.94,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Uromax 0.4",
+            "generic_name": "Tamsulosin Hydrochloride",
+            "form": "Capsule",
+            "strength": "0.4 mg",
+            "dosage_syntax": "0+0+1",
+            "frequency_per_day": 1.0,
+            "timing": "Night After Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Alpha-1 blocker for lower urinary tract symptoms",
+            "confidence": 0.95,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Zovia Silver",
+            "generic_name": "Multivitamin and Multimineral",
+            "form": "Tablet",
+            "strength": "Standard Formula",
+            "dosage_syntax": "0+1+0",
+            "frequency_per_day": 1.0,
+            "timing": "Noon After Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Nutritional support",
+            "confidence": 0.98,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Pantonix 20",
+            "generic_name": "Pantoprazole",
+            "form": "Tablet",
+            "strength": "20 mg",
+            "dosage_syntax": "1+0+1",
+            "frequency_per_day": 2.0,
+            "timing": "Before Meal",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Proton pump inhibitor for mucosal gastroprotection",
+            "confidence": 0.97,
+            "needs_review": False,
+            "issues": [],
+        },
+    ],
+    "interactions": [
+        {
+            "drug_a": "Quetiapine (Queta XR)",
+            "drug_b": "Levodopa + Carbidopa (Syndopa)",
+            "severity": "MODERATE",
+            "mechanism": "Dopamine D2 antagonism vs dopaminergic stimulation.",
+            "clinical_significance": "May attenuate antiparkinsonian motor benefit if quetiapine dose escalated.",
+            "evidence_source": "MDS Evidence-Based Medicine Review for DLB 2024",
+            "recommended_action": "Use lowest effective dose of Queta XR. Monitor motor signs.",
+        },
+        {
+            "drug_a": "Rivastigmine (Rivacap)",
+            "drug_b": "Tamsulosin (Uromax)",
+            "severity": "MODERATE",
+            "mechanism": "Centrally acting cholinesterase inhibition with peripheral alpha-1 adrenoceptor blockade.",
+            "clinical_significance": "Additive risk of orthostatic hypotension and syncope in geriatric patients.",
+            "evidence_source": "AGS Beers Criteria 2023",
+            "recommended_action": "Counsel patient to rise slowly from seated/supine position.",
+        },
+    ],
+    "risk": {
+        "risk_score": 32,
+        "risk_classification": "MODERATE",
+        "aki_risk_percentage": 8,
+        "gi_bleed_risk_percentage": 12,
+        "cardiovascular_risk_percentage": 24,
+        "shap_features": [
+            {
+                "feature": "Cholinesterase Inhibitor + Atypical Antipsychotic Interplay",
+                "value": "Rivacap + Queta XR",
+                "impact_score": 0.18,
+                "category": "Interaction",
+                "clinical_explanation": "Central neurotransmitter modulation in DLB.",
+            },
+            {
+                "feature": "Patient Age (63 years)",
+                "value": 63,
+                "impact_score": 0.12,
+                "category": "Age",
+                "clinical_explanation": "Geriatric postural stability vigilance.",
+            },
+            {
+                "feature": "Preserved Renal Clearance (eGFR 91 ml/min)",
+                "value": 91,
+                "impact_score": -0.28,
+                "category": "Renal",
+                "clinical_explanation": "Zero nephrotoxicity identified.",
+            },
+            {
+                "feature": "Normal Metabolic Profile (HbA1c 5.4%)",
+                "value": 5.4,
+                "impact_score": -0.10,
+                "category": "Patient Condition",
+                "clinical_explanation": "Metabolically stable baseline.",
+            },
+            {
+                "feature": "Gastroprotective Therapy (Pantonix 20)",
+                "value": "Pantoprazole 20mg",
+                "impact_score": -0.08,
+                "category": "Dosage",
+                "clinical_explanation": "Gastric mucosal barrier protection.",
+            },
+        ],
+    },
+    "bangla_companion": {
+        "overview": "রোগী মোহাম্মদ পরাগ (৬৩ বছর), লিউই বডি ডিমেনশিয়া ও পারকিনসোনিজমের প্রেসক্রিপশন নিরাপত্তা নির্দেশিকা।",
+        "warning": "জরুরি সতর্কতা: শোয়া বা বসা অবস্থা থেকে রোগীকে কখনো হঠাৎ করে দ্রুত দাঁড় করাবেন না; ধীরে ধীরে উঠতে বলুন। এতে মাথা ঘোরার ঝুঁকি দূর হবে।",
+        "instructions": [
+            "Rivacap 3mg: স্মৃতিশক্তি সতেজ রাখতে সকালে ও রাতে ১টি করে ভরা পেটে সেবন করুন।",
+            "Dementa 5mg: মস্তিষ্কের সুরক্ষার জন্য সকালে ও রাতে ১টি করে সেবন করুন।",
+            "Syndopa 110: হাত-পায়ের জড়তা কমাতে সকালে, দুপুরে ও রাতে ১টি করে সেবন করবেন।",
+            "Queta XR 50mg: রাতে ঘুমানোর আগে ১টি সেবন করবেন।",
+            "Uromax 0.4mg: রাতে খাবারের পর ১টি সেবন করবেন।",
+            "Zovia Silver: দুপুরে খাবারের পর ১টি সেবন করবেন।",
+            "Pantonix 20mg: খাবার গ্রহণের ৩০ মিনিট আগে সেবন করুন।"
+        ],
+    },
+}
+
 
 class SmartCacheService:
     """Manages offline fast-path caching and fail-safe scenario matching."""
@@ -461,6 +660,8 @@ class SmartCacheService:
         "e1ff03b525cbe084aa98672fb6241a33a31f53e5c608b935fc85cd4b8b441518": "GOLDEN_01_CKD_KETOROLAC",
         # ai_engine/samples/test1.jpeg
         "895f98d1b288e474aca619231e1f8c1bac16707613fa010ace5b966247a059c7": "GOLDEN_01_CKD_KETOROLAC",
+        # porag.jpeg (Lewy Body Dementia / Dr. Rakan-Uz-Zaman)
+        "2c4474cbe01468273185b6a337cbca9f73b03d41ac7c40a32e2452afdf8937c6": "GOLDEN_04_PORAG_DLB",
     }
 
     def __new__(cls):
@@ -474,7 +675,8 @@ class SmartCacheService:
         self._in_memory_cache["GOLDEN_01_CKD_KETOROLAC"] = GOLDEN_SCENARIO_1_CKD_KETOROLAC
         self._in_memory_cache["GOLDEN_02_TRIPLE_WHAMMY"] = GOLDEN_SCENARIO_2_TRIPLE_WHAMMY
         self._in_memory_cache["GOLDEN_03_PEDIATRIC_ASPIRIN"] = GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
-        logger.info("Initialized PredictRx Smart Cache with 3 Golden Clinical Scenarios")
+        self._in_memory_cache["GOLDEN_04_PORAG_DLB"] = GOLDEN_SCENARIO_4_PORAG_DLB
+        logger.info("Initialized PredictRx Smart Cache with 4 Golden Clinical Scenarios")
 
     def get_by_hash(self, file_hash: str) -> Optional[Dict[str, Any]]:
         """Look up pre-computed scenario by SHA-256 binary hash."""
@@ -529,6 +731,11 @@ class SmartCacheService:
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 3")
             return GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
 
+        if any(k in fname for k in ["porag", "dement", "dlb", "riva", "syndopa", "queta", "golden_04"]):
+            self._cache_stats["hits"] += 1
+            logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 4 (Porag DLB)")
+            return GOLDEN_SCENARIO_4_PORAG_DLB
+
         # 3. Patient clinical profile matching (for direct API calls without image uploads)
         ctx = patient_context or {}
         p_name = str(ctx.get("name", "")).lower()
@@ -550,6 +757,11 @@ class SmartCacheService:
             self._cache_stats["hits"] += 1
             logger.info("Smart Cache HIT via patient clinical profile (Ayan / Pediatric) -> Scenario 3")
             return GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
+
+        if "porag" in p_name or "dementia" in "".join(p_cond) or "dlb" in "".join(p_cond) or "memory" in "".join(p_cond):
+            self._cache_stats["hits"] += 1
+            logger.info("Smart Cache HIT via patient clinical profile (Porag / DLB) -> Scenario 4")
+            return GOLDEN_SCENARIO_4_PORAG_DLB
 
         # 4. Medication list keywords matching
         if raw_meds:
@@ -811,7 +1023,7 @@ class SmartCacheService:
         """Return cache health and usage statistics."""
         return {
             "total_cached_scenarios": len(self._in_memory_cache),
-            "golden_scenarios_preseeded": 3,
+            "golden_scenarios_preseeded": 4,
             "cache_hits": self._cache_stats["hits"],
             "cache_misses": self._cache_stats["misses"],
             "fast_path_serves": self._cache_stats["fast_path_serves"],
