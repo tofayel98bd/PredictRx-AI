@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { saveClinicianReview } from '@/services/prescriptionService';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from 'sonner';
 import { UserCheck, ShieldCheck, CheckCircle2, AlertOctagon, Edit3 } from 'lucide-react';
 
@@ -33,8 +34,13 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
 }) => {
   const { t, i18n } = useTranslation(['reports', 'common']);
   const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
-  const [reviewerName, setReviewerName] = useState('Dr. M. Ashraful Hoque');
-  const [reviewerLicense, setReviewerLicense] = useState('BMDC #A-89412');
+  const { user } = useAuth();
+  const [reviewerName, setReviewerName] = useState(
+    user ? user.full_name : (isBn ? 'ডা. মো. রফিকুল ইসলাম' : 'Dr. M. Ashraful Hoque')
+  );
+  const [reviewerLicense, setReviewerLicense] = useState(
+    user?.bmdc_number ? `BMDC #${user.bmdc_number}` : 'BMDC #A-89412'
+  );
   const [decision, setDecision] = useState<'APPROVED' | 'MODIFIED' | 'REJECTED'>(
     currentDecision || 'MODIFIED'
   );
