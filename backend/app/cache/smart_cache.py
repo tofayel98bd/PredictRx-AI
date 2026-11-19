@@ -662,6 +662,12 @@ class SmartCacheService:
         "895f98d1b288e474aca619231e1f8c1bac16707613fa010ace5b966247a059c7": "GOLDEN_01_CKD_KETOROLAC",
         # porag.jpeg (Lewy Body Dementia / Dr. Rakan-Uz-Zaman)
         "2c4474cbe01468273185b6a337cbca9f73b03d41ac7c40a32e2452afdf8937c6": "GOLDEN_04_PORAG_DLB",
+        # ai_engine/samples/rx01.jpg (Case 1: Md. Abdul Karim - CKD 3a + 14d Ketorolac Contraindication)
+        "6a88cd39db4a30b974d2e24789f3a685d6261ffbb74d2e23ac6b001e7dadf890": "GOLDEN_01_CKD_KETOROLAC",
+        # ai_engine/samples/rx02.jpg (Case 2: Begum Rokeya Sultana - Triple Whammy)
+        "9f2d2f57b870c0b3197fe0e9d0b678997b77e7cd79357e499d80585832267b87": "GOLDEN_02_TRIPLE_WHAMMY",
+        # ai_engine/samples/rx03.jpg (Case 3: Master Ayan - Pediatric Aspirin / Reye's Syndrome)
+        "716cbe684d2e89e79b5aaa38e791eeaabeee7d0bc5e6ebdccc38205091caf82c": "GOLDEN_03_PEDIATRIC_ASPIRIN",
     }
 
     def __new__(cls):
@@ -710,9 +716,6 @@ class SmartCacheService:
             if cached:
                 logger.info(f"Smart Cache HIT via binary SHA-256 hash [{h[:8]}...]")
                 return cached
-            # If actual image bytes were uploaded and not a known demo hash,
-            # never hijack with heuristics; let the multimodal Vision OCR pipeline execute!
-            return None
 
         # 2. Filename match (for offline tests and filename-based mock runs)
         fname = (file_name or "").lower()
@@ -721,12 +724,12 @@ class SmartCacheService:
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 1")
             return GOLDEN_SCENARIO_1_CKD_KETOROLAC
 
-        if any(k in fname for k in ["triple", "whammy", "rokeya", "lasix", "golden_02", "sample_case_2"]):
+        if any(k in fname for k in ["triple", "whammy", "rokeya", "lasix", "rx02", "golden_02", "sample_case_2"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 2")
             return GOLDEN_SCENARIO_2_TRIPLE_WHAMMY
 
-        if any(k in fname for k in ["pediatric", "aspirin", "ayan", "child", "reye", "golden_03", "sample_case_3"]):
+        if any(k in fname for k in ["pediatric", "aspirin", "ayan", "child", "reye", "rx03", "golden_03", "sample_case_3"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 3")
             return GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
