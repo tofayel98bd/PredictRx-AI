@@ -1,7 +1,8 @@
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
 WORKDIR /app
 
@@ -11,14 +12,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Copy Alembic migrations and application source
-COPY alembic.ini .
-COPY alembic/ ./alembic/
-COPY app/ ./app/
+# Copy application source, migrations, and AI vision engine
+COPY backend/alembic.ini .
+COPY backend/alembic/ ./alembic/
+COPY backend/app/ ./app/
+COPY ai_engine/ ./ai_engine/
 
 # Create upload directory
 RUN mkdir -p uploads
