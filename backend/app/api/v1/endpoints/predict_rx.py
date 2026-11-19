@@ -188,6 +188,31 @@ async def analyze_prescription_endpoint(
 
     # Fallback to standard scenario if medications were not provided or extracted
     if not raw_meds:
+        # Check if user explicitly provided current medications in patient context
+        if parsed_patient_context.current_medications:
+            raw_meds = [
+                {
+                    "brand_name": med.split("(")[0].strip(),
+                    "dosage_syntax": "1+0+1" if "1+" not in med else med.split("(")[1].split(")")[0].strip(),
+                    "frequency": "1+0+1",
+                    "timing": "After Meal",
+                    "duration": "14 days",
+                }
+                for med in parsed_patient_context.current_medications if med.strip()
+            ]
+
+        # Check if Porag / Lewy Body Dementia scenario
+        is_dlb_scenario = (
+            any("dementia" in c.lower() or "dlb" in c.lower() or "memory" in c.lower() for c in parsed_patient_context.conditions)
+            or "porag" in (file_name or "").lower()
+            or "porag" in (parsed_patient_context.name or "").lower()
+        )
+
+        if not raw_meds and is_dlb_scenario:
+            cached_dlb = smart_cache.get_scenario("GOLDEN_04_PORAG_DLB")
+            if cached_dlb:
+                return smart_cache.to_analysis_result(cached_dlb, file_name=file_name)
+
         # Check if ketorolac + antihypertensive scenario or standard demo scenario
         is_ketorolac_scenario = (
             any("ckd" in c.lower() or "kidney" in c.lower() for c in parsed_patient_context.conditions)
@@ -500,6 +525,17 @@ def list_demo_scenarios():
             "egfr": 110.0,
             "risk_score": 84.0,
             "highlight": "84% Pediatric ADE Risk, Reye's Syndrome Fatal Contraindication, Napa Syrup Substitution",
+        },
+        {
+            "scenario_id": "GOLDEN_04_PORAG_DLB",
+            "title": "Case 4: Mohammad Porag (63M — Lewy Body Dementia Polypharmacy CDSS)",
+            "patient_name": "Porag",
+            "age": 63,
+            "gender": "Male",
+            "creatinine": 0.9,
+            "egfr": 91.0,
+            "risk_score": 32.0,
+            "highlight": "Normal renal function (eGFR 91), Quetiapine vs Levodopa balance, Postural hypotension monitoring",
         },
     ]
 

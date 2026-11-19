@@ -25,7 +25,8 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
     return badge
       .replace('86% AKI RISK', '৮৬% AKI ঝুঁকি')
       .replace('78% COLLAPSE RISK', '৭৮% কলাপস ঝুঁকি')
-      .replace("84% REYE'S SYNDROME", '৮৪% রে সিন্ড্রোম');
+      .replace("84% REYE'S SYNDROME", '৮৪% রে সিন্ড্রোম')
+      .replace('32% NEURO-GERIATRIC', '৩২% নিউরো-জেরিয়াট্রিক');
   };
 
   return (
@@ -46,7 +47,7 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {GOLDEN_DEMO_SCENARIOS.map((scenario) => {
           const isActive = activeScenarioId === scenario.scenario_id;
 
