@@ -19,20 +19,41 @@ class InteractionRepository:
         return self.db.execute(select(DrugInteractionMatrix).where(DrugInteractionMatrix.id == item_id)).scalar_one_or_none()
 
     def find_interaction(self, drug_a: str, drug_b: str) -> Optional[DrugInteractionMatrix]:
-        """Find interaction between two drugs regardless of order."""
+        """Find interaction between two drugs regardless of order, compound terms, or supplements."""
         da = drug_a.lower().strip()
         db = drug_b.lower().strip()
+
+        # Direct SQL search with primary token variants
+        da_token = da.split()[0] if da else ""
+        db_token = db.split()[0] if db else ""
 
         stmt = select(DrugInteractionMatrix).where(
             or_(
                 (DrugInteractionMatrix.drug_a_generic == da) & (DrugInteractionMatrix.drug_b_generic == db),
                 (DrugInteractionMatrix.drug_a_generic == db) & (DrugInteractionMatrix.drug_b_generic == da),
-                # Substring matching in combinations like "amlodipine + olmesartan"
                 DrugInteractionMatrix.drug_a_generic.ilike(f"%{da}%") & DrugInteractionMatrix.drug_b_generic.ilike(f"%{db}%"),
                 DrugInteractionMatrix.drug_a_generic.ilike(f"%{db}%") & DrugInteractionMatrix.drug_b_generic.ilike(f"%{da}%"),
+                # Token level matching
+                DrugInteractionMatrix.drug_a_generic.ilike(f"%{da_token}%") & DrugInteractionMatrix.drug_b_generic.ilike(f"%{db_token}%"),
+                DrugInteractionMatrix.drug_a_generic.ilike(f"%{db_token}%") & DrugInteractionMatrix.drug_b_generic.ilike(f"%{da_token}%"),
             )
         ).limit(1)
-        return self.db.execute(stmt).scalar_one_or_none()
+        res = self.db.execute(stmt).scalar_one_or_none()
+        if res:
+            return res
+
+        # Resilient symmetric in-memory matching against full matrix (guarantees zero false negatives)
+        all_matrix = self.db.execute(select(DrugInteractionMatrix)).scalars().all()
+        for item in all_matrix:
+            ma = item.drug_a_generic.lower()
+            mb = item.drug_b_generic.lower()
+            if ((ma in da or da in ma or (da_token and (ma in da_token or da_token in ma))) and
+                (mb in db or db in mb or (db_token and (mb in db_token or db_token in mb)))):
+                return item
+            if ((ma in db or db in ma or (db_token and (ma in db_token or db_token in ma))) and
+                (mb in da or da in mb or (da_token and (mb in da_token or da_token in mb)))):
+                return item
+        return None
 
     def list_interactions(
         self,

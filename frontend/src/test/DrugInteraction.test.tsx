@@ -41,6 +41,38 @@ describe('DrugInteractionPage', () => {
     });
   });
 
+  it('screens Warfarin + Aspirin as CRITICAL bleeding interaction', async () => {
+    render(<DrugInteractionPage />);
+    const drugAInput = screen.getByPlaceholderText(/Drug A/i);
+    const drugBInput = screen.getByPlaceholderText(/Drug B/i);
+    const screenBtn = screen.getByRole('button', { name: /Screen Drug Pair/i });
+
+    fireEvent.change(drugAInput, { target: { value: 'Warfarin' } });
+    fireEvent.change(drugBInput, { target: { value: 'Aspirin' } });
+    fireEvent.click(screenBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Screening Finding:/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/CRITICAL/i).length).toBeGreaterThan(0);
+    });
+  });
+
+  it('screens Beta-blocker + Verapamil as CRITICAL interaction', async () => {
+    render(<DrugInteractionPage />);
+    const drugAInput = screen.getByPlaceholderText(/Drug A/i);
+    const drugBInput = screen.getByPlaceholderText(/Drug B/i);
+    const screenBtn = screen.getByRole('button', { name: /Screen Drug Pair/i });
+
+    fireEvent.change(drugAInput, { target: { value: 'Atenolol' } });
+    fireEvent.change(drugBInput, { target: { value: 'Verapamil' } });
+    fireEvent.click(screenBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Screening Finding:/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/CRITICAL/i).length).toBeGreaterThan(0);
+    });
+  });
+
   it('filters interactions by search query', async () => {
     render(<DrugInteractionPage />);
     const searchInput = screen.getByPlaceholderText(/Search by drug name/i);

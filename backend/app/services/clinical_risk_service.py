@@ -128,4 +128,20 @@ class ClinicalRiskService:
                         )
                     )
 
+        # Rule D: ACEi/ARB + Potassium collision -> Discontinue Potassium Supplement
+        has_k_collision = any("hyperkalemia" in i.clinical_significance.lower() or "potassium" in i.clinical_significance.lower() for i in interactions)
+        if has_k_collision:
+            safer_alternatives.append(
+                SaferAlternativeSchema(
+                    original_brand="Potassium Supplement",
+                    original_generic="Potassium Chloride",
+                    alternative_brand="Dietary Moderation & Hydration",
+                    alternative_generic="Electrolyte Monitoring",
+                    clinical_rationale="Concomitant ACE inhibitor / ARB therapy diminishes renal potassium clearance. Stopping supplemental potassium prevents hyperkalemic cardiac arrest.",
+                    safety_benefit="Eliminates lethal ventricular arrhythmia hazard while sustaining antihypertensive efficacy.",
+                    precautions="Check baseline serum potassium and repeat in 7 days.",
+                    requires_clinician_approval=True,
+                )
+            )
+
         return risk_analysis, safer_alternatives

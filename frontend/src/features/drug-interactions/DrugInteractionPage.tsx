@@ -121,7 +121,19 @@ export const DrugInteractionPage: React.FC = () => {
     const pool = [...allInteractions, ...COMMON_DRUG_INTERACTIONS];
     const isAceOrArb = (d: string) =>
       /enalapril|lisinopril|ramipril|captopril|perindopril|losartan|valsartan|olmesartan|candesartan|telmisartan/i.test(d);
-    const isPotassium = (d: string) => /potassium|potasium|k-supplement|ultra-k/i.test(d);
+    const isPotassium = (d: string) => /potassium|potasium|k-supplement|ultra-k|spironolactone|eplerenone/i.test(d);
+    const isAnticoagulant = (d: string) => /warfarin|heparin|enoxaparin|rivaroxaban|apixaban|dabigatran/i.test(d);
+    const isNsaid = (d: string) => /ketorolac|ibuprofen|naproxen|diclofenac|indomethacin|meloxicam|piroxicam|aceclofenac/i.test(d);
+    const isAntiplatelet = (d: string) => /aspirin|clopidogrel|ticagrelor|prasugrel/i.test(d);
+    const isBetaBlocker = (d: string) => /atenolol|metoprolol|bisoprolol|carvedilol|nebivolol|propranolol|labetalol/i.test(d);
+    const isNonDhpCcb = (d: string) => /verapamil|diltiazem/i.test(d);
+    const isMethotrexate = (d: string) => /methotrexate/i.test(d);
+    const isDigoxin = (d: string) => /digoxin/i.test(d);
+    const isAmiodarone = (d: string) => /amiodarone/i.test(d);
+    const isSerotonergic = (d: string) => /fluoxetine|sertraline|escitalopram|citalopram|paroxetine|venlafaxine|duloxetine/i.test(d);
+    const isTramadol = (d: string) => /tramadol/i.test(d);
+    const isStatin = (d: string) => /simvastatin|atorvastatin|lovastatin/i.test(d);
+    const isMacrolide = (d: string) => /clarithromycin|erythromycin/i.test(d);
 
     let match = pool.find((i) => {
       const da = i.drug_a.toLowerCase();
@@ -134,26 +146,108 @@ export const DrugInteractionPage: React.FC = () => {
       );
     });
 
-    if (!match && ((isAceOrArb(normA) && isPotassium(normB)) || (isAceOrArb(normB) && isPotassium(normA)))) {
-      match = {
-        id: 'INT-07',
-        drug_a: targetA,
-        drug_b: targetB,
-        severity: 'CRITICAL',
-        mechanism: isBn
-          ? 'ACE ইনহিবিটর / ARB রক্তচাপ কমানোর পাশাপাশি কিডনি থেকে পটাসিয়াম নির্গমন কমিয়ে শরীরে পটাসিয়াম ধরে রাখে। এর সাথে পটাসিয়াম সাপ্লিমেন্ট গ্রহণ করলে রক্তে মারাত্মক হাইপারক্যালেমিয়া (Hyperkalemia) ও কার্ডিয়াক অ্যারেস্টের ঝুঁকি সৃষ্টি হয়।'
-          : 'ACE inhibitors and ARBs decrease aldosterone secretion leading to renal potassium retention. Concomitant administration of potassium supplements precipitates severe hyperkalemia and fatal cardiac conduction arrest.',
-        clinical_significance: isBn
-          ? 'হাইপারক্যালেমিয়া (Hyperkalemia - রক্তে বিপজ্জনক পটাসিয়াম বৃদ্ধি) এবং প্রাণঘাতী হার্ট অ্যারিদমিয়া ও কার্ডিয়াক অ্যারেস্ট।'
-          : 'Hyperkalemia (rokto-te extra potassium) leading to life-threatening cardiac conduction disturbance and ventricular arrhythmias.',
-        evidence_source: 'AHA/ACC Heart Failure & Hypertension Guidelines / BNF 86',
-        recommended_action: isBn
-          ? 'একসাথে সেবন সম্পূর্ণ পরিহার করুন। অবিলম্বে পটাসিয়াম সাপ্লিমেন্ট বন্ধ করুন এবং রক্তের সিরাম পটাসিয়াম ও ইসিজি মনিটর করুন।'
-          : 'Avoid concomitant potassium supplements with ACE inhibitors. Check serum electrolytes and ECG immediately.',
-        management_protocol: isBn
-          ? 'জরুরী সিরাম পটাসিয়াম ও ক্রিয়েটিনিন টেস্ট এবং হৃদস্পন্দন নজরদারি।'
-          : 'Emergency serum potassium, renal function testing, and ECG rhythm monitoring.',
-      };
+    if (!match) {
+      if ((isAceOrArb(normA) && isPotassium(normB)) || (isAceOrArb(normB) && isPotassium(normA))) {
+        match = {
+          id: 'INT-07',
+          drug_a: targetA,
+          drug_b: targetB,
+          severity: 'CRITICAL',
+          mechanism: isBn
+            ? 'ACE ইনহিবিটর / ARB রক্তচাপ কমানোর পাশাপাশি কিডনি থেকে পটাসিয়াম নির্গমন কমিয়ে শরীরে পটাসিয়াম ধরে রাখে। এর সাথে পটাসিয়াম সাপ্লিমেন্ট গ্রহণ করলে রক্তে মারাত্মক হাইপারক্যালেমিয়া (Hyperkalemia) ও কার্ডিয়াক অ্যারেস্টের ঝুঁকি সৃষ্টি হয়।'
+            : 'ACE inhibitors and ARBs decrease aldosterone secretion leading to renal potassium retention. Concomitant administration of potassium supplements precipitates severe hyperkalemia and fatal cardiac conduction arrest.',
+          clinical_significance: isBn
+            ? 'হাইপারক্যালেমিয়া (Hyperkalemia - রক্তে বিপজ্জনক পটাসিয়াম বৃদ্ধি) এবং প্রাণঘাতী হার্ট অ্যারিদমিয়া ও কার্ডিয়াক অ্যারেস্ট।'
+            : 'Hyperkalemia (rokto-te extra potassium) leading to life-threatening cardiac conduction disturbance and ventricular arrhythmias.',
+          evidence_source: 'AHA/ACC Heart Failure & Hypertension Guidelines / BNF 86',
+          recommended_action: isBn
+            ? 'একসাথে সেবন সম্পূর্ণ পরিহার করুন। অবিলম্বে পটাসিয়াম সাপ্লিমেন্ট বন্ধ করুন এবং রক্তের সিরাম পটাসিয়াম ও ইসিজি মনিটর করুন।'
+            : 'Avoid concomitant potassium supplements with ACE inhibitors. Check serum electrolytes and ECG immediately.',
+          management_protocol: isBn ? 'জরুরী সিরাম পটাসিয়াম ও ক্রিয়েটিনিন টেস্ট।' : 'Emergency serum potassium and ECG rhythm monitoring.',
+        };
+      } else if ((isAnticoagulant(normA) && (isNsaid(normB) || isAntiplatelet(normB))) || (isAnticoagulant(normB) && (isNsaid(normA) || isAntiplatelet(normA)))) {
+        match = {
+          id: 'INT-09',
+          drug_a: targetA,
+          drug_b: targetB,
+          severity: 'CRITICAL',
+          mechanism: isBn
+            ? 'অ্যান্টিকোয়াগুল্যান্ট এবং ব্যথানাশক/অ্যান্টিপ্লাটিলেটের যৌথ ব্যবহারে রক্ত জমাট বাঁধার ক্ষমতা ব্যাহত হয় এবং পাকস্থলীর আবরণে ক্ষত সৃষ্টি হয়।'
+            : 'Synergistic inhibition of coagulation factors and platelet aggregation with direct gastric mucosal erosion.',
+          clinical_significance: isBn
+            ? 'মারাত্মক পাকস্থলী ও অভ্যন্তরীণ রক্তক্ষরণ (Gastrointestinal Bleeding)।'
+            : 'Severe gastrointestinal and systemic hemorrhagic complications with catastrophic bleeding hazard.',
+          evidence_source: 'CHEST Guidelines / BNF 86',
+          recommended_action: isBn
+            ? 'একসাথে সেবন কঠোরভাবে নিষিদ্ধ। ব্যথানাশক হিসেবে নিরাপদ প্যারাসিটামল ব্যবহার করুন।'
+            : 'Strictly avoid systemic NSAIDs with anticoagulants. Substitute with Paracetamol.',
+          management_protocol: 'Urgent Hemostatic Review',
+        };
+      } else if ((isBetaBlocker(normA) && isNonDhpCcb(normB)) || (isBetaBlocker(normB) && isNonDhpCcb(normA))) {
+        match = {
+          id: 'INT-10',
+          drug_a: targetA,
+          drug_b: targetB,
+          severity: 'CRITICAL',
+          mechanism: isBn
+            ? 'হার্টের পরিবাহী তন্ত্র ও মাংসপেশিতে যৌথ ঋণাত্মক প্রভাবের কারণে হৃদস্পন্দন মারাত্মক হ্রাস পায়।'
+            : 'Additive suppression of sinoatrial and atrioventricular nodal conduction and myocardial contractility.',
+          clinical_significance: isBn
+            ? 'মারাত্মক ব্রাডিকার্ডিয়া (Bradycardia), কমপ্লিট হার্ট ব্লক এবং কার্ডিওজেনিক শক।'
+            : 'Severe bradycardia, high-grade AV heart block, and acute cardiogenic collapse.',
+          evidence_source: 'ACC/AHA Guidelines / BNF 86',
+          recommended_action: isBn ? 'বহির্বিভাগে একসাথে সেবন এড়িয়ে চলুন। অবিলম্বে একটি ওষুধ স্থগিত করুন।' : 'Avoid concurrent oral therapy in outpatient settings. Monitor ECG.',
+          management_protocol: 'Cardiac Rhythm Monitoring',
+        };
+      } else if ((isMethotrexate(normA) && isNsaid(normB)) || (isMethotrexate(normB) && isNsaid(normA))) {
+        match = {
+          id: 'INT-12',
+          drug_a: targetA,
+          drug_b: targetB,
+          severity: 'CRITICAL',
+          mechanism: isBn
+            ? 'NSAID কিডনির মাধ্যমে মেথোট্রেক্সেট নির্গমন বাধাগ্রস্ত করে শরীরে এর বিষাক্ত মাত্রা বাড়ায়।'
+            : 'NSAIDs competitively inhibit renal tubular secretion of methotrexate.',
+          clinical_significance: isBn
+            ? 'মারাত্মক বোন ম্যারো সাপ্রেশন (Pancytopenia) এবং কিডনি ফেইলিউর।'
+            : 'Methotrexate toxic accumulation, profound bone marrow suppression, severe pancytopenia.',
+          evidence_source: 'FDA Black Box Warning / EULAR Guidelines',
+          recommended_action: isBn ? 'একসাথে সেবন নিষিদ্ধ। NSAID পরিহার করুন।' : 'Strictly contraindicated. Avoid NSAIDs in patients taking methotrexate.',
+          management_protocol: 'Emergency Hematologic Review',
+        };
+      } else if ((isSerotonergic(normA) && isTramadol(normB)) || (isSerotonergic(normB) && isTramadol(normA))) {
+        match = {
+          id: 'INT-13',
+          drug_a: targetA,
+          drug_b: targetB,
+          severity: 'CRITICAL',
+          mechanism: isBn
+            ? 'মস্তিষ্কে যৌথভাবে সেরোটোনিনের মাত্রা অতিরিক্ত বাড়িয়ে দিয়ে নার্ভতন্ত্রে তীব্র প্রতিক্রিয়া সৃষ্টি করে।'
+            : 'Additive synaptic serotonin accumulation and receptor hyperstimulation.',
+          clinical_significance: isBn
+            ? 'সেরোটোনিন সিন্ড্রোম (Serotonin Syndrome): তীব্র জ্বর, কাঁপুনি, প্রলাপ এবং প্রাণহানির ঝুঁকি।'
+            : 'Serotonin Syndrome: autonomic instability, hyperthermia, clonus, delirium, potential fatality.',
+          evidence_source: 'Hunter Serotonin Toxicity Criteria / BNF 86',
+          recommended_action: isBn ? 'একসাথে সেবন এড়িয়ে চলুন। ট্রামাডল বন্ধ করে নন-সেরোটোনার্জিক ব্যথানাশক নিন।' : 'Avoid concomitant use. Discontinue tramadol; substitute Paracetamol.',
+          management_protocol: 'Neurological & Autonomic Assessment',
+        };
+      } else if ((isStatin(normA) && isMacrolide(normB)) || (isStatin(normB) && isMacrolide(normA))) {
+        match = {
+          id: 'INT-14',
+          drug_a: targetA,
+          drug_b: targetB,
+          severity: 'HIGH',
+          mechanism: isBn
+            ? 'ম্যাক্রোলাইড অ্যান্টিবায়োটিক CYP3A4 এনজাইম বাধাগ্রস্ত করে স্ট্যাটিনের মাত্রা ১০ গুণ পর্যন্ত বৃদ্ধি করে।'
+            : 'Potent CYP3A4 inhibition by macrolide elevates statin AUC up to 10-fold.',
+          clinical_significance: isBn
+            ? 'র‌্যাবডোমায়োলাইসিস (Rhabdomyolysis - মাংসপেশি ধ্বংস) এবং সেকেন্ডারি কিডনি বৈকল্য।'
+            : 'Rhabdomyolysis, severe myopathy, myoglobinuria, and acute secondary renal failure.',
+          evidence_source: 'FDA Drug Safety Communication / BNF 86',
+          recommended_action: isBn ? 'অ্যান্টিবায়োটিক চলাকালীন সাময়িকভাবে স্ট্যাটিন স্থগিত রাখুন।' : 'Temporarily suspend statin during macrolide antibiotic therapy.',
+          management_protocol: 'Serum Creatine Kinase (CK) Monitoring',
+        };
+      }
     }
 
     if (match) {
@@ -167,8 +261,8 @@ export const DrugInteractionPage: React.FC = () => {
       setPairResultType('SAFE');
       setPairResult(
         isBn
-          ? `"${targetA}" এবং "${targetB}" এর মধ্যে কোনো তীব্র প্রতিক্রিয়া পাওয়া যায়নি। রোগীর কিডনি বা লিভারের সমস্যা থাকলে ক্লিনিক্যাল পর্যবেক্ষণ নিশ্চিত করুন।`
-          : `No severe interaction found in the active local rule set for "${targetA}" and "${targetB}". Ensure clinical monitoring if patient has kidney or liver impairment.`
+          ? `"${targetA}" এবং "${targetB}" এর মধ্যে সক্রিয় লোকাল রুলসেটে কোনো প্রত্যক্ষ সংঘাত পাওয়া যায়নি। তবে অপ্রচলিত কম্বিনেশনে রোগীর নির্দিষ্ট লিভার ও কিডনি প্যারামিটার পর্যবেক্ষণ নিশ্চিত করুন।`
+          : `No severe interaction found in the active local rule set for "${targetA}" and "${targetB}". Ensure clinical monitoring if patient has kidney, liver, or cardiac impairment.`
       );
     }
   };
@@ -304,10 +398,10 @@ export const DrugInteractionPage: React.FC = () => {
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
                       <span className="font-bold text-emerald-900 dark:text-emerald-300">
-                        {isBn ? 'নিরাপদ কম্বিনেশন (Safe Combination)' : 'Safe & Compatible Combination'}
+                        {isBn ? 'সংঘাতহীন কম্বিনেশন (No Collision)' : 'No Documented Collision'}
                       </span>
                       <Badge variant="success" className="text-[10px]">
-                        {isBn ? 'কোনো সংঘাত নেই' : 'No Collision'}
+                        {isBn ? 'স্বাভাবিক' : 'Compatible'}
                       </Badge>
                     </div>
                     <p className="text-muted-foreground leading-relaxed">
@@ -316,8 +410,8 @@ export const DrugInteractionPage: React.FC = () => {
                     </p>
                     <p className="text-[11px] text-emerald-800 dark:text-emerald-400">
                       {isBn
-                        ? `প্রেসক্রাইবকৃত ওষুধ দুটির মধ্যে কোনো ড্রাগ-ড্রাগ ইন্টারঅ্যাকশন নেই। এগুলো একসাথে সেবন করা চিকিৎসাগতভাবে নিরাপদ।`
-                        : `No pharmacokinetic or pharmacodynamic collisions identified. Concomitant administration is clinically safe.`}
+                        ? `প্রেসক্রাইবকৃত ওষুধ দুটির মধ্যে সক্রিয় ডাটাবেজে কোনো মারাত্মক সংঘর্ষ পাওয়া যায়নি। তবে অচেনা কম্বিনেশনে রোগীর নির্দিষ্ট অঙ্গপ্রত্যঙ্গের অবস্থা ও ল্যাব রিপোর্ট পর্যালোচনা করুন।`
+                        : `No pharmacokinetic or pharmacodynamic collisions identified in the active rules. Verify individual patient organ function and clinical history.`}
                     </p>
                   </div>
                 </div>

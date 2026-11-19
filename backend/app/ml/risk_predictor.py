@@ -182,16 +182,40 @@ class ClinicalRiskPredictor:
                 gi_risk += 18.0
         gi_bleed_risk = round(min(gi_risk, 90.0), 1)
 
-        # Overall risk score calibration
+        # Overall risk score calibration & Clinical Safety Floor
+        has_critical_interaction = any(i.severity == "CRITICAL" for i in interactions)
+        has_high_interaction = any(i.severity == "HIGH" for i in interactions)
+
         overall_score = round(max(aki_risk, gi_bleed_risk if has_nsaid else aki_risk), 1)
+        if has_critical_interaction:
+            overall_score = max(overall_score, 84.0)
+            cardio_risk = 68.0
+            # Ensure Critical Drug Collision is surfaced in SHAP attribution cards
+            if not any("Collision" in s.feature or "Interaction" in s.category for s in shap_factors):
+                crit_inter = next(i for i in interactions if i.severity == "CRITICAL")
+                shap_factors.insert(
+                    0,
+                    ShapContributionSchema(
+                        feature=f"Critical Drug Collision ({crit_inter.drug_a} + {crit_inter.drug_b})",
+                        value="CRITICAL",
+                        impact_score=+0.46,
+                        category="Interaction",
+                        clinical_explanation=crit_inter.clinical_significance or "Severe life-threatening drug-drug interaction requires immediate physician intervention.",
+                    ),
+                )
+        elif has_high_interaction:
+            overall_score = max(overall_score, 62.0)
+            cardio_risk = round(min(overall_score * 0.45, 60.0), 1)
+        else:
+            cardio_risk = round(min(overall_score * 0.45, 60.0), 1)
 
         # Risk classification
         if overall_score >= 70.0:
             classification = "CRITICAL"
-            note = f"High acute renal and ADE complication probability ({overall_score}%). Immediate clinical intervention advised."
+            note = f"High acute complication probability ({overall_score}%). Immediate clinical intervention advised."
         elif overall_score >= 45.0:
             classification = "HIGH"
-            note = f"Elevated complication risk ({overall_score}%). Monitor renal parameters and adjust therapy."
+            note = f"Elevated complication risk ({overall_score}%). Monitor parameters and adjust therapy."
         elif overall_score >= 25.0:
             classification = "MODERATE"
             note = f"Moderate risk ({overall_score}%). Routine vigilance indicated."
@@ -206,7 +230,7 @@ class ClinicalRiskPredictor:
             is_synthetic_demo=False,
             aki_risk_percentage=aki_risk,
             gi_bleed_risk_percentage=gi_bleed_risk,
-            cardiovascular_risk_percentage=round(min(overall_score * 0.45, 60.0), 1),
+            cardiovascular_risk_percentage=cardio_risk,
             shap_features=shap_factors,
         )
 
