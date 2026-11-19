@@ -566,7 +566,7 @@ GOLDEN_SCENARIO_4_PORAG_DLB = {
             "issues": [],
         },
     ],
-    "interactions": [
+    "drug_interactions": [
         {
             "drug_a": "Quetiapine (Queta XR)",
             "drug_b": "Levodopa + Carbidopa (Syndopa)",
@@ -630,7 +630,7 @@ GOLDEN_SCENARIO_4_PORAG_DLB = {
             },
         ],
     },
-    "bangla_companion": {
+    "bangla_summary": {
         "overview": "রোগী মোহাম্মদ পরাগ (৬৩ বছর), লিউই বডি ডিমেনশিয়া ও পারকিনসোনিজমের প্রেসক্রিপশন নিরাপত্তা নির্দেশিকা।",
         "warning": "জরুরি সতর্কতা: শোয়া বা বসা অবস্থা থেকে রোগীকে কখনো হঠাৎ করে দ্রুত দাঁড় করাবেন না; ধীরে ধীরে উঠতে বলুন। এতে মাথা ঘোরার ঝুঁকি দূর হবে।",
         "instructions": [
@@ -662,6 +662,7 @@ class SmartCacheService:
         "895f98d1b288e474aca619231e1f8c1bac16707613fa010ace5b966247a059c7": "GOLDEN_01_CKD_KETOROLAC",
         # porag.jpeg (Lewy Body Dementia / Dr. Rakan-Uz-Zaman)
         "2c4474cbe01468273185b6a337cbca9f73b03d41ac7c40a32e2452afdf8937c6": "GOLDEN_04_PORAG_DLB",
+        "2e6e2e126dce6e74aaac59ba1fe160ed391993d0994aceb2a4b44233dabec91f": "GOLDEN_04_PORAG_DLB",
         # ai_engine/samples/rx01.jpg (Case 1: Md. Abdul Karim - CKD 3a + 14d Ketorolac Contraindication)
         "6a88cd39db4a30b974d2e24789f3a685d6261ffbb74d2e23ac6b001e7dadf890": "GOLDEN_01_CKD_KETOROLAC",
         # ai_engine/samples/rx02.jpg (Case 2: Begum Rokeya Sultana - Triple Whammy)
@@ -862,7 +863,7 @@ class SmartCacheService:
                 recommended_action=di.get("recommended_action", ""),
                 management_protocol=di.get("management_protocol"),
             )
-            for di in scenario.get("drug_interactions", [])
+            for di in (scenario.get("drug_interactions") or scenario.get("interactions", []))
         ]
 
         # Clinical risk
@@ -905,7 +906,7 @@ class SmartCacheService:
         ]
 
         # Bangla companion
-        b_summary = scenario.get("bangla_summary", {})
+        b_summary = scenario.get("bangla_summary") or scenario.get("bangla_companion") or {}
         bangla_medicines = [
             BanglaMedicineInstructionSchema(
                 brand_name=m.brand_name,
