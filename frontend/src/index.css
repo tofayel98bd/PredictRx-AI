@@ -108,23 +108,35 @@
 
 /* Print Stylesheet for Clinical Reports and Patient Companion */
 @media print {
-  body {
-    background: white !important;
-    color: black !important;
-    font-size: 11pt !important;
+  html, body, #root, .dark, [class*="bg-"] {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
   }
-  .no-print {
+
+  /* Hide app chrome: sidebar, topnav, patient forms, buttons, tabs bar */
+  header, nav, aside, footer, form, [role="tablist"], button, .no-print, [data-state="inactive"] {
     display: none !important;
   }
+
   .print-only {
     display: block !important;
   }
+
   .page-break {
     page-break-before: always;
   }
+
   .card-print {
+    display: block !important;
+    width: 100% !important;
     box-shadow: none !important;
     border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
     break-inside: avoid;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }

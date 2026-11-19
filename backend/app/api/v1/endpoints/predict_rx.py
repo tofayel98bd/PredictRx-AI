@@ -9,6 +9,7 @@ import sys
 from typing import Any, Dict, List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 # Dynamic import of ai_engine from workspace
@@ -513,3 +514,27 @@ def run_demo_scenario(scenario_id: str) -> PrescriptionAnalysisResult:
             detail=f"Golden Demo Scenario '{scenario_id}' not found.",
         )
     return smart_cache.to_analysis_result(scenario)
+
+
+class TTSRequest(BaseModel):
+    text: str
+    lang: str = "bn"
+
+
+@router.post("/tts", summary="Generate Bengali / English Audio Voice")
+def generate_tts_endpoint(payload: TTSRequest):
+    """Generate crystal-clear spoken audio in Bengali (or English)."""
+    try:
+        from gtts import gTTS
+        import io
+        from fastapi.responses import StreamingResponse
+
+        tts = gTTS(text=payload.text, lang=payload.lang or "bn")
+        buf = io.BytesIO()
+        tts.write_to_fp(buf)
+        buf.seek(0)
+        return StreamingResponse(buf, media_type="audio/mpeg")
+    except Exception as exc:
+        logger.error(f"TTS generation error: {exc}")
+        raise HTTPException(status_code=500, detail=f"TTS generation failed: {exc}")
+
