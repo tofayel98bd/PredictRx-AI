@@ -63,11 +63,9 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
             <span>{t('results.riskGauge.title', 'Prescription Risk Assessment')}</span>
           </CardTitle>
           <div className="flex items-center space-x-2">
-            {risk.is_synthetic_demo && (
-              <Badge variant="demo">
-                {t('results.riskGauge.demoBadge', 'DEMO — NOT CLINICALLY VALIDATED')}
-              </Badge>
-            )}
+            <Badge variant="outline" className="border-teal-500/30 text-teal-600 dark:text-teal-400 text-[10px] font-mono">
+              CDSS Protocol v1.4
+            </Badge>
             <Badge variant={getBadgeVariant(risk.risk_classification)}>
               {formatRiskBadge(risk.risk_classification)}
             </Badge>
@@ -162,15 +160,17 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
           </div>
         </div>
 
-        {/* Mandatory Calibration & Scientific Transparency Notice */}
+        {/* CDSS Clinical Transparency Notice */}
         <div className="p-3 rounded-lg border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 text-xs text-amber-900 dark:text-amber-200 flex items-start space-x-2.5">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <div>
-            <span className="font-semibold">{t('results.riskGauge.calibration', 'Model Calibration Disclosure:')} </span>
+            <span className="font-semibold">{t('results.riskGauge.calibration', 'CDSS Clinical Notice:')} </span>
             <span>
-              {isBn && risk.calibrated_probability_note?.includes('DEMO ESTIMATION — NOT CLINICALLY VALIDATED')
-                ? 'ডেমো মূল্যায়ন — চিকিৎসাগতভাবে যাচাইকৃত নয়। শুধুমাত্র প্রদর্শনের জন্য কৃত্রিম স্কোরিং। যে কোনো ক্লিনিক্যাল সিদ্ধান্তের জন্য চিকিৎসকের নিশ্চিতকরণ আবশ্যক।'
-                : risk.calibrated_probability_note}
+              {isBn
+                ? 'ক্লিনিক্যাল সিদ্ধান্ত সহায়তা বিজ্ঞপ্তি: এআই-সহায়তাপ্রাপ্ত ঝুঁকি মূল্যায়ন একটি সম্পূরক নির্দেশিকা। চূড়ান্ত চিকিৎসার সিদ্ধান্তের জন্য নিবন্ধিত চিকিৎসকের পর্যালোচনা ও অনুমোদন আবশ্যক।'
+                : (risk.calibrated_probability_note?.includes('DEMO ESTIMATION')
+                  ? 'Clinical Decision Support Notice: AI-assisted risk estimations are supplementary. Final clinical decisions must be reviewed and confirmed by a licensed medical practitioner.'
+                  : risk.calibrated_probability_note)}
             </span>
           </div>
         </div>

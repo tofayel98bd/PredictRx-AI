@@ -37,15 +37,12 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
           </div>
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-              <span>{t('scenarios.title', '1-Click Hackathon Golden Demo Scenarios')}</span>
-              <span className="text-[10px] font-medium text-muted-foreground lowercase">
-                {t('scenarios.fastPath', '(Fail-safe sub-15ms fast-path)')}
-              </span>
+              <span>{t('scenarios.title', isBn ? 'ক্লিনিক্যাল রেফারেন্স কেস স্টাডি' : 'Clinical Reference Case Scenarios')}</span>
             </h3>
           </div>
         </div>
         <span className="text-[11px] font-medium text-muted-foreground hidden sm:inline-block">
-          {t('scenarios.subtitle', 'Select any case to auto-fill or execute instant evaluation')}
+          {t('scenarios.subtitle', isBn ? 'নমুনা কেস নির্বাচন করে তাৎক্ষণিক মূল্যায়ন পরীক্ষা করুন' : 'Select any reference case to preload sample clinical profile')}
         </span>
       </div>
 

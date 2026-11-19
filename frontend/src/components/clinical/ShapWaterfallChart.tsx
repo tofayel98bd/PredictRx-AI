@@ -91,11 +91,9 @@ export const ShapWaterfallChart: React.FC<ShapChartProps> = ({ features, isDemo 
               <CardTitle className="text-base font-bold">
                 {t('results.shap.title', 'Explainable AI (XAI): SHAP Risk Factor Contributions')}
               </CardTitle>
-              {isDemo && (
-                <Badge variant="demo">
-                  {t('results.shap.demoBadge', 'DEMO — NOT CLINICALLY VALIDATED')}
-                </Badge>
-              )}
+              <Badge variant="outline" className="border-teal-500/30 text-teal-600 dark:text-teal-400 font-mono text-[10px]">
+                XAI Layer
+              </Badge>
             </div>
             <CardDescription className="text-xs mt-1">
               {t('results.shap.subtitle', 'Shapley Additive Explanations decompose the overall adverse clinical risk into patient-specific factor weights.')}

@@ -303,7 +303,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           className="border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-xs flex items-center space-x-1.5 self-start"
         >
           <Sparkles className="h-3.5 w-3.5 text-teal-600" />
-          <span>{t('scenarios.loadDemoBtn', 'Load Hackathon Demo Scenario (CKD 3 / Ketorolac)')}</span>
+          <span>{t('scenarios.loadDemoBtn', 'Load Reference Case (CKD 3 / Ketorolac)')}</span>
         </Button>
       </div>
 

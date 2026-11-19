@@ -7,15 +7,12 @@ import {
   History,
   Users,
   ShieldAlert,
-  Activity,
-  FileText,
   Settings,
   ChevronLeft,
   ChevronRight,
   Stethoscope,
   AlertTriangle,
   HeartHandshake,
-  Presentation,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -65,29 +62,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: ShieldAlert,
     },
     {
-      name: t('sidebar.clinicalRisk', { ns: 'navigation', defaultValue: 'Clinical Risk Analysis' }),
-      path: '/risk-analysis/AN-2026-0941',
-      icon: Activity,
-    },
-    {
-      name: t('sidebar.reports', { ns: 'navigation', defaultValue: 'Clinical Reports' }),
-      path: '/reports/AN-2026-0941',
-      icon: FileText,
-    },
-    {
       name: isBn
         ? t('sidebar.patientCompanion', { ns: 'navigation', defaultValue: 'রোগীর ওষুধ নির্দেশিকা' })
         : t('sidebar.patientCompanion', { ns: 'navigation', defaultValue: 'Patient Medication Guide' }),
       path: '/bangla-companion',
       icon: HeartHandshake,
       badgeText: isBn ? 'অডিও' : 'AUDIO',
-    },
-    {
-      name: t('sidebar.pitchDeck', { ns: 'navigation', defaultValue: 'Pitch Deck (10-Slide)' }),
-      path: '/pitch_deck.html',
-      icon: Presentation,
-      isExternal: true,
-      badgeText: 'PITCH',
     },
     {
       name: t('sidebar.settings', { ns: 'navigation', defaultValue: 'System Settings' }),
@@ -163,29 +143,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            if (item.isExternal) {
-              return (
-                <a
-                  key={item.path}
-                  href={item.path}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={onCloseMobile}
-                  className={cn(
-                    'group flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all text-muted-foreground hover:bg-muted hover:text-foreground',
-                    collapsed && 'justify-center px-2'
-                  )}
-                >
-                  <Icon className={cn('h-5 w-5 shrink-0 text-cyan-500', !collapsed && 'mr-3')} />
-                  {!collapsed && <span className="truncate">{item.name}</span>}
-                  {!collapsed && item.badgeText && (
-                    <Badge variant="demo" className="ml-auto text-[10px] py-0 px-1.5 bg-cyan-500/20 text-cyan-800 dark:text-cyan-300 border-cyan-400/40">
-                      {item.badgeText}
-                    </Badge>
-                  )}
-                </a>
-              );
-            }
             return (
               <NavLink
                 key={item.path}

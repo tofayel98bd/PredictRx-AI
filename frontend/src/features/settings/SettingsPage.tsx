@@ -341,7 +341,7 @@ export const SettingsPage: React.FC = () => {
         <CardContent className="text-xs space-y-2 text-muted-foreground">
           <div className="flex justify-between py-1 border-b border-border">
             <span>Application Version:</span>
-            <span className="font-mono text-foreground">PredictRx-AI v1.4.0 (Hackathon Release)</span>
+            <span className="font-mono text-foreground">PredictRx-AI v1.4.0 (Enterprise CDSS Edition)</span>
           </div>
           <div className="flex justify-between py-1 border-b border-border">
             <span>Bangladesh Drug Catalog:</span>

@@ -23,11 +23,11 @@ describe('PrescriptionAnalysisPage', () => {
   });
 
   it(
-    'loads the hackathon synthetic demonstration scenario and executes evaluation',
+    'loads the clinical reference demonstration scenario and executes evaluation',
     async () => {
       renderWithProviders(<PrescriptionAnalysisPage />);
       const loadDemoBtn = screen.getByRole('button', {
-        name: /Load Hackathon Demo Scenario/i,
+        name: /Load Reference Case/i,
       });
       fireEvent.click(loadDemoBtn);
 
@@ -62,7 +62,7 @@ describe('PrescriptionAnalysisPage', () => {
     renderWithProviders(<PrescriptionAnalysisPage />);
 
     // Verify 3 scenario cards exist
-    expect(screen.getByText(/1-Click Hackathon Golden Demo Scenarios/i)).toBeInTheDocument();
+    expect(screen.getByText(/Clinical Reference Case Scenarios/i)).toBeInTheDocument();
     expect(screen.getByText(/Case 1: Abdul Karim/i)).toBeInTheDocument();
     expect(screen.getByText(/Case 2: Begum Rokeya/i)).toBeInTheDocument();
     expect(screen.getByText(/Case 3: Master Ayan/i)).toBeInTheDocument();

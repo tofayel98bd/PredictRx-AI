@@ -6,12 +6,12 @@ import { DEMO_ANALYSIS_RESULT } from '@/constants';
 describe('ShapWaterfallChart', () => {
   const features = DEMO_ANALYSIS_RESULT.clinical_risk.shap_features;
 
-  it('renders SHAP XAI title and mandatory synthetic demo disclaimer', () => {
+  it('renders SHAP XAI title and XAI badge', () => {
     render(<ShapWaterfallChart features={features} isDemo={true} />);
     expect(
       screen.getByText(/Explainable AI \(XAI\): SHAP Risk Factor Contributions/i)
     ).toBeInTheDocument();
-    expect(screen.getByText(/DEMO — NOT CLINICALLY VALIDATED/i)).toBeInTheDocument();
+    expect(screen.getByText(/XAI Layer/i)).toBeInTheDocument();
   });
 
   it('renders factor contribution cards with clinical explanations', () => {

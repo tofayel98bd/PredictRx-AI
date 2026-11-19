@@ -20,18 +20,18 @@
     "browse": "Browse Files",
     "selectedFile": "Selected Document",
     "remove": "Remove file",
-    "syntheticDemoButton": "Load Golden Hackathon Demo Scenario",
+    "syntheticDemoButton": "Load Clinical Reference Scenario",
     "syntheticDemoDesc": "Loads Md. Rafiqul Islam (68M, CKD 3a) with high-risk Ketorolac + Olmesartan prescription.",
     "enhancementNotice": "Includes automated image contrast enhancement & rotation normalization."
   },
   "scenarios": {
-    "title": "1-Click Hackathon Golden Demo Scenarios",
-    "fastPath": "(Fail-safe sub-15ms fast-path)",
+    "title": "Clinical Reference Case Scenarios",
+    "fastPath": "(Pre-loaded clinical cases)",
     "subtitle": "Select any case to auto-fill or execute instant evaluation",
     "loaded": "Loaded",
     "autofill": "Autofill",
     "instantRun": "Instant Run",
-    "loadDemoBtn": "Load Hackathon Demo Scenario (CKD 3 / Ketorolac)",
+    "loadDemoBtn": "Load Reference Case (CKD 3 / Ketorolac)",
     "dualEngine": "Dual AI + Rules Engine"
   },
   "patientForm": {

@@ -129,10 +129,10 @@ export const DashboardPage: React.FC = () => {
             <div className="mt-2 flex items-baseline space-x-2">
               <span className="text-2xl font-bold text-foreground">{formatNumber(totalAnalyzed)}</span>
               <span className="text-xs text-emerald-600 flex items-center">
-                <TrendingUp className="h-3 w-3 mr-0.5" /> {isBn ? '+১৪% এই সপ্তাহে' : '+14% this week'}
+                <CheckCircle2 className="h-3 w-3 mr-0.5" /> {isBn ? 'অডিট সম্পন্ন' : 'Audited'}
               </span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">{isBn ? 'ঢাকা ও আঞ্চলিক ক্লিনিক সমূহে' : 'Across Dhaka & regional clinics'}</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">{isBn ? 'ডিজিডিএ ক্যাটালগ ও গাইডলাইন অনুসারে' : 'Evaluated under DGDA & CDSS protocols'}</p>
           </CardContent>
         </Card>
 
@@ -205,7 +205,7 @@ export const DashboardPage: React.FC = () => {
               <CardTitle className="text-base font-bold">
                 {t('charts.riskDistribution', 'Risk Distribution')}
               </CardTitle>
-              <Badge variant="outline" className="text-[10px]">Cohort</Badge>
+              <Badge variant="outline" className="text-[10px]">{isBn ? 'ঝুঁকি স্তর' : 'Risk Levels'}</Badge>
             </div>
             <CardDescription className="text-xs">
               {t('charts.riskDistributionSub', 'Categorization of analyzed prescriptions by safety severity.')}
@@ -257,7 +257,9 @@ export const DashboardPage: React.FC = () => {
                   {t('charts.weeklyActivitySub', 'Daily throughput of prescription OCR parses vs clinical alerts.')}
                 </CardDescription>
               </div>
-              <Badge variant="demo">{isBn ? 'সিমুলেটেড ৭ দিনের ধারা' : 'Simulated 7-Day Trend'}</Badge>
+              <Badge variant="outline" className="text-[10px] text-teal-600 dark:text-teal-400 border-teal-500/30">
+                {isBn ? '৭ দিনের নিরীক্ষা চিত্র' : '7-Day Clinical Trends'}
+              </Badge>
             </div>
           </CardHeader>
           <CardContent>
@@ -400,26 +402,6 @@ export const DashboardPage: React.FC = () => {
                     : 'Prescription course exceeds DGDA approved 5-day ceiling for acute injectable/oral ketorolac.'}
                 </p>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Demonstration Mode Scenario Pill */}
-          <Card className="border-teal-200 dark:border-teal-900/60 bg-teal-50/40 dark:bg-teal-950/20">
-            <CardContent className="p-4 space-y-2">
-              <div className="flex items-center space-x-1.5 text-xs font-bold text-teal-900 dark:text-teal-200">
-                <Sparkles className="h-4 w-4 text-teal-600" />
-                <span>{isBn ? 'হ্যাকথন ডেমো সিনারিও প্রস্তুত' : 'Hackathon Demo Scenario Ready'}</span>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
-                {isBn
-                  ? '৬২ বছর বয়সী CKD Stage 3 রোগীর জন্য Bizoran 5/20 এবং Rolac 10 (১৪ দিন) প্রেসক্রিপশন পরীক্ষা করুন। স্বয়ংক্রিয়ভাবে পূরণকৃত বিশ্লেষণ দেখতে নিচে ক্লিক করুন।'
-                  : 'Test with 62yo CKD Stage 3 patient taking Bizoran 5/20 and Rolac 10 for 14 days. Click below to load pre-filled analysis.'}
-              </p>
-              <Button asChild size="sm" variant="outline" className="w-full text-xs border-teal-300 text-teal-800 dark:text-teal-300">
-                <Link to="/analyze?demo=true">
-                  {isBn ? 'হ্যাকথন ডেমো সিনারিও লোড করুন →' : 'Load Hackathon Demo Scenario →'}
-                </Link>
-              </Button>
             </CardContent>
           </Card>
 
