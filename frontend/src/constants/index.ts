@@ -420,6 +420,16 @@ export const COMMON_DRUG_INTERACTIONS: DrugInteraction[] = [
     evidence_source: 'FDA Prescribing Information',
     recommended_action: 'Limit Simvastatin to 20mg daily or switch to Atorvastatin / Rosuvastatin.',
   },
+  {
+    id: 'INT-07',
+    drug_a: 'Enalapril / Lisinopril',
+    drug_b: 'Potassium Supplements',
+    severity: 'CRITICAL',
+    mechanism: 'Blood pressure er ei oshudh gulo body te potassium dhore rakhe. Extra potassium khele heart-er rhythm e problem hote pare.',
+    clinical_significance: 'Hyperkalemia (rokto-te extra potassium) causing life-threatening cardiac conduction disturbance and fatal arrhythmia.',
+    evidence_source: 'AHA Heart Failure Guidelines / BNF 86',
+    recommended_action: 'Avoid concomitant potassium supplements with ACE inhibitors. Check serum electrolytes and ECG.',
+  },
 ];
 
 // =========================================================================

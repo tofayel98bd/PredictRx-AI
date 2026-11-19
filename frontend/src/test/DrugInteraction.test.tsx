@@ -24,6 +24,23 @@ describe('DrugInteractionPage', () => {
     });
   });
 
+  it('screens Enalapril + Potassium Supplements as CRITICAL interaction', async () => {
+    render(<DrugInteractionPage />);
+    const drugAInput = screen.getByPlaceholderText(/Drug A/i);
+    const drugBInput = screen.getByPlaceholderText(/Drug B/i);
+    const screenBtn = screen.getByRole('button', { name: /Screen Drug Pair/i });
+
+    fireEvent.change(drugAInput, { target: { value: 'Enalapril' } });
+    fireEvent.change(drugBInput, { target: { value: 'Potassium Supplements' } });
+    fireEvent.click(screenBtn);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Screening Finding:/i)).toBeInTheDocument();
+      expect(screen.getAllByText(/Hyperkalemia/i).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/CRITICAL/i).length).toBeGreaterThan(0);
+    });
+  });
+
   it('filters interactions by search query', async () => {
     render(<DrugInteractionPage />);
     const searchInput = screen.getByPlaceholderText(/Search by drug name/i);

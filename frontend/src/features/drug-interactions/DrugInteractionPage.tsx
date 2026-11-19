@@ -32,6 +32,19 @@ const BRAND_TO_GENERIC: Record<string, string> = {
   camlosart: 'olmesartan',
   ramiril: 'ramipril',
   ramicard: 'ramipril',
+  enalapril: 'enalapril',
+  renitec: 'enalapril',
+  vasotec: 'enalapril',
+  lisinopril: 'lisinopril',
+  inopril: 'lisinopril',
+  zestril: 'lisinopril',
+  losartan: 'losartan',
+  osartil: 'losartan',
+  potassium: 'potassium',
+  'potassium chloride': 'potassium',
+  'potassium supplements': 'potassium',
+  'ultra-k': 'potassium',
+  'k-supplement': 'potassium',
   comformin: 'metformin',
   glucomin: 'metformin',
   lasix: 'furosemide',
@@ -106,7 +119,11 @@ export const DrugInteractionPage: React.FC = () => {
 
     // Check in both allInteractions and COMMON_DRUG_INTERACTIONS
     const pool = [...allInteractions, ...COMMON_DRUG_INTERACTIONS];
-    const match = pool.find((i) => {
+    const isAceOrArb = (d: string) =>
+      /enalapril|lisinopril|ramipril|captopril|perindopril|losartan|valsartan|olmesartan|candesartan|telmisartan/i.test(d);
+    const isPotassium = (d: string) => /potassium|potasium|k-supplement|ultra-k/i.test(d);
+
+    let match = pool.find((i) => {
       const da = i.drug_a.toLowerCase();
       const db = i.drug_b.toLowerCase();
       return (
@@ -116,6 +133,28 @@ export const DrugInteractionPage: React.FC = () => {
         (da.includes(targetB.toLowerCase()) && db.includes(targetA.toLowerCase()))
       );
     });
+
+    if (!match && ((isAceOrArb(normA) && isPotassium(normB)) || (isAceOrArb(normB) && isPotassium(normA)))) {
+      match = {
+        id: 'INT-07',
+        drug_a: targetA,
+        drug_b: targetB,
+        severity: 'CRITICAL',
+        mechanism: isBn
+          ? 'ACE ইনহিবিটর / ARB রক্তচাপ কমানোর পাশাপাশি কিডনি থেকে পটাসিয়াম নির্গমন কমিয়ে শরীরে পটাসিয়াম ধরে রাখে। এর সাথে পটাসিয়াম সাপ্লিমেন্ট গ্রহণ করলে রক্তে মারাত্মক হাইপারক্যালেমিয়া (Hyperkalemia) ও কার্ডিয়াক অ্যারেস্টের ঝুঁকি সৃষ্টি হয়।'
+          : 'ACE inhibitors and ARBs decrease aldosterone secretion leading to renal potassium retention. Concomitant administration of potassium supplements precipitates severe hyperkalemia and fatal cardiac conduction arrest.',
+        clinical_significance: isBn
+          ? 'হাইপারক্যালেমিয়া (Hyperkalemia - রক্তে বিপজ্জনক পটাসিয়াম বৃদ্ধি) এবং প্রাণঘাতী হার্ট অ্যারিদমিয়া ও কার্ডিয়াক অ্যারেস্ট।'
+          : 'Hyperkalemia (rokto-te extra potassium) leading to life-threatening cardiac conduction disturbance and ventricular arrhythmias.',
+        evidence_source: 'AHA/ACC Heart Failure & Hypertension Guidelines / BNF 86',
+        recommended_action: isBn
+          ? 'একসাথে সেবন সম্পূর্ণ পরিহার করুন। অবিলম্বে পটাসিয়াম সাপ্লিমেন্ট বন্ধ করুন এবং রক্তের সিরাম পটাসিয়াম ও ইসিজি মনিটর করুন।'
+          : 'Avoid concomitant potassium supplements with ACE inhibitors. Check serum electrolytes and ECG immediately.',
+        management_protocol: isBn
+          ? 'জরুরী সিরাম পটাসিয়াম ও ক্রিয়েটিনিন টেস্ট এবং হৃদস্পন্দন নজরদারি।'
+          : 'Emergency serum potassium, renal function testing, and ECG rhythm monitoring.',
+      };
+    }
 
     if (match) {
       setMatchedInteraction(match);
@@ -200,6 +239,13 @@ export const DrugInteractionPage: React.FC = () => {
             {/* Quick Demo Chips */}
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-[11px] text-muted-foreground">{isBn ? 'নমুনা পরীক্ষা:' : 'Try:'}</span>
+              <button
+                type="button"
+                onClick={() => handlePairCheck(undefined, 'Enalapril', 'Potassium Supplements')}
+                className="text-[10px] px-2 py-0.5 rounded bg-red-100 dark:bg-red-950/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-900 hover:bg-red-200 transition font-medium"
+              >
+                Enalapril + Potassium ({isBn ? 'মারাত্মক' : 'Critical'})
+              </button>
               <button
                 type="button"
                 onClick={() => handlePairCheck(undefined, 'Ketorolac', 'Olmesartan')}

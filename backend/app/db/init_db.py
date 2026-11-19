@@ -247,6 +247,40 @@ def seed_interactions(db: Session) -> None:
             "is_contraindicated": False,
             "citation_ids": ["FDA-CLOPIDOGREL-PPI", "ACC-AHA-2023"],
         },
+        # ACEi / ARB + Potassium Supplements (Hyperkalemia)
+        {
+            "drug_a_generic": "enalapril",
+            "drug_b_generic": "potassium",
+            "severity": "critical",
+            "clinical_effect": "Severe, life-threatening hyperkalemia (rokto-te extra potassium) predisposing to fatal cardiac dysrhythmias and arrest.",
+            "mechanism": "Blood pressure er ei oshudh gulo body te potassium dhore rakhe. ACE inhibitor blocks aldosterone production, severely diminishing renal potassium excretion. Concurrent potassium causes toxic overload.",
+            "evidence_level": "A",
+            "management_recommendation": "Avoid concurrent use. Discontinue routine potassium supplements. Monitor serum potassium and ECG if co-prescribed.",
+            "is_contraindicated": True,
+            "citation_ids": ["AHA-HYPERKALEMIA-2023", "BNF-86-POTASSIUM"],
+        },
+        {
+            "drug_a_generic": "lisinopril",
+            "drug_b_generic": "potassium",
+            "severity": "critical",
+            "clinical_effect": "Severe hyperkalemia with cardiac conduction abnormalities, heart block, and ventricular arrhythmias.",
+            "mechanism": "Lisinopril suppresses aldosterone synthesis in adrenal cortex, causing renal retention of potassium. Supplementary potassium creates fatal toxic overload.",
+            "evidence_level": "A",
+            "management_recommendation": "Discontinue routine potassium supplementation. Check serum electrolytes and creatinine within 1-2 weeks.",
+            "is_contraindicated": True,
+            "citation_ids": ["AHA-HYPERKALEMIA-2023", "BNF-86-POTASSIUM"],
+        },
+        {
+            "drug_a_generic": "ramipril",
+            "drug_b_generic": "potassium",
+            "severity": "critical",
+            "clinical_effect": "Hyperkalemia and fatal cardiac conduction abnormalities due to uncoupled potassium homeostasis.",
+            "mechanism": "Inhibition of angiotensin-converting enzyme impairs aldosterone-mediated distal tubule potassium excretion, retaining potassium.",
+            "evidence_level": "A",
+            "management_recommendation": "Avoid concurrent use unless strictly managed with serum potassium monitoring. Stop OTC potassium supplements.",
+            "is_contraindicated": True,
+            "citation_ids": ["AHA-HYPERKALEMIA-2023", "BNF-86-POTASSIUM"],
+        },
     ]
 
     for item in interactions:
