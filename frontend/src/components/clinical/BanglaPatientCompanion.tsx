@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, VolumeX, Printer, AlertTriangle, ShieldCheck, HeartHandshake } from 'lucide-react';
+import { Volume2, VolumeX, Printer, AlertTriangle, ShieldCheck, HeartHandshake, Loader2 } from 'lucide-react';
 import { BanglaPatientCompanion as BanglaData } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,6 +78,9 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
   const isBn = activeLang === 'bn';
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [cachedAudioUrl, setCachedAudioUrl] = useState<string | null>(null);
+  const [cachedAudioText, setCachedAudioText] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const getDosageDisplay = (dosageBn: string) => {
@@ -150,29 +153,7 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     return [];
   };
 
-  const stopAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current = null;
-    }
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    setIsPlaying(false);
-  };
-
-  const speakInstructions = async () => {
-    if (isPlaying) {
-      stopAudio();
-      toast.info(isBn ? 'অডিও বন্ধ করা হয়েছে।' : 'Audio stopped.');
-      return;
-    }
-
-    setIsPlaying(true);
-
-    let fullSpeechText = '';
-
+  const buildSpeechText = useCallback(() => {
     if (isBn) {
       const patientDisplay = data.patient_name_bengali || patientName || 'সম্মানিত রোগী';
       const textParts = [
@@ -186,7 +167,7 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
         'ধন্যবাদ। চিকিৎসকের পরামর্শ অনুযায়ী ওষুধ সেবন করুন।',
       ].filter(Boolean);
 
-      fullSpeechText = textParts
+      return textParts
         .join(' ')
         .replace(/([0-9০-৯]+)\s*[-–]\s*([0-9০-৯]+)/g, '$1 থেকে $2')
         .replace(/\s*[-–]\s*/g, ' ');
@@ -202,13 +183,122 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
         "Thank you. Please take medications strictly according to your physician's instructions.",
       ].filter(Boolean);
 
-      fullSpeechText = textParts
+      return textParts
         .join(' ')
         .replace(/([0-9]+)\s*[-–]\s*([0-9]+)/g, '$1 to $2')
         .replace(/\s*[-–]\s*/g, ' ');
     }
+  }, [data, isBn, patientName]);
 
-    // 1. Primary Method: High-Quality Real Audio TTS from PredictRx Backend
+  // Background Audio Warm-Up / Pre-Fetcher: Loads audio immediately when companion card appears
+  useEffect(() => {
+    let active = true;
+    const speechText = buildSpeechText();
+    if (!speechText) return;
+
+    // For English: if native speech synthesis is supported, no need to pre-fetch network audio
+    if (!isBn && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      return;
+    }
+
+    // Silently pre-fetch TTS in background so clicking Play is instantaneous
+    fetch('/api/v1/predict-rx/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: speechText, lang: isBn ? 'bn' : 'en' }),
+    })
+      .then(async (res) => {
+        if (res.ok && active) {
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          setCachedAudioUrl((prev) => {
+            if (prev) URL.revokeObjectURL(prev);
+            return url;
+          });
+          setCachedAudioText(speechText);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [buildSpeechText, isBn]);
+
+  // Clean up object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (cachedAudioUrl) {
+        URL.revokeObjectURL(cachedAudioUrl);
+      }
+    };
+  }, [cachedAudioUrl]);
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsLoadingAudio(false);
+    setIsPlaying(false);
+  };
+
+  const playAudioFromUrl = (url: string) => {
+    const audio = new Audio(url);
+    audioRef.current = audio;
+
+    audio.onplay = () => {
+      setIsLoadingAudio(false);
+      setIsPlaying(true);
+      toast.success(isBn ? 'বিশুদ্ধ বাংলা অডিও নির্দেশিকা চালু হয়েছে...' : 'Audio voice guide is playing...');
+    };
+    audio.onended = () => {
+      setIsPlaying(false);
+      audioRef.current = null;
+    };
+    audio.onerror = () => {
+      setIsLoadingAudio(false);
+      setIsPlaying(false);
+      audioRef.current = null;
+      fallbackBrowserSpeech(buildSpeechText());
+    };
+
+    audio.play().catch(() => {
+      setIsLoadingAudio(false);
+      setIsPlaying(false);
+      fallbackBrowserSpeech(buildSpeechText());
+    });
+  };
+
+  const speakInstructions = async () => {
+    if (isPlaying) {
+      stopAudio();
+      toast.info(isBn ? 'অডিও বন্ধ করা হয়েছে।' : 'Audio stopped.');
+      return;
+    }
+
+    const fullSpeechText = buildSpeechText();
+
+    // Fast Path 1: English mode instant native speech synthesis (starts in ~10ms with zero network delay)
+    if (!isBn && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      fallbackBrowserSpeech(fullSpeechText);
+      return;
+    }
+
+    // Fast Path 2: Pre-fetched audio ready in memory (starts in 0ms)
+    if (cachedAudioUrl && cachedAudioText === fullSpeechText) {
+      playAudioFromUrl(cachedAudioUrl);
+      return;
+    }
+
+    // Path 3: First-time fetch with immediate visual buffer feedback
+    setIsLoadingAudio(true);
+    setIsPlaying(true);
+
     try {
       const response = await fetch('/api/v1/predict-rx/tts', {
         method: 'POST',
@@ -219,41 +309,28 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
       if (response.ok) {
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audioRef.current = audio;
-
-        audio.onplay = () => {
-          setIsPlaying(true);
-          toast.success(isBn ? 'বিশুদ্ধ বাংলা অডিও নির্দেশিকা চালু হয়েছে...' : 'Audio voice guide is playing...');
-        };
-        audio.onended = () => {
-          setIsPlaying(false);
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-        };
-        audio.onerror = () => {
-          setIsPlaying(false);
-          URL.revokeObjectURL(audioUrl);
-          audioRef.current = null;
-          fallbackBrowserSpeech(fullSpeechText);
-        };
-
-        await audio.play();
+        setCachedAudioUrl(audioUrl);
+        setCachedAudioText(fullSpeechText);
+        playAudioFromUrl(audioUrl);
         return;
       }
     } catch {
       // Backend TTS unavailable, smoothly fallback
     }
 
-    // 2. Secondary Method: Web Speech API
+    setIsLoadingAudio(false);
     fallbackBrowserSpeech(fullSpeechText);
   };
 
   const fallbackBrowserSpeech = (text: string) => {
+    setIsLoadingAudio(false);
     if (!('speechSynthesis' in window) || typeof SpeechSynthesisUtterance === 'undefined') {
+      setIsPlaying(false);
       toast.error(isBn ? 'আপনার ব্রাউজারে ভয়েস সমর্থিত নয়।' : 'Voice synthesis not supported in browser.');
       return;
     }
+
+    window.speechSynthesis.cancel();
 
     const availableVoices = window.speechSynthesis.getVoices();
     let targetVoice: SpeechSynthesisVoice | undefined;
@@ -267,6 +344,11 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
           v.name.toLowerCase().includes('bangla') ||
           v.name.toLowerCase().includes('bengali')
       );
+      if (!targetVoice) {
+        setIsPlaying(false);
+        toast.info('আপনার ব্রাউজার বা ডিভাইসে বাংলা ভয়েস প্যাক ইনস্টল করা নেই। নিচের কার্ডে সকল নিয়ম বাংলায় লেখা রয়েছে।');
+        return;
+      }
     } else {
       targetVoice = availableVoices.find(
         (v) =>
@@ -289,7 +371,6 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     utterance.onend = () => setIsPlaying(false);
     utterance.onerror = () => setIsPlaying(false);
 
-    window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
     setIsPlaying(true);
     toast.success(isBn ? 'ভয়েস প্লে হচ্ছে...' : 'Voice playing...');
@@ -520,7 +601,13 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
               onClick={speakInstructions}
               className="text-xs flex items-center space-x-1.5 border-teal-300 dark:border-teal-800 text-teal-900 dark:text-teal-200"
             >
-              {isPlaying ? <VolumeX className="h-4 w-4 text-red-500" /> : <Volume2 className="h-4 w-4 text-teal-600" />}
+              {isLoadingAudio ? (
+                <Loader2 className="h-4 w-4 text-teal-600 animate-spin" />
+              ) : isPlaying ? (
+                <VolumeX className="h-4 w-4 text-red-500" />
+              ) : (
+                <Volume2 className="h-4 w-4 text-teal-600" />
+              )}
               <span>
                 {isPlaying
                   ? (isBn ? 'বন্ধ করুন (Stop)' : 'Stop Audio')

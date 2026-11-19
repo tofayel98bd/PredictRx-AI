@@ -521,29 +521,54 @@ class TTSRequest(BaseModel):
     lang: str = "bn"
 
 
+_tts_cache: dict[str, bytes] = {}
+
+
 @router.post("/tts", summary="Generate Bengali / English Audio Voice")
 def generate_tts_endpoint(payload: TTSRequest):
-    """Generate crystal-clear spoken audio in Bengali (or English)."""
+    """Generate crystal-clear spoken audio in Bengali (or English) with fast in-memory caching."""
     try:
-        from gtts import gTTS
+        import hashlib
         import io
         import re
-        from fastapi.responses import StreamingResponse
+        from fastapi.responses import Response
 
-        # Clean speech text: replace hyphens in number ranges with 'থেকে' or 'to' so TTS doesn't say 'minus'
+        lang = (payload.lang or "bn").strip().lower()
         clean_text = payload.text
-        if payload.lang == "en":
+        # Clean speech text: replace hyphens in number ranges with 'থেকে' or 'to' so TTS doesn't say 'minus'
+        if lang == "en":
             clean_text = re.sub(r'([0-9]+)\s*[-–]\s*([0-9]+)', r'\1 to \2', clean_text)
         else:
             clean_text = re.sub(r'([0-9০-৯]+)\s*[-–]\s*([0-9০-৯]+)', r'\1 থেকে \2', clean_text)
         # Avoid orphan hyphens being read as 'minus'
         clean_text = re.sub(r'\s*[-–]\s*', ' ', clean_text)
 
-        tts = gTTS(text=clean_text, lang=payload.lang or "bn")
+        # 1. Check in-memory MD5 cache for sub-millisecond instant response
+        cache_key = hashlib.md5(f"{lang}:{clean_text}".encode("utf-8")).hexdigest()
+        if cache_key in _tts_cache:
+            return Response(
+                content=_tts_cache[cache_key],
+                media_type="audio/mpeg",
+                headers={"X-TTS-Cache": "HIT", "Cache-Control": "public, max-age=86400"},
+            )
+
+        # 2. Generate with gTTS
+        from gtts import gTTS
+        tts = gTTS(text=clean_text, lang=lang)
         buf = io.BytesIO()
         tts.write_to_fp(buf)
-        buf.seek(0)
-        return StreamingResponse(buf, media_type="audio/mpeg")
+        audio_bytes = buf.getvalue()
+
+        # Cache in memory (keep last 120 audio snippets)
+        if len(_tts_cache) > 120:
+            _tts_cache.pop(next(iter(_tts_cache)))
+        _tts_cache[cache_key] = audio_bytes
+
+        return Response(
+            content=audio_bytes,
+            media_type="audio/mpeg",
+            headers={"X-TTS-Cache": "MISS", "Cache-Control": "public, max-age=86400"},
+        )
     except Exception as exc:
         logger.error(f"TTS generation error: {exc}")
         raise HTTPException(status_code=500, detail=f"TTS generation failed: {exc}")
