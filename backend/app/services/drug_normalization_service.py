@@ -36,6 +36,9 @@ BRAND_SEED: Dict[str, str] = {
     "comformin": "Metformin",
     "trajenta": "Linagliptin",
     "jardiance": "Empagliflozin",
+    "dextrose": "Dextrose",
+    "ors": "Oral Rehydration Salts",
+    "oral rehydration": "Oral Rehydration Salts",
 }
 
 
@@ -102,8 +105,19 @@ class DrugNormalizationService:
         if exact_match:
             return self._build_result(exact_match, confidence=0.98, source="database_exact")
 
-        # 2. Substring/prefix search in database catalog
-        candidates = self.repo.find_by_brand_prefix_or_contains(cleaned)
+        # 2. Exact match in curated brand seed dictionary (prevents short tokens like 'ORS' matching 'Torsemide')
+        if cleaned_lower in BRAND_SEED:
+            seed_generic = BRAND_SEED[cleaned_lower]
+            return DrugNormalizationResult(
+                brand_name=cleaned.upper() if len(cleaned) <= 3 else cleaned.title(),
+                generic_name=seed_generic,
+                is_matched=True,
+                confidence=0.95,
+                normalized_source="seed_exact",
+            )
+
+        # 3. Substring/prefix search in database catalog (only for tokens >= 4 characters to avoid false positive substring matches)
+        candidates = self.repo.find_by_brand_prefix_or_contains(cleaned) if len(cleaned) >= 4 else []
         if candidates:
             # Check if one of candidates matches case-insensitively
             for c in candidates:

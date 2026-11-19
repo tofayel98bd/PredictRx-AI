@@ -15,6 +15,7 @@ joblib>=1.4.0
 numpy>=1.26.0
 pandas>=2.2.0
 shap>=0.45.0
+xgboost>=2.0.0
 reportlab>=4.2.0
 google-genai>=0.3.0
 pillow>=10.0.0

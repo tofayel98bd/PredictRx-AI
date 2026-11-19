@@ -19,12 +19,12 @@ RULES
    brand if written together ('Sergel 20' -> brand 'Sergel', strength '20 mg' only if mg is implied by the product).
    Prefix words Tab./Cap./Syp./Inj. go in `form`.
 6. `generic_name_guess`: fill ONLY if you are highly confident; otherwise null (a database resolves it later).
-7. Ignore logos, doctor letterhead, ads, patient phone numbers. Do not output patient names.
+7. Ignore logos, doctor letterhead, ads, patient phone numbers. Extract patient name if clearly written, otherwise null.
 8. One entry per medicine line, in the order written. Include injections, syrups, drops, creams.
 9. confidence: 0.95+ clear print, 0.8 readable handwriting, <0.6 guessing. legibility: whole-image quality 0-1.
 If the image is not a prescription set is_prescription=false and medicines=[]."""
 
-USER_PROMPT = "Extract every medicine and the patient age/gender/weight (if written) from this prescription."
+USER_PROMPT = "Extract every medicine and the patient name, age, gender, and weight (if written) from this prescription."
 
 _MED = {
     "type": "object",
@@ -45,6 +45,7 @@ TOOL = {
         "properties": {
             "is_prescription": {"type": "boolean"}, "legibility": {"type": "number"},
             "doctor_name": {"type": ["string", "null"]}, "prescription_date": {"type": ["string", "null"]},
+            "patient_name": {"type": ["string", "null"]},
             "patient_age_years": {"type": ["number", "null"]}, "patient_gender": {"type": ["string", "null"]},
             "patient_weight_kg": {"type": ["number", "null"]}, "diagnosis_or_cc": {"type": ["string", "null"]},
             "medicines": {"type": "array", "items": _MED}, "notes": {"type": ["string", "null"]},

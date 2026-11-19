@@ -26,8 +26,8 @@ services:
   predictrx-backend:
     container_name: predictrx-backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     restart: unless-stopped
     depends_on:
       predictrx-postgres:
@@ -42,6 +42,9 @@ services:
       ENVIRONMENT: production
       DEBUG: "false"
       BACKEND_CORS_ORIGINS: '["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://localhost:8000"]'
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-AQ.Ab8RN6K7yFjTCDWQuAXLl9QnOn5ytvI3wAN9CpYh-GL5CLZdTw}
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.5-flash-lite}
     ports:
       - "8000:8000"
     networks:

@@ -55,7 +55,7 @@ def vote_runs(runs: List[RawPrescription]) -> RawPrescription:
     out.medicines = merged
     out.legibility = sum(r.legibility for r in runs) / n
     out.is_prescription = sum(r.is_prescription for r in runs) > n / 2
-    for f in ("patient_age_years", "patient_gender", "patient_weight_kg"):
+    for f in ("patient_name", "patient_age_years", "patient_gender", "patient_weight_kg"):
         setattr(out, f, _vote([getattr(r, f) for r in runs]))
     return out
 

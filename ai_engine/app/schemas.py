@@ -23,6 +23,7 @@ class RawPrescription(BaseModel):
     legibility: float = Field(0.8, ge=0, le=1, description="Overall readability of the image")
     doctor_name: Optional[str] = None
     prescription_date: Optional[str] = None
+    patient_name: Optional[str] = None
     patient_age_years: Optional[float] = None
     patient_gender: Optional[str] = None
     patient_weight_kg: Optional[float] = None

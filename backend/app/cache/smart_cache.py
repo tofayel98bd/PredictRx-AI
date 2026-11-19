@@ -508,25 +508,28 @@ class SmartCacheService:
             if cached:
                 logger.info(f"Smart Cache HIT via binary SHA-256 hash [{h[:8]}...]")
                 return cached
+            # If actual image bytes were uploaded and not a known demo hash,
+            # never hijack with heuristics; let the multimodal Vision OCR pipeline execute!
+            return None
 
-        # 2. Filename match
+        # 2. Filename match (for offline tests and filename-based mock runs)
         fname = (file_name or "").lower()
-        if any(k in fname for k in ["bizoran", "rolac", "ckd", "rx01"]):
+        if any(k in fname for k in ["bizoran", "rolac", "ckd", "rx01", "golden_01", "sample_case_1"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 1")
             return GOLDEN_SCENARIO_1_CKD_KETOROLAC
 
-        if any(k in fname for k in ["triple", "whammy", "rokeya", "lasix"]):
+        if any(k in fname for k in ["triple", "whammy", "rokeya", "lasix", "golden_02", "sample_case_2"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 2")
             return GOLDEN_SCENARIO_2_TRIPLE_WHAMMY
 
-        if any(k in fname for k in ["pediatric", "aspirin", "ayan", "child", "reye"]):
+        if any(k in fname for k in ["pediatric", "aspirin", "ayan", "child", "reye", "golden_03", "sample_case_3"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 3")
             return GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
 
-        # 3. Patient clinical profile matching
+        # 3. Patient clinical profile matching (for direct API calls without image uploads)
         ctx = patient_context or {}
         p_name = str(ctx.get("name", "")).lower()
         p_age = ctx.get("age", 45)

@@ -295,7 +295,7 @@ def validate_prescription(raw: RawPrescription, patient_context: Optional[dict] 
     return {
         "extracted_prescription": [m.model_dump() for m in meds],
         "prescription_level_alerts": rx_alerts,
-        "detected_patient": {"age": age, "gender": gender, "weight_kg": weight},
+        "detected_patient": {"name": getattr(raw, "patient_name", None), "age": age, "gender": gender, "weight_kg": weight},
         "summary": {
             "medicine_count": len(meds),
             "syntax_errors_count": sum(not m.syntax_valid for m in meds),

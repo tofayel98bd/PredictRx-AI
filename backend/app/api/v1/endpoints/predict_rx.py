@@ -12,9 +12,16 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Uplo
 from sqlalchemy.orm import Session
 
 # Dynamic import of ai_engine from workspace
-_project_root = Path(__file__).resolve().parent
-while _project_root.name and _project_root.name != "PredictRx-AI" and _project_root.parent != _project_root:
-    _project_root = _project_root.parent
+# Ensure project root / app directory and ai_engine are in sys.path
+_current = Path(__file__).resolve()
+_project_root = None
+for _parent in [_current] + list(_current.parents):
+    if (_parent / "ai_engine").exists() or _parent.name == "PredictRx-AI":
+        _project_root = _parent
+        break
+if _project_root is None:
+    _project_root = Path("/app")
+
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 _ai_dir = _project_root / "ai_engine"
@@ -24,6 +31,7 @@ if _ai_dir.exists() and str(_ai_dir) not in sys.path:
 from dotenv import load_dotenv
 load_dotenv(_project_root / ".env")
 load_dotenv(_ai_dir / ".env")
+load_dotenv()
 
 try:
     from ai_engine.app.pipeline import analyze_prescription_image
@@ -59,6 +67,7 @@ router = APIRouter()
 async def analyze_prescription_endpoint(
     request: Request,
     prescription_file: Optional[UploadFile] = File(None),
+    file: Optional[UploadFile] = File(None),
     patient_context: Optional[str] = Form(None),
     db: Session = Depends(get_db),
     current_user: Optional[User] = Depends(get_optional_user),
@@ -72,9 +81,10 @@ async def analyze_prescription_endpoint(
     file_bytes = None
     file_name = None
 
-    if prescription_file:
-        file_name = prescription_file.filename
-        file_bytes = await prescription_file.read()
+    active_file = prescription_file or file
+    if active_file:
+        file_name = active_file.filename
+        file_bytes = await active_file.read()
 
     # Parse patient context from form data if provided
     if patient_context:
@@ -147,20 +157,29 @@ async def analyze_prescription_endpoint(
                     for m in extracted
                 ]
 
-                # Update patient age/gender/weight from prescription if not explicitly set
+                # Update patient details from prescription if not explicitly set
                 detected_pat = ai_result.get("detected_patient", {})
-                if detected_pat.get("age") and parsed_patient_context.age == 45:
+                if detected_pat.get("name") and (not parsed_patient_context.name or parsed_patient_context.name in ("Unnamed Patient", "")):
+                    parsed_patient_context.name = str(detected_pat["name"]).strip()
+                if detected_pat.get("age") and (not parsed_patient_context.age or parsed_patient_context.age == 45):
                     try:
                         parsed_patient_context.age = int(detected_pat["age"])
                     except (ValueError, TypeError):
                         pass
-                if detected_pat.get("gender") and parsed_patient_context.gender == "Male":
+                if detected_pat.get("gender") and (not parsed_patient_context.gender or parsed_patient_context.gender == "Male"):
                     parsed_patient_context.gender = str(detected_pat["gender"]).capitalize()
                 if detected_pat.get("weight_kg") and not parsed_patient_context.weight_kg:
                     try:
                         parsed_patient_context.weight_kg = float(detected_pat["weight_kg"])
                     except (ValueError, TypeError):
                         pass
+
+                raw_meta = (ai_result.get("meta") or {}).get("raw_extraction", {})
+                detected_diagnosis = raw_meta.get("diagnosis_or_cc")
+                if detected_diagnosis and not parsed_patient_context.conditions:
+                    parsed_patient_context.conditions = [
+                        c.strip() for c in str(detected_diagnosis).split(",") if c.strip()
+                    ]
             else:
                 logger.warning("Vision LLM returned 0 medications. Falling back to clinical demo baseline.")
         except Exception as exc:
