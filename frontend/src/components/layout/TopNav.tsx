@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -10,8 +10,14 @@ import {
   UserCheck,
   ShieldAlert,
   Stethoscope,
+  LogIn,
+  LogOut,
+  UserPlus,
+  ChevronDown,
+  User,
 } from 'lucide-react';
 import { useTheme } from '@/app/providers/ThemeProvider';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { checkBackendHealth } from '@/services/apiClient';
@@ -24,13 +30,27 @@ interface TopNavProps {
 export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
-  const { t } = useTranslation(['navigation', 'common']);
+  const { t, i18n } = useTranslation(['navigation', 'common']);
+  const isBn = i18n.language === 'bn';
+  const { user, isAuthenticated, logout, openLogin, openRegister } = useAuth();
 
   const [backendStatus, setBackendStatus] = useState<{ online: boolean; message: string }>({
     online: false,
     message: 'Checking backend status...',
   });
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     checkBackendHealth().then(setBackendStatus);
@@ -258,20 +278,107 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobile }) => {
           )}
         </Button>
 
-        {/* Clinician Profile Chip */}
-        <div className="hidden sm:flex items-center space-x-2 pl-1.5 sm:pl-2 border-l border-border">
-          <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20">
-            <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+        {/* Dynamic Clinician Authentication Profile / Login Options */}
+        {isAuthenticated && user ? (
+          <div ref={userMenuRef} className="relative hidden sm:block">
+            <button
+              type="button"
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center space-x-2 pl-2 border-l border-border hover:opacity-90 transition-opacity focus:outline-none"
+              aria-label="Clinician Profile Menu"
+            >
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                <UserCheck className="h-4 w-4" />
+                <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-background" />
+              </div>
+              <div className="hidden xl:flex flex-col text-left">
+                <span className="text-xs font-semibold text-foreground flex items-center gap-1">
+                  {user.full_name}
+                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                </span>
+                <span className="text-[10px] text-muted-foreground">
+                  {user.bmdc_number ? `বিএমডিসি #${user.bmdc_number}` : (user.department || user.role)}
+                </span>
+              </div>
+            </button>
+
+            {/* Profile Dropdown Menu */}
+            {showUserMenu && (
+              <div className="absolute right-0 mt-2 w-72 rounded-xl border border-border bg-popover p-3 shadow-xl z-50 animate-in fade-in-50 zoom-in-95">
+                <div className="flex items-center space-x-2.5 pb-2.5 border-b border-border">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-sm">
+                    {user.full_name.charAt(0)}
+                  </div>
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-xs font-bold text-foreground truncate">{user.full_name}</span>
+                    <span className="text-[11px] text-muted-foreground truncate">{user.email}</span>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                      {user.role === 'doctor' ? (isBn ? 'নিবন্ধিত চিকিৎসক' : 'Registered Physician') : (isBn ? 'ক্লিনিক্যাল ফার্মাসিস্ট' : 'Clinical Pharmacist')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="py-2 text-xs space-y-1">
+                  {user.department && (
+                    <div className="text-[11px] text-muted-foreground px-1">
+                      <span className="font-semibold text-foreground">{isBn ? 'বিভাগ:' : 'Dept:'}</span> {user.department}
+                    </div>
+                  )}
+                  {user.bmdc_number && (
+                    <div className="text-[11px] text-muted-foreground px-1">
+                      <span className="font-semibold text-foreground">{isBn ? 'রেজিস্ট্রেশন:' : 'BMDC:'}</span> #{user.bmdc_number}
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-border flex flex-col space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      openLogin();
+                    }}
+                    className="w-full flex items-center space-x-2 px-2 py-1.5 rounded-md text-xs text-muted-foreground hover:bg-muted hover:text-foreground text-left transition-colors"
+                  >
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>{isBn ? 'ডাক্তার পরিবর্তন করুন (Switch Profile)' : 'Switch Clinician Account'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUserMenu(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center space-x-2 px-2 py-1.5 rounded-md text-xs text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left font-medium transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    <span>{isBn ? 'লগআউট করুন' : 'Sign Out'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="hidden xl:flex flex-col text-left">
-            <span className="text-xs font-semibold text-foreground">
-              {t('header.profile.doctorName', { ns: 'navigation' })}
-            </span>
-            <span className="text-[10px] text-muted-foreground">
-              {t('header.profile.bmdcNumber', { ns: 'navigation' })}
-            </span>
+        ) : (
+          <div className="flex items-center space-x-1.5 pl-2 border-l border-border">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openLogin}
+              className="h-8 px-2.5 text-xs font-semibold border-primary/40 text-primary hover:bg-primary/10 gap-1.5"
+            >
+              <LogIn className="h-3.5 w-3.5" />
+              <span>{isBn ? 'লগইন' : 'Sign In'}</span>
+            </Button>
+            <Button
+              size="sm"
+              onClick={openRegister}
+              className="h-8 px-2.5 text-xs font-semibold bg-primary hover:bg-primary/90 text-primary-foreground gap-1"
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              <span className="hidden md:inline">{isBn ? 'নিবন্ধন' : 'Register'}</span>
+            </Button>
           </div>
-        </div>
+        )}
       </div>
     </header>
   );

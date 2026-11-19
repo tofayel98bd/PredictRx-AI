@@ -19,6 +19,7 @@ import {
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/app/providers/AuthProvider';
 import {
   ResponsiveContainer,
   PieChart,
@@ -38,6 +39,7 @@ import { formatDate, formatNumber } from '@/lib/utils';
 
 export const DashboardPage: React.FC = () => {
   const { t, i18n } = useTranslation(['dashboard', 'common']);
+  const { user } = useAuth();
   const [prescriptions, setPrescriptions] = useState<PrescriptionAnalysisResult[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -87,6 +89,12 @@ export const DashboardPage: React.FC = () => {
           <h2 className="mt-1 text-2xl font-bold tracking-tight">
             {isBn ? 'প্রেডিক্ট-আরএক্স ক্লিনিক্যাল ড্যাশবোর্ড' : 'PredictRx Clinical Dashboard'}
           </h2>
+          {user && (
+            <p className="mt-0.5 text-xs font-medium text-emerald-300">
+              {isBn ? `স্বাগতম, ${user.full_name}` : `Welcome back, ${user.full_name}`}
+              {user.bmdc_number && ` (${isBn ? 'বিএমডিসি' : 'BMDC'} #${user.bmdc_number})`}
+            </p>
+          )}
           <p className="mt-1 text-xs text-teal-200/90 max-w-xl">
             {t(
               'hubBanner.description',

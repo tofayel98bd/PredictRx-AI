@@ -47,6 +47,9 @@ const BanglaCompanionPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage }))
 );
+const AuthPage = lazy(() =>
+  import('@/features/auth/AuthPage').then((m) => ({ default: m.AuthPage }))
+);
 
 const PageLoader = () => (
   <div className="space-y-4 p-4 animate-in fade-in duration-300">
@@ -182,6 +185,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<PageLoader />}>
             <SettingsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'login',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AuthPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'register',
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <AuthPage />
           </Suspense>
         ),
       },
