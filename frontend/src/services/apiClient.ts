@@ -15,12 +15,16 @@ export const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// Attach user's active locale (en or bn) to Accept-Language header
+// Attach user's active locale (en or bn) and JWT Auth token to headers
 apiClient.interceptors.request.use((config) => {
   try {
     const lang = localStorage.getItem('predictrx_language') || 'en';
     if (config.headers) {
       config.headers['Accept-Language'] = lang;
+      const token = localStorage.getItem('predictrx_token');
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`;
+      }
     }
   } catch {
     // LocalStorage fallback
