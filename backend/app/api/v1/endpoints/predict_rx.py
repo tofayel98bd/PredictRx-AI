@@ -464,9 +464,9 @@ def get_cache_status():
     return smart_cache.get_stats()
 
 
-@router.get("/scenarios", summary="List Golden Demo Hackathon Scenarios")
+@router.get("/scenarios", summary="List Golden Demo Clinical Scenarios")
 def list_demo_scenarios():
-    """Return the 3 Golden Hackathon Clinical Demo Scenarios for instant presentation."""
+    """Return the 3 Golden Benchmark Clinical Demo Scenarios for instant evaluation."""
     return [
         {
             "scenario_id": "GOLDEN_01_CKD_KETOROLAC",

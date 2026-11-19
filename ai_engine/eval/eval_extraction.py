@@ -1,5 +1,5 @@
 """
-Measure Day-1 accuracy against Tahrima's golden dataset.
+Measure prescription extraction accuracy against validated benchmark dataset.
   python eval/eval_extraction.py eval/ground_truth.json --votes 3
 ground_truth.json = [{"image": "samples/rx01.jpg", "age": 62, "gender": "Male",
    "medicines": [{"brand_name": "Rolac 10", "dosage_syntax": "1+1+1", "duration_days": 14, "timing": "After Meal"}]}]
