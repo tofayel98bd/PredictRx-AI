@@ -530,9 +530,12 @@ def generate_tts_endpoint(payload: TTSRequest):
         import re
         from fastapi.responses import StreamingResponse
 
-        # Clean speech text: replace hyphens in number ranges with 'থেকে' so TTS says 'থেকে' instead of 'মাইনাস'
+        # Clean speech text: replace hyphens in number ranges with 'থেকে' or 'to' so TTS doesn't say 'minus'
         clean_text = payload.text
-        clean_text = re.sub(r'([0-9০-৯]+)\s*[-–]\s*([0-9০-৯]+)', r'\1 থেকে \2', clean_text)
+        if payload.lang == "en":
+            clean_text = re.sub(r'([0-9]+)\s*[-–]\s*([0-9]+)', r'\1 to \2', clean_text)
+        else:
+            clean_text = re.sub(r'([0-9০-৯]+)\s*[-–]\s*([0-9০-৯]+)', r'\1 থেকে \2', clean_text)
         # Avoid orphan hyphens being read as 'minus'
         clean_text = re.sub(r'\s*[-–]\s*', ' ', clean_text)
 

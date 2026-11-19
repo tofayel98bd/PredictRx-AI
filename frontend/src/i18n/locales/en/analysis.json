@@ -70,7 +70,7 @@
       "interactions": "Drug Interactions",
       "risk": "Risk & SHAP (XAI)",
       "alternatives": "Safer Alternatives",
-      "companion": "Bangla Companion"
+      "companion": "Patient Companion"
     },
     "medTable": {
       "brand": "Brand Name",

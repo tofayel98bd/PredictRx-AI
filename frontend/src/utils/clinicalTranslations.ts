@@ -80,6 +80,13 @@ export const CLINICAL_ISSUES_MAP_BN: Record<string, string> = {
   'CKD_MONITORING': 'কিডনি পর্যবেক্ষণ',
   'TRIPLE_WHAMMY_SYNDROME': 'ট্রিপল হোয়ামি সিন্ড্রোম',
   'CONTRAINDICATION_REYES_SYNDROME': 'রে সিন্ড্রোমের ঝুঁকি',
+  'DOSE_FORMAT_INVALID': 'ডোজ ফরম্যাট অস্পষ্ট বা অসংলগ্ন',
+  'DURATION_MISSING': 'ওষুধের মেয়াদ অনুপস্থিত',
+  'DOSE_HIGH': 'ডোজের মাত্রা অতিমাত্রায় বেশি',
+  'DOSE_LOW': 'ডোজের মাত্রা অত্যন্ত কম',
+  'FREQUENCY_INVALID': 'সেবনের পুনরাবৃত্তি অস্পষ্ট',
+  'ROUTE_INVALID': 'ওষুধ প্রয়োগের মাধ্যম অস্পষ্ট',
+  'FORM_INCOMPATIBLE': 'ওষুধের ধরন সামঞ্জস্যপূর্ণ নয়',
 
   // Messages
   'Ketorolac duration (14 days) exceeds strict maximum 5-day course safety ceiling. High risk of Acute Kidney Injury (AKI) and GI hemorrhage.':
@@ -184,7 +191,16 @@ export function translateIssueCode(code: string, isBn: boolean): string {
 
 export function translateIssueMessage(msg: string, isBn: boolean): string {
   if (!isBn) return msg;
-  return CLINICAL_ISSUES_MAP_BN[msg] || msg;
+  if (CLINICAL_ISSUES_MAP_BN[msg]) return CLINICAL_ISSUES_MAP_BN[msg];
+  if (msg.toLowerCase().includes('unrecognised dosage format') || msg.toLowerCase().includes('unrecognized dosage format')) {
+    const matched = msg.match(/'([^']+)'/);
+    const code = matched ? matched[1] : '';
+    return code ? `অস্বীকৃত ডোজ ফরম্যাট '${code}' (চিকিৎসকের যাচাই আবশ্যক)` : 'অস্বীকৃত বা অস্পষ্ট ডোজ ফরম্যাট';
+  }
+  if (msg.toLowerCase().includes('duration not specified')) {
+    return 'প্রেসক্রিপশনে কত দিন খাবেন তা নির্দিষ্ট করা নেই (মেয়াদ যাচাই আবশ্যক)';
+  }
+  return msg;
 }
 
 export function translateTimingText(timing?: string, isBn?: boolean): string {

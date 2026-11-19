@@ -769,7 +769,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
               <TabsTrigger value="clinical" className="text-xs py-1.5">{t('results.tabs.medications', 'Clinical Findings')}</TabsTrigger>
               <TabsTrigger value="interactions" className="text-xs py-1.5">{t('results.tabs.interactions', 'Interactions')} ({analysisResult.drug_interactions.length})</TabsTrigger>
               <TabsTrigger value="risk" className="text-xs py-1.5">{t('results.tabs.risk', 'SHAP Explainability')}</TabsTrigger>
-              <TabsTrigger value="bangla" className="text-xs py-1.5">{t('results.tabs.companion', 'Bangla Companion')}</TabsTrigger>
+              <TabsTrigger value="bangla" className="text-xs py-1.5">{t('results.tabs.companion', isBn ? 'রোগীর নির্দেশিকা' : 'Patient Companion')}</TabsTrigger>
             </TabsList>
 
             {/* TAB 1: Clinical Findings & Normalization */}
@@ -1002,11 +1002,12 @@ export const PrescriptionAnalysisPage: React.FC = () => {
               />
             </TabsContent>
 
-            {/* TAB 4: Bangla Patient Companion */}
+            {/* TAB 4: Patient Companion */}
             <TabsContent value="bangla" className="mt-4">
               <BanglaPatientCompanion
                 data={analysisResult.bangla_companion}
                 patientName={analysisResult.patient_context.name}
+                lang={isBn ? 'bn' : 'en'}
               />
             </TabsContent>
           </Tabs>
