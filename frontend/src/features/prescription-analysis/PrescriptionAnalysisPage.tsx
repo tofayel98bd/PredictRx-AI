@@ -22,6 +22,7 @@ import {
   RefreshCw,
   Eye,
   FileCheck,
+  RotateCcw,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -37,7 +38,7 @@ import { ClinicianReviewModal } from '@/components/clinical/ClinicianReviewModal
 import { DemoScenarioSwitcher } from '@/components/clinical/DemoScenarioSwitcher';
 import { analyzePrescription, fetchScenarioAnalysis } from '@/services/prescriptionService';
 import { PatientContext, PrescriptionAnalysisResult } from '@/types';
-import { MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario } from '@/constants';
+import { MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario, DEMO_PATIENTS_LIST } from '@/constants';
 import { toast } from 'sonner';
 
 // Validation schema for patient context form
@@ -72,7 +73,7 @@ const WORKFLOW_STAGES = [
 ];
 
 export const PrescriptionAnalysisPage: React.FC = () => {
-  const { t } = useTranslation(['analysis', 'common']);
+  const { t, i18n } = useTranslation(['analysis', 'common']);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -87,9 +88,14 @@ export const PrescriptionAnalysisPage: React.FC = () => {
   const [analysisResult, setAnalysisResult] = useState<PrescriptionAnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState('clinical');
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
-  const [activeScenarioId, setActiveScenarioId] = useState<string | null>('GOLDEN_01_CKD_KETOROLAC');
+  const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
+  const [showReferenceCases, setShowReferenceCases] = useState<boolean>(() => {
+    return searchParams.get('demo') === 'true' || searchParams.get('scenarios') === 'true';
+  });
 
-  // Form setup
+  const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
+
+  // Form setup - Empty and clean by default
   const {
     register,
     handleSubmit,
@@ -99,25 +105,26 @@ export const PrescriptionAnalysisPage: React.FC = () => {
   } = useForm<PatientFormValues>({
     resolver: zodResolver(patientFormSchema) as any,
     defaultValues: {
-      patient_id: 'PRX-BD-2026-081',
-      name: 'Md. Rafiqul Islam (Demo)',
-      age: 62,
+      patient_id: '',
+      name: '',
+      age: '' as any,
       gender: 'Male',
-      weight_kg: 68,
-      creatinine: 2.1,
-      egfr: 34.5,
-      hba1c: 8.4,
-      systolic_bp: 148,
-      diastolic_bp: 92,
-      conditions_text: 'Type 2 Diabetes, Chronic Kidney Disease (CKD Stage 3), Hypertension',
-      current_meds_text: 'Metformin 500mg BD, Atorvastatin 10mg HS',
-      allergies_text: 'Penicillin',
+      weight_kg: '' as any,
+      creatinine: '' as any,
+      egfr: '' as any,
+      hba1c: '' as any,
+      systolic_bp: '' as any,
+      diastolic_bp: '' as any,
+      conditions_text: '',
+      current_meds_text: '',
+      allergies_text: '',
     },
   });
 
-  // Pre-fill demo scenario if queried
+  // Pre-fill demo scenario ONLY if explicitly requested via query param
   useEffect(() => {
     if (searchParams.get('demo') === 'true') {
+      setShowReferenceCases(true);
       loadDemoData();
     }
   }, [searchParams]);
@@ -161,13 +168,66 @@ export const PrescriptionAnalysisPage: React.FC = () => {
         setIsAnalyzing(false);
       }
     } else {
-      toast.success(`Autofilled profile for ${scenario.title}. Click "Run Safety Evaluation" to process.`);
+      toast.success(
+        isBn
+          ? `${scenario.title}-এর প্রোফাইল লোড হয়েছে। মূল্যায়ন করতে নিচের বাটনে ক্লিক করুন।`
+          : `Autofilled profile for ${scenario.title}. Click "Run Safety Evaluation" to process.`
+      );
     }
   };
 
   const loadDemoData = () => {
+    setShowReferenceCases(true);
     const defaultScenario = GOLDEN_DEMO_SCENARIOS[0];
     handleSelectScenario(defaultScenario, false);
+  };
+
+  const handleResetForm = () => {
+    reset({
+      patient_id: '',
+      name: '',
+      age: '' as any,
+      gender: 'Male',
+      weight_kg: '' as any,
+      creatinine: '' as any,
+      egfr: '' as any,
+      hba1c: '' as any,
+      systolic_bp: '' as any,
+      diastolic_bp: '' as any,
+      conditions_text: '',
+      current_meds_text: '',
+      allergies_text: '',
+    });
+    setFile(null);
+    if (filePreview && !filePreview.startsWith('http')) {
+      URL.revokeObjectURL(filePreview);
+    }
+    setFilePreview(null);
+    setActiveScenarioId(null);
+    setAnalysisResult(null);
+    toast.info(isBn ? 'ফর্ম সফলভাবে খালি করা হয়েছে।' : 'Form reset successfully.');
+  };
+
+  const handleSelectExistingPatient = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const patientId = e.target.value;
+    if (!patientId) return;
+    const patient = DEMO_PATIENTS_LIST.find((p) => p.id === patientId);
+    if (!patient) return;
+
+    setValue('patient_id', patient.id);
+    setValue('name', patient.name);
+    setValue('age', patient.age);
+    setValue('gender', (patient.gender as any) || 'Male');
+    setValue('creatinine', patient.creatinine);
+    setValue('egfr', patient.egfr);
+    setValue('hba1c', patient.hba1c);
+    setValue('conditions_text', patient.conditions?.join(', ') || '');
+    setValue('allergies_text', patient.allergies?.join(', ') || '');
+    toast.success(
+      isBn
+        ? `রোগী ${patient.name}-এর প্রোফাইল লোড করা হয়েছে`
+        : `Loaded clinical profile for ${patient.name}`
+    );
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -283,36 +343,58 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Top Header & Demo Quick Loader */}
+      {/* Top Header & Reference Cases Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center space-x-2">
             <span>{t('title', 'Prescription OCR & Clinical Safety Analysis')}</span>
-            <Badge variant="demo">{t('scenarios.dualEngine', 'Dual AI + Rules Engine')}</Badge>
+            <Badge variant="outline" className="text-xs border-teal-500/30 text-teal-600 dark:text-teal-400 font-mono">
+              CDSS Engine v1.4
+            </Badge>
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
             {t('subtitle', 'Extract handwritten/printed BD prescriptions, validate dosing syntax, and predict patient-specific pharmacotherapy risks.')}
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={loadDemoData}
-          className="border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-xs flex items-center space-x-1.5 self-start"
-        >
-          <Sparkles className="h-3.5 w-3.5 text-teal-600" />
-          <span>{t('scenarios.loadDemoBtn', 'Load Reference Case (CKD 3 / Ketorolac)')}</span>
-        </Button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <Button
+            type="button"
+            variant={showReferenceCases ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setShowReferenceCases(!showReferenceCases)}
+            className="text-xs flex items-center space-x-1.5"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>
+              {showReferenceCases
+                ? (isBn ? 'কেস লুকান ▲' : 'Hide Sample Cases ▲')
+                : (isBn ? 'নমুনা কেস দেখুন (৩টি) ▼' : 'Sample Clinical Cases (3) ▼')}
+            </span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={loadDemoData}
+            className="border-teal-300 dark:border-teal-800 text-teal-800 dark:text-teal-300 text-xs flex items-center space-x-1.5"
+          >
+            <span>{t('scenarios.loadDemoBtn', 'Load Reference Case (CKD 3 / Ketorolac)')}</span>
+          </Button>
+        </div>
       </div>
 
-      {/* 1-Click 3 Golden Demo Scenarios Switcher */}
-      <DemoScenarioSwitcher
-        activeScenarioId={activeScenarioId}
-        onSelectScenario={handleSelectScenario}
-        isLoading={isAnalyzing}
-      />
+      {/* Collapsible Reference Cases Panel - Only shown when requested */}
+      {showReferenceCases && (
+        <div className="rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/20 dark:bg-teal-950/20 p-4 transition animate-in fade-in duration-200">
+          <DemoScenarioSwitcher
+            activeScenarioId={activeScenarioId}
+            onSelectScenario={handleSelectScenario}
+            isLoading={isAnalyzing}
+          />
+        </div>
+      )}
 
       {/* Upload and Patient Context Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -407,13 +489,33 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           {/* Patient Clinical Context Form (7 cols) */}
           <Card className="lg:col-span-7 border-border">
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold flex items-center space-x-2">
-                <Stethoscope className="h-4 w-4 text-primary" />
-                <span>{t('patientForm.title', '2. Patient Baseline Clinical Profile')}</span>
-              </CardTitle>
-              <CardDescription className="text-xs">
-                {t('patientForm.subtitle', 'Essential for contraindication screening (renal eGFR, diabetic control, and comorbidities).')}
-              </CardDescription>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-sm font-bold flex items-center space-x-2">
+                    <Stethoscope className="h-4 w-4 text-primary" />
+                    <span>{t('patientForm.title', '2. Patient Baseline Clinical Profile')}</span>
+                  </CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
+                    {t('patientForm.subtitle', 'Essential for contraindication screening (renal eGFR, diabetic control, and comorbidities).')}
+                  </CardDescription>
+                </div>
+                {/* Registered Patient Quick Picker */}
+                <select
+                  aria-label={isBn ? 'নিবন্ধিত রোগী নির্বাচন করুন' : 'Select Registered Patient'}
+                  onChange={handleSelectExistingPatient}
+                  className="text-xs rounded-md border border-input bg-background px-2.5 py-1 text-muted-foreground hover:text-foreground focus:ring-1 focus:ring-primary"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    {isBn ? '📋 রেজিস্ট্রি থেকে রোগী নির্বাচন (ঐচ্ছিক)' : '📋 Select Registered Patient (Optional)'}
+                  </option>
+                  {DEMO_PATIENTS_LIST.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} ({p.id}) • {p.age}y/{p.gender.charAt(0)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </CardHeader>
 
             <CardContent className="space-y-4">
@@ -510,7 +612,18 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-2 flex justify-end">
+              <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-border/50">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetForm}
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                  <span>{isBn ? 'ফর্ম খালি করুন (Reset)' : 'Clear Form (Reset)'}</span>
+                </Button>
+
                 <Button
                   type="submit"
                   size="default"

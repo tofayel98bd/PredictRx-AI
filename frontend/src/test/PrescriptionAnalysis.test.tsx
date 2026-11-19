@@ -58,8 +58,20 @@ describe('PrescriptionAnalysisPage', () => {
     15000
   );
 
-  it('renders 1-Click 3 Golden Demo Scenarios Switcher and allows switching cases', async () => {
+  it('starts with a clean empty form by default without pre-filled data', () => {
     renderWithProviders(<PrescriptionAnalysisPage />);
+    const patientNameInput = screen.getByPlaceholderText(/Mohammad Abdul Karim/i);
+    expect(patientNameInput).toHaveValue('');
+    const patientIdInput = screen.getByPlaceholderText(/PRX-BD/i);
+    expect(patientIdInput).toHaveValue('');
+  });
+
+  it('renders Reference Scenarios Switcher when toggled and allows switching cases', async () => {
+    renderWithProviders(<PrescriptionAnalysisPage />);
+
+    // Open sample cases
+    const toggleBtn = screen.getByRole('button', { name: /Sample Clinical Cases/i });
+    fireEvent.click(toggleBtn);
 
     // Verify 3 scenario cards exist
     expect(screen.getByText(/Clinical Reference Case Scenarios/i)).toBeInTheDocument();
@@ -86,6 +98,10 @@ describe('PrescriptionAnalysisPage', () => {
 
   it('executes 1-Click Instant Run for Golden Scenario 2 (Triple Whammy)', async () => {
     renderWithProviders(<PrescriptionAnalysisPage />);
+
+    // Open sample cases
+    const toggleBtn = screen.getByRole('button', { name: /Sample Clinical Cases/i });
+    fireEvent.click(toggleBtn);
 
     const instantRunRokeya = screen.getByRole('button', { name: /Instant Run Case 2: Begum Rokeya/i });
     fireEvent.click(instantRunRokeya);
