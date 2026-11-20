@@ -706,6 +706,38 @@ export const PrescriptionAnalysisPage: React.FC = () => {
       {/* Analysis Results Display */}
       {analysisResult && (
         <div className="space-y-6 animate-in fade-in-50 duration-500">
+          {/* Prescription-Level Alerts (API Key, Quota, OCR Failures) */}
+          {analysisResult.prescription_level_alerts && analysisResult.prescription_level_alerts.length > 0 && (
+            <div className="space-y-3">
+              {analysisResult.prescription_level_alerts.map((alert, idx) => (
+                <Alert
+                  key={idx}
+                  variant={alert.severity === 'CRITICAL' ? 'critical' : 'warning'}
+                  className={alert.code === 'AI_API_KEY_INVALID' ? 'border-amber-500/80 bg-amber-50/90 dark:bg-amber-950/40 text-amber-950 dark:text-amber-100' : ''}
+                >
+                  <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  <AlertTitle className="text-sm font-bold flex items-center space-x-2">
+                    <span>
+                      {alert.code === 'AI_API_KEY_INVALID'
+                        ? (isBn ? '⚠️ এআই এপিআই কী সতর্কতা (AI Key Not Valid / 401)' : '⚠️ AI Service Alert: API Key Not Valid (401)')
+                        : alert.code === 'AI_API_QUOTA_EXCEEDED'
+                        ? (isBn ? '⚠️ এআই সার্ভিস কোটা শেষ (Quota Exceeded / 429)' : '⚠️ AI API Quota Exceeded (429)')
+                        : (isBn ? 'প্রেসক্রিপশন সতর্কতা' : 'Prescription Alert')}
+                    </span>
+                    <Badge variant="outline" className="text-[10px] font-mono uppercase ml-2">
+                      {alert.severity}
+                    </Badge>
+                  </AlertTitle>
+                  <AlertDescription className="text-xs mt-1.5 leading-relaxed">
+                    {alert.code === 'AI_API_KEY_INVALID' && isBn
+                      ? 'আপনার দেওয়া Google Gemini API Key কার্যকর হচ্ছে না বা মেয়াদোত্তীর্ণ (401 Unauthorized)। অনুগ্রহ করে .env ফাইলে একটি সচল এপিআই কী যুক্ত করে ব্যাকএন্ড রিস্টার্ট করুন। ডেমো স্যাম্পল টেস্ট করতে ওপরের "নমুনা কেস দেখুন" বাটনে ক্লিক করুন।'
+                      : alert.message}
+                  </AlertDescription>
+                </Alert>
+              ))}
+            </div>
+          )}
+
           {/* Clinical Alert Top Banner if Critical */}
           {analysisResult.clinical_risk.risk_classification === 'CRITICAL' && (
             <Alert variant="critical">
@@ -721,8 +753,16 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                       ? 'জরুরি সতর্কতা: প্রেসক্রিপশনে উচ্চ রক্তচাপের ওষুধ (Ramipril), পানির ওষুধ (Lasix) এবং ব্যথার ওষুধ (Diclofenac) একত্রে রয়েছে। চিকিৎসাবিজ্ঞানে একে "ট্রিপল হোয়ামি" বলা হয়—যা আকস্মিকভাবে কিডনি অকেজো করে দেয়। ব্যথার ওষুধটি বাদ দিয়ে নিরাপদ বিকল্প ব্যবহার আবশ্যক।'
                       : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
                       ? 'গুরুতর সতর্কতা: ভাইরাল জ্বরে আক্রান্ত শিশুর ক্ষেত্রে অ্যাসপিরিন সেবনে প্রাণঘাতী রে সিন্ড্রোমের মারাত্মক ঝুঁকি রয়েছে। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।'
-                      : 'কিটোরোলাক (Rolac 10) ১৪ দিনের মেয়াদ সর্বোচ্চ সুরক্ষা সীমা অতিক্রম করেছে এবং রোগীর সিকেডি স্টেজ ৩ (eGFR 34.5)-এর ক্ষেত্রে সম্পূর্ণ নিষিদ্ধ। একই সাথে ওলমেসারটান সেবনে তীব্র কিডনি ক্ষতির (AKI) ঝুঁকি বাড়িয়ে দেয়। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।')
-                  : "Ketorolac (Rolac 10) 14-day duration exceeds safety ceilings and is contraindicated in patient's CKD Stage 3 (eGFR 34.5). Concomitant Olmesartan increases Acute Kidney Injury hazard. Immediate clinician substitution required."}
+                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('rolac') || m.brand_name.toLowerCase().includes('ketorolac') || m.generic_name?.toLowerCase().includes('ketorolac'))
+                      ? 'কিটোরোলাক (Rolac 10) ১৪ দিনের মেয়াদ সর্বোচ্চ সুরক্ষা সীমা অতিক্রম করেছে এবং রোগীর সিকেডি স্টেজ ৩ (eGFR 34.5)-এর ক্ষেত্রে সম্পূর্ণ নিষিদ্ধ। একই সাথে ওলমেসারটান সেবনে তীব্র কিডনি ক্ষতির (AKI) ঝুঁকি বাড়িয়ে দেয়। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।'
+                      : (analysisResult.clinical_risk.calibrated_probability_note || 'প্রেসক্রিপশনে ঝুঁকিপূর্ণ ওষুধের সংমিশ্রণ পাওয়া গেছে। তাৎক্ষণিক চিকিৎসকের পর্যালোচনা প্রয়োজন।'))
+                  : (analysisResult.prescription_id?.includes('TRIPLE')
+                      ? 'Triple Whammy detected: Concomitant ACEi/ARB + Diuretic + NSAID creates high risk of acute kidney injury.'
+                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
+                      ? 'Pediatric Aspirin contraindicated: high risk of fatal Reye syndrome.'
+                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('rolac') || m.brand_name.toLowerCase().includes('ketorolac') || m.generic_name?.toLowerCase().includes('ketorolac'))
+                      ? "Ketorolac (Rolac 10) 14-day duration exceeds safety ceilings and is contraindicated in patient's CKD Stage 3 (eGFR 34.5). Concomitant Olmesartan increases Acute Kidney Injury hazard. Immediate clinician substitution required."
+                      : (analysisResult.clinical_risk.calibrated_probability_note || 'High-risk medication combination detected. Immediate clinician review required.'))}
               </AlertDescription>
             </Alert>
           )}
@@ -806,7 +846,21 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border">
-                        {analysisResult.extracted_prescription.map((med, idx) => (
+                        {analysisResult.extracted_prescription.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="py-8 px-4 text-center text-muted-foreground">
+                              <p className="text-sm font-medium">
+                                {isBn ? 'কোনো ওষুধ শনাক্ত করা যায়নি' : 'No medications detected or extracted'}
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {isBn
+                                  ? 'প্রেসক্রিপশন এআই এক্সট্রাকশন সম্পন্ন করা সম্ভব হয়নি। অনুগ্রহ করে এআই এপিআই কী (.env) অথবা ছবির স্বচ্ছতা পরীক্ষা করুন।'
+                                  : 'Could not extract medications from image. Please verify your Gemini API key in .env or upload a clearer image.'}
+                              </p>
+                            </td>
+                          </tr>
+                        ) : (
+                          analysisResult.extracted_prescription.map((med, idx) => (
                           <tr key={idx} className={med.issues.some((i) => i.severity === 'CRITICAL') ? 'bg-red-50/30 dark:bg-red-950/20' : ''}>
                             <td className="py-3 px-4 font-semibold text-foreground">
                               {med.brand_name}
@@ -857,7 +911,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                               )}
                             </td>
                           </tr>
-                        ))}
+                        )))}
                       </tbody>
                     </table>
                   </div>

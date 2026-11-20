@@ -274,11 +274,11 @@ class AnalysisOrchestrator:
             timestamp=datetime.now(timezone.utc).isoformat(),
             image_url=file_name,
             file_name=file_name or "prescription_upload.png",
-            status="COMPLETED",
+            status="FAILED" if (ai_prescription_alerts and any(isinstance(a, dict) and a.get("code") in ("AI_API_KEY_INVALID", "AI_API_QUOTA_EXCEEDED") for a in ai_prescription_alerts)) else "COMPLETED",
             meta=AnalysisMetaSchema(
                 votes=ai_pipeline_meta.get("votes", 1) if ai_pipeline_meta else 1,
                 latency_ms=ai_pipeline_meta.get("latency_ms", latency_ms) if ai_pipeline_meta else latency_ms,
-                ocr_engine="PredictRx Multi-Pass Vision LLM + BD Deterministic Rule Engine" if ai_pipeline_meta else "PredictRx Hybrid Vision Pipeline v1.0",
+                ocr_engine=ai_pipeline_meta.get("ocr_engine", "PredictRx Multi-Pass Vision LLM + BD Deterministic Rule Engine") if ai_pipeline_meta else "PredictRx Hybrid Vision Pipeline v1.0",
                 legibility=ai_pipeline_meta.get("legibility", 0.96) if ai_pipeline_meta else 0.96,
                 is_prescription=ai_pipeline_meta.get("is_prescription", True) if ai_pipeline_meta else True,
             ),

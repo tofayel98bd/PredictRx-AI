@@ -72,6 +72,19 @@ class BanglaCompanionService:
         medications: List[ValidatedMedicineSchema],
         critical_alerts: bool = False,
     ) -> BanglaPatientCompanionSchema:
+        if not medications:
+            return BanglaPatientCompanionSchema(
+                patient_name_bengali=patient.name or "সম্মানিত রোগী",
+                patient_id=patient.patient_id or patient.id or "PRX-PATIENT",
+                date_bengali=datetime.now().strftime("%d-%m-%Y"),
+                overview_bengali="প্রেসক্রিপশন থেকে কোনো ওষুধের তালিকা পাওয়া যায়নি। অনুগ্রহ করে এআই এপিআই কী (GEMINI_API_KEY) অথবা প্রেসক্রিপশনের ছবিটি পরীক্ষা করুন।",
+                medicines=[],
+                critical_safety_notice_bengali="কোনো ওষুধের তথ্য পাওয়া যায়নি।",
+                emergency_instructions_bengali="জরুরি স্বাস্থ্য সমস্যার জন্য নিকটস্থ হাসপাতালে যোগাযোগ করুন।",
+                clinician_reviewed=False,
+                reviewer_name=None,
+            )
+
         med_cards: List[BanglaMedicineInstructionSchema] = []
 
         for med in medications:

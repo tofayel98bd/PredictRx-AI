@@ -26,6 +26,21 @@ class ClinicalRiskService:
         medications: List[ValidatedMedicineSchema],
         interactions: List[DrugInteractionSchema],
     ) -> Tuple[ClinicalRiskAnalysisSchema, List[SaferAlternativeSchema]]:
+        if not medications:
+            return ClinicalRiskAnalysisSchema(
+                risk_score=0.0,
+                risk_classification="LOW",
+                calibrated_probability_note="No medications detected or extracted from the uploaded prescription.",
+                is_synthetic_demo=False,
+                aki_risk_percentage=0.0,
+                gi_bleed_risk_percentage=0.0,
+                cardiovascular_risk_percentage=0.0,
+                shap_features=[],
+                patient_specific_factors=[],
+                evidence_citations=[],
+                limitations=["No medications extracted or supplied."],
+            ), []
+
         # 1. Real Machine Learning + SHAP Prediction
         risk_analysis = self.predictor.predict(patient, medications, interactions)
 

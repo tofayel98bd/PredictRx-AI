@@ -182,12 +182,67 @@ async def analyze_prescription_endpoint(
                         c.strip() for c in str(detected_diagnosis).split(",") if c.strip()
                     ]
             else:
-                logger.warning("Vision LLM returned 0 medications. Falling back to clinical demo baseline.")
+                logger.warning("Vision LLM returned 0 medications.")
         except Exception as exc:
-            logger.error(f"Vision LLM extraction failed: {exc}. Gracefully falling back to clinical baseline.")
+            err_msg = str(exc)
+            logger.error(f"Vision LLM extraction failed: {err_msg}")
+            is_auth_error = any(k in err_msg.lower() for k in ["api key not valid", "unauthenticated", "401", "api_key_invalid", "forbidden", "403", "api key"])
+            is_quota_error = any(k in err_msg.lower() for k in ["429", "resource_exhausted", "quota", "rate limit"])
 
-    # Fallback to standard scenario if medications were not provided or extracted
-    if not raw_meds:
+            if is_auth_error:
+                ai_prescription_alerts = [
+                    {
+                        "code": "AI_API_KEY_INVALID",
+                        "severity": "CRITICAL",
+                        "message": "Google Gemini API Key is invalid or unauthenticated (401). Please check GEMINI_API_KEY in your .env file.",
+                    }
+                ]
+                ai_pipeline_meta = {
+                    "votes": 0,
+                    "latency_ms": 0,
+                    "ocr_engine": "Gemini AI (API Key Invalid / 401 Unauthorized)",
+                    "legibility": 0.0,
+                    "is_prescription": False,
+                }
+            elif is_quota_error:
+                ai_prescription_alerts = [
+                    {
+                        "code": "AI_API_QUOTA_EXCEEDED",
+                        "severity": "CRITICAL",
+                        "message": "Google Gemini API quota exceeded (429 Resource Exhausted). Rate limit reached for this API key.",
+                    }
+                ]
+                ai_pipeline_meta = {
+                    "votes": 0,
+                    "latency_ms": 0,
+                    "ocr_engine": "Gemini AI (Quota Exceeded / 429)",
+                    "legibility": 0.0,
+                    "is_prescription": False,
+                }
+            else:
+                ai_prescription_alerts = [
+                    {
+                        "code": "OCR_EXTRACTION_FAILED",
+                        "severity": "WARNING",
+                        "message": f"Vision LLM extraction failed: {err_msg[:120]}",
+                    }
+                ]
+                ai_pipeline_meta = {
+                    "votes": 0,
+                    "latency_ms": 0,
+                    "ocr_engine": "Perception Failed",
+                    "legibility": 0.0,
+                    "is_prescription": False,
+                }
+
+    # Fallback to standard scenario ONLY IF:
+    # 1. No medications were extracted or provided, AND
+    # 2. EITHER no file was uploaded (e.g. testing endpoint via direct JSON/form)
+    #    OR the uploaded file is explicitly one of the named reference demo cases (golden_01, rx01, etc.)
+    fname = (file_name or "").lower()
+    is_golden_sample_name = any(k in fname for k in ["golden", "rx01", "rx02", "rx03", "case_1", "case_2", "case_3", "case1", "case2", "case3", "sample_case"])
+
+    if not raw_meds and (file_bytes is None or is_golden_sample_name):
         fname = (file_name or "").lower()
         is_triple_whammy = (
             any("heart failure" in c.lower() or "chf" in c.lower() or "edema" in c.lower() for c in parsed_patient_context.conditions)

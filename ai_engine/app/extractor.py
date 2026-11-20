@@ -92,15 +92,15 @@ class GeminiExtractor:
         if not key:
             raise RuntimeError("GEMINI_API_KEY not set")
         self.client = genai.Client(api_key=key)
-        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
         self.fallback_models = [
             self.model,
+            "gemini-3.8-flash",
             "gemini-3.5-flash-lite",
             "gemini-3.1-flash-lite",
             "gemini-3.6-flash",
             "gemini-3.5-flash",
             "gemini-3.7-flash",
-            "gemini-3.8-flash",
         ]
 
     def extract(self, image_bytes: bytes, media_type: str = "image/jpeg") -> RawPrescription:
