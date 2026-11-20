@@ -1,6 +1,7 @@
 import { PatientContext, PrescriptionAnalysisResult, Patient, DrugInteraction } from '../types';
 import { DEMO_SCENARIO_4_PORAG_RESULT } from './scenario_porag';
-export { DEMO_SCENARIO_4_PORAG_RESULT };
+import { DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT } from './scenario_abdur_rahman';
+export { DEMO_SCENARIO_4_PORAG_RESULT, DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT };
 
 export const MEDICAL_SAFETY_DISCLAIMER =
   'PredictRx-AI is a clinical decision support tool. It does not replace professional medical judgment. All clinical decisions must be reviewed by a qualified healthcare professional.';
@@ -1031,5 +1032,21 @@ export const GOLDEN_DEMO_SCENARIOS: GoldenDemoScenario[] = [
     analysis_result: DEMO_SCENARIO_4_PORAG_RESULT,
     sample_file_name: 'porag.jpeg',
     preview_image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'case-5-abdur-rahman-ckd4',
+    scenario_id: 'GOLDEN_05_ABDUR_RAHMAN_CKD4',
+    badge: '48% STAGE 4 CKD',
+    badgeVariant: 'warning',
+    title: 'Case 5: Md. Abdur Rahman (65M)',
+    subtitle: 'CKD Stage 4 Nephrology — Metformin Deprescribing & Linagliptin',
+    patient_name: 'মোঃ আব্দুর রহমান',
+    patient_summary: '65M, CKD-4, eGFR 28.4, Cr 2.5 | Rx: Amlodipine, Linagliptin, Losartan, Calcium Carbonate',
+    risk_score: 48,
+    highlight: 'Severe renal impairment (eGFR 28.4). Metformin contraindicated (MALA risk). Prescribed renal-safe Linagliptin & Losartan monitoring.',
+    patient_context: DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT.patient_context,
+    analysis_result: DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT,
+    sample_file_name: 'prescription_abdur_rahman_ckd4.jpg',
+    preview_image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=60',
   },
 ];

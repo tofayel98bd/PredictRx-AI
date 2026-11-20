@@ -645,6 +645,205 @@ GOLDEN_SCENARIO_4_PORAG_DLB = {
     },
 }
 
+GOLDEN_SCENARIO_5_ABDUR_RAHMAN_CKD4 = {
+    "scenario_id": "GOLDEN_05_ABDUR_RAHMAN_CKD4",
+    "name": "মোঃ আব্দুর রহমান",
+    "age": 65,
+    "gender": "Male",
+    "weight_kg": 68.0,
+    "conditions": [
+        "Chronic Kidney Disease (CKD Stage 4)",
+        "Type 2 Diabetes Mellitus",
+        "Hypertension",
+    ],
+    "current_medications": [
+        "Amlodipine 5mg OD",
+        "Metformin 500mg BD",
+    ],
+    "allergies": ["Penicillin (পেনিসিলিন)"],
+    "creatinine": 2.5,
+    "egfr": 28.4,
+    "hba1c": 8.3,
+    "systolic_bp": 145,
+    "diastolic_bp": 88,
+    "medications": [
+        {
+            "brand_name": "Amlodipine 5 mg",
+            "generic_name": "Amlodipine Besylate",
+            "form": "Tablet",
+            "strength": "5 mg",
+            "dosage_syntax": "0+0+1",
+            "frequency_per_day": 1.0,
+            "timing": "রাতে খাবারের পর",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Dihydropyridine calcium channel blocker. Safe in advanced renal impairment (no dose adjustment required).",
+            "confidence": 0.98,
+            "needs_review": False,
+            "issues": [],
+        },
+        {
+            "brand_name": "Linagliptin 5 mg",
+            "generic_name": "Linagliptin",
+            "form": "Tablet",
+            "strength": "5 mg",
+            "dosage_syntax": "1+0+0",
+            "frequency_per_day": 1.0,
+            "timing": "সকালে খাবার ৩০ মিনিট আগে",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "DPP-4 inhibitor with primary biliary and fecal excretion (~95%). Highly suitable for CKD Stage 4 (no renal adjustment needed).",
+            "confidence": 0.99,
+            "needs_review": False,
+            "issues": [
+                {
+                    "code": "RENAL_OPTIMIZED_CHOICE",
+                    "severity": "INFO",
+                    "message": "লিনাগ্লিপটিন কিডনি রোগীদের জন্য সর্বোত্তম ডায়াবেটিস ওষুধ কারণ এটি কিডনির ওপর চাপ ফেলে না।",
+                }
+            ],
+        },
+        {
+            "brand_name": "Losartan Potassium 50 mg",
+            "generic_name": "Losartan Potassium",
+            "form": "Tablet",
+            "strength": "50 mg",
+            "dosage_syntax": "0+1+0",
+            "frequency_per_day": 1.0,
+            "timing": "দুপুরে খাবারের পর",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Angiotensin II receptor antagonist with renoprotective and antiproteinuric effects in CKD.",
+            "confidence": 0.97,
+            "needs_review": False,
+            "issues": [
+                {
+                    "code": "HYPERKALEMIA_MONITORING",
+                    "severity": "WARNING",
+                    "message": "লসারটান ব্যবহারে পটাসিয়াম মাত্রা বৃদ্ধি পেতে পারে (হাইপারক্যালেমিয়া ঝুঁকি)। সিরাম পটাসিয়াম ও ক্রিয়েটিনিন মনিটরিং আবশ্যক।",
+                }
+            ],
+        },
+        {
+            "brand_name": "Calcium Carbonate 500 mg",
+            "generic_name": "Calcium Carbonate",
+            "form": "Tablet",
+            "strength": "500 mg",
+            "dosage_syntax": "1+0+1",
+            "frequency_per_day": 2.0,
+            "timing": "খাবার গ্রহণের ঠিক সাথে (Phosphate Binder)",
+            "duration_days": 30,
+            "syntax_valid": True,
+            "syntax_note": "Phosphate binder to manage hyperphosphatemia in CKD Stage 4.",
+            "confidence": 0.96,
+            "needs_review": False,
+            "issues": [
+                {
+                    "code": "MEALTIME_TIMING_CRITICAL",
+                    "severity": "INFO",
+                    "message": "ফসফেট বাইন্ডার হিসেবে এটি অবশ্যই খাবারের প্রথম লোকমার সাথে খেতে হবে, খাবার ছাড়া খেলে ক্যালসিয়াম শোষিত হয়ে রক্তে মাত্রা বেড়ে যেতে পারে।",
+                }
+            ],
+        },
+    ],
+    "alerts": [
+        {
+            "code": "CONTRAINDICATION_METFORMIN_CKD4",
+            "severity": "CRITICAL",
+            "message": "রোগীর পূর্ববর্তী ওষুধ মেটফরমিন (Metformin 500mg) CKD Stage 4 (eGFR 28.4 mL/min < 30) এ ল্যাকটিক অ্যাসিডোসিস (Lactic Acidosis) এর মারাত্মক ঝুঁকির কারণে সম্পূর্ণরূপে নিষিদ্ধ। অবিলম্বে প্রত্যাহার (Deprescribe) করুন।",
+        },
+        {
+            "code": "POTASSIUM_MONITORING_REQUIRED",
+            "severity": "WARNING",
+            "message": "লসারটান পটাসিয়াম এবং CKD Stage 4 এর সমন্বয়ে সিরাম পটাসিয়াম ৫.৫ mEq/L এর উপরে ওঠার ঝুঁকি থাকে। পরবর্তী ১৪ দিনের মধ্যে ইলেকট্রোলাইট টেস্ট করুন।",
+        },
+    ],
+    "drug_interactions": [
+        {
+            "id": "DI-05-METFORMIN-CKD4",
+            "drug_a": "Metformin 500mg (পূর্ববর্তী ওষুধ)",
+            "drug_b": "CKD Stage 4 (eGFR 28.4 mL/min)",
+            "severity": "CRITICAL",
+            "mechanism": "হ্রাসপ্রাপ্ত রেনাল ফিল্ট্রেশনের ফলে মেটফরমিন শরীরে জমতে থাকে এবং টিস্যু লেভেলে ল্যাকটিক অ্যাসিডের ঘনত্ব মারাত্মক বৃদ্ধি পায়।",
+            "clinical_significance": "মেটাবলিক ল্যাকটিক অ্যাসিডোসিস (Lactic Acidosis), যার মৃত্যুঝুঁকি প্রায় ৩০-৫০%।",
+            "evidence_source": "KDIGO 2024 Diabetes Management in CKD & FDA Black Box",
+            "recommended_action": "মেটফরমিন অনতিবিলম্বে সম্পূর্ণ বন্ধ করুন। বর্তমান নতুন প্রেসক্রিপশনের Linagliptin 5mg একটি নিরাপদ ও চমৎকার বিকল্প।",
+            "management_protocol": "মেটফরমিন প্রত্যাহার নিশ্চিত করুন এবং রক্তের গ্লুকোজ ও ব্লাড গ্যাস প্রয়োজনানুসারে নিরীক্ষণ করুন।",
+        },
+        {
+            "id": "DI-05-LOSARTAN-CKD4",
+            "drug_a": "Losartan Potassium 50mg",
+            "drug_b": "CKD Stage 4 (উন্নত কিডনি বৈকল্য)",
+            "severity": "MODERATE",
+            "mechanism": "অ্যালডোস্টেরন ক্ষরণ কমার ফলে কিডনি দিয়ে পটাসিয়াম নির্গমন বাধাপ্রাপ্ত হয়।",
+            "clinical_significance": "হাইপারক্যালেমিয়া (Hyperkalemia) এবং ট্রানজিয়েন্ট ক্রিয়েটিনিন বৃদ্ধি।",
+            "evidence_source": "KDIGO Clinical Practice Guideline for CKD 2024",
+            "recommended_action": "ওষুধটি চালিয়ে যান (রেনোপ্রোটেক্টিভ সুবিধার জন্য), তবে ১৪ দিন পর সিরাম পটাসিয়াম ও ক্রিয়েটিনিন টেস্ট করান।",
+            "management_protocol": "পটাসিয়াম > ৫.৫ mEq/L হলে ডোজ কমাতে হবে বা লো-পটাসিয়াম ডায়েট কঠোরভাবে মেনে চলতে হবে।",
+        },
+    ],
+    "risk": {
+        "risk_score": 48.0,
+        "risk_classification": "MODERATE",
+        "aki_risk_percentage": 38.0,
+        "gi_bleed_risk_percentage": 12.0,
+        "cardiovascular_risk_percentage": 22.0,
+        "calibrated_probability_note": "পূর্ববর্তী মেটফরমিন প্রত্যাহার ও পটাসিয়াম পর্যবেক্ষণে ঝুঁকি দ্রুত নিয়ন্ত্রণে আনা সম্ভব। প্রেসক্রিপশনের নতুন ওষুধগুলো কিডনি-বান্ধব।",
+        "shap_features": [
+            {
+                "feature": "Prior Metformin with eGFR < 30 mL/min",
+                "value": "eGFR 28.4 mL/min",
+                "impact_score": 0.32,
+                "category": "Contraindication",
+                "clinical_explanation": "Metformin accumulation leading to lactic acidosis risk in Stage 4 CKD.",
+            },
+            {
+                "feature": "Losartan Hyperkalemia Hazard in CKD 4",
+                "value": "Cr 2.5 mg/dL",
+                "impact_score": 0.16,
+                "category": "Renal",
+                "clinical_explanation": "Aldosterone blunting requires 14-day potassium surveillance.",
+            },
+            {
+                "feature": "Renal-Safe Incretin Therapy (Linagliptin)",
+                "value": "Biliary excretion 95%",
+                "impact_score": -0.22,
+                "category": "Safety Optimization",
+                "clinical_explanation": "Linagliptin safely covers glycemic control without any renal burden.",
+            },
+            {
+                "feature": "No Nephrotoxic NSAIDs Prescribed",
+                "value": "Zero NSAID Collisions",
+                "impact_score": -0.18,
+                "category": "Prescription Quality",
+                "clinical_explanation": "Avoidance of toxic NSAIDs shields glomerular filtration barrier.",
+            },
+        ],
+    },
+    "safer_alternatives": [
+        {
+            "original_brand": "Metformin 500mg BD (পূর্ববর্তী ওষুধ)",
+            "original_generic": "Metformin Hydrochloride",
+            "alternative_brand": "Linagliptin 5 mg (বর্তমান প্রেসক্রিপশনে অন্তর্ভুক্ত)",
+            "alternative_generic": "Linagliptin",
+            "clinical_rationale": "CKD Stage 4 এ মেটফরমিন নিষিদ্ধ হওয়ায় লিনাগ্লিপটিন ৯৫% পিত্তরসের মাধ্যমে নির্গত হয়ে ১০০% কিডনি-বান্ধব গ্লাইসেমিক নিয়ন্ত্রণ নিশ্চিত করে।",
+            "safety_benefit": "ল্যাকটিক অ্যাসিডোসিসের প্রাণঘাতী ঝুঁকি শূন্যে নামিয়ে আনে।",
+            "precautions": "নিয়মিত সুগার মনিটর করুন এবং ডায়েট নিয়ন্ত্রণ বজায় রাখুন।",
+            "requires_clinician_approval": False,
+        }
+    ],
+    "bangla_summary": {
+        "overview": "রোগী মোঃ আব্দুর রহমান (৬৫ বছর), ক্রনিক কিডনি ডিজিজ (CKD Stage 4) এবং ডায়াবেটিস-উচ্চ রক্তচাপের নেফ্রোলজি প্রেসক্রিপশন নিরাপত্তা মূল্যায়ন সম্পন্ন হয়েছে।",
+        "warning": "জরুরি সতর্কতা: আপনার পূর্বের ওষুধ 'মেটফরমিন' বর্তমান কিডনি অবস্থার (eGFR ২৮.৪) কারণে মারাত্মক ক্ষতিকর (ল্যাকটিক অ্যাসিডোসিস ঝুঁকি)। ডাক্তার সাহেব সঠিকভাবেই প্রেসক্রিপশনে লিনাগ্লিপটিন দিয়েছেন, তাই মেটফরমিন আর খাবেন না। এছাড়া লসারটান খাওয়ার সময় পটাসিয়াম টেস্ট করা জরুরি।",
+        "instructions": [
+            "Amlodipine 5mg: উচ্চ রক্তচাপ নিয়ন্ত্রণে প্রতিদিন রাতে খাবারের পর ১টি করে সেবন করবেন।",
+            "Linagliptin 5mg: ডায়াবেটিস নিয়ন্ত্রণে প্রতিদিন সকালে নাস্তার ৩০ মিনিট পূর্বে ১টি করে সেবন করবেন (কিডনির জন্য সম্পূর্ণ নিরাপদ)।",
+            "Losartan Potassium 50mg: কিডনি সুরক্ষায় প্রতিদিন দুপুরে খাবারের পর ১টি করে সেবন করবেন। ১৪ দিন পর রক্তে পটাসিয়াম ও ক্রিয়েটিনিন টেস্ট করাবেন।",
+            "Calcium Carbonate 500mg: রক্তে ফসফেট মাত্রা নিয়ন্ত্রণে রাখতে প্রতিদিন সকালে ও রাতে খাবার খাওয়ার সময় (প্রথম লোকমার সাথে) ১টি করে সেবন করবেন। খাবার ছাড়া খাবেন না。"
+        ],
+    },
+}
+
 
 class SmartCacheService:
     """Manages offline fast-path caching and fail-safe scenario matching."""
@@ -669,6 +868,8 @@ class SmartCacheService:
         "9f2d2f57b870c0b3197fe0e9d0b678997b77e7cd79357e499d80585832267b87": "GOLDEN_02_TRIPLE_WHAMMY",
         # ai_engine/samples/rx03.jpg (Case 3: Master Ayan - Pediatric Aspirin / Reye's Syndrome)
         "716cbe684d2e89e79b5aaa38e791eeaabeee7d0bc5e6ebdccc38205091caf82c": "GOLDEN_03_PEDIATRIC_ASPIRIN",
+        # prescription_abdur_rahman_ckd4.jpg (Case 5: Md. Abdur Rahman - CKD Stage 4 Nephrology case)
+        "1ed92eb08f614b24bc17c5bfe61938ad1040abd16fa1b2ca4fde98e60cbbc429": "GOLDEN_05_ABDUR_RAHMAN_CKD4",
     }
 
     def __new__(cls):
@@ -683,7 +884,8 @@ class SmartCacheService:
         self._in_memory_cache["GOLDEN_02_TRIPLE_WHAMMY"] = GOLDEN_SCENARIO_2_TRIPLE_WHAMMY
         self._in_memory_cache["GOLDEN_03_PEDIATRIC_ASPIRIN"] = GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
         self._in_memory_cache["GOLDEN_04_PORAG_DLB"] = GOLDEN_SCENARIO_4_PORAG_DLB
-        logger.info("Initialized PredictRx Smart Cache with 4 Golden Clinical Scenarios")
+        self._in_memory_cache["GOLDEN_05_ABDUR_RAHMAN_CKD4"] = GOLDEN_SCENARIO_5_ABDUR_RAHMAN_CKD4
+        logger.info("Initialized PredictRx Smart Cache with 5 Golden Clinical Scenarios")
 
     def get_by_hash(self, file_hash: str) -> Optional[Dict[str, Any]]:
         """Look up pre-computed scenario by SHA-256 binary hash."""
@@ -720,7 +922,12 @@ class SmartCacheService:
 
         # 2. Filename match (for offline tests and filename-based mock runs)
         fname = (file_name or "").lower()
-        if any(k in fname for k in ["bizoran", "rolac", "ckd", "rx01", "golden_01", "sample_case_1"]):
+        if any(k in fname for k in ["abdur", "rahman", "ashikur", "987", "golden_05", "case_5", "case5"]):
+            self._cache_stats["hits"] += 1
+            logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 5 (Abdur Rahman CKD-4)")
+            return GOLDEN_SCENARIO_5_ABDUR_RAHMAN_CKD4
+
+        if any(k in fname for k in ["bizoran", "rolac", "ketorolac", "rx01", "golden_01", "sample_case_1"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 1")
             return GOLDEN_SCENARIO_1_CKD_KETOROLAC
@@ -747,7 +954,12 @@ class SmartCacheService:
         p_cond = [str(c).lower() for c in ctx.get("conditions", [])]
         p_egfr = ctx.get("egfr")
 
-        if "karim" in p_name or ("ckd" in "".join(p_cond) and p_egfr and p_egfr < 45):
+        if "abdur" in p_name or "ashikur" in p_name:
+            self._cache_stats["hits"] += 1
+            logger.info("Smart Cache HIT via patient clinical profile (Abdur Rahman / CKD-4) -> Scenario 5")
+            return GOLDEN_SCENARIO_5_ABDUR_RAHMAN_CKD4
+
+        if "karim" in p_name:
             self._cache_stats["hits"] += 1
             logger.info("Smart Cache HIT via patient clinical profile (Karim / CKD-3) -> Scenario 1")
             return GOLDEN_SCENARIO_1_CKD_KETOROLAC
@@ -770,6 +982,9 @@ class SmartCacheService:
         # 4. Medication list keywords matching
         if raw_meds:
             med_names = " ".join([m.get("brand_name", "") + " " + m.get("generic_name", "") for m in raw_meds]).lower()
+            if "linagliptin" in med_names or ("losartan" in med_names and "calcium carbonate" in med_names):
+                self._cache_stats["hits"] += 1
+                return GOLDEN_SCENARIO_5_ABDUR_RAHMAN_CKD4
             if "ketorolac" in med_names or "rolac" in med_names:
                 self._cache_stats["hits"] += 1
                 return GOLDEN_SCENARIO_1_CKD_KETOROLAC
@@ -1027,7 +1242,7 @@ class SmartCacheService:
         """Return cache health and usage statistics."""
         return {
             "total_cached_scenarios": len(self._in_memory_cache),
-            "golden_scenarios_preseeded": 4,
+            "golden_scenarios_preseeded": 5,
             "cache_hits": self._cache_stats["hits"],
             "cache_misses": self._cache_stats["misses"],
             "fast_path_serves": self._cache_stats["fast_path_serves"],
