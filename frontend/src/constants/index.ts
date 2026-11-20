@@ -1,4 +1,7 @@
 import { PatientContext, PrescriptionAnalysisResult, Patient, DrugInteraction } from '../types';
+import { DEMO_SCENARIO_4_PORAG_RESULT } from './scenario_porag';
+import { DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT } from './scenario_abdur_rahman';
+export { DEMO_SCENARIO_4_PORAG_RESULT, DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT };
 
 export const MEDICAL_SAFETY_DISCLAIMER =
   'PredictRx-AI is a clinical decision support tool. It does not replace professional medical judgment. All clinical decisions must be reviewed by a qualified healthcare professional.';
@@ -356,6 +359,27 @@ export const DEMO_PATIENTS_LIST: Patient[] = [
     active_prescriptions_count: 1,
     last_analyzed: '2026-11-10T11:05:00Z',
     risk_level: 'LOW',
+  },
+  {
+    id: 'PRX-BD-2026-063',
+    name: 'Mohammad Porag',
+    age: 63,
+    gender: 'Male',
+    phone: '+880 1711-987654',
+    blood_group: 'A+',
+    creatinine: 0.9,
+    egfr: 91.0,
+    hba1c: 5.4,
+    conditions: [
+      'Lewy Body Dementia (DLB)',
+      'Impaired memory',
+      'Slowness of movement (Bradykinesia)',
+      'Visual hallucination',
+    ],
+    allergies: ['None reported'],
+    active_prescriptions_count: 7,
+    last_analyzed: '2026-11-19T20:45:00Z',
+    risk_level: 'MODERATE',
   },
 ];
 
@@ -992,5 +1016,37 @@ export const GOLDEN_DEMO_SCENARIOS: GoldenDemoScenario[] = [
     analysis_result: DEMO_SCENARIO_3_AYAN_RESULT,
     sample_file_name: 'sample_rx_pediatric_aspirin.jpg',
     preview_image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=800&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'case-4-porag-dlb',
+    scenario_id: 'GOLDEN_04_PORAG_DLB',
+    badge: '32% NEURO-GERIATRIC',
+    badgeVariant: 'warning',
+    title: 'Case 4: Mohammad Porag (63M)',
+    subtitle: 'Lewy Body Dementia (DLB) — Polypharmacy CDSS',
+    patient_name: 'Porag',
+    patient_summary: '63M, Lewy Body Dementia, eGFR 91, Creatinine 0.9 | Rx: Rivacap, Dementa, Syndopa, Queta XR',
+    risk_score: 32,
+    highlight: 'Normal renal function (eGFR 91). Dopaminergic balance (Quetiapine vs Levodopa) & postural hypotension vigilance.',
+    patient_context: DEMO_SCENARIO_4_PORAG_RESULT.patient_context,
+    analysis_result: DEMO_SCENARIO_4_PORAG_RESULT,
+    sample_file_name: 'porag.jpeg',
+    preview_image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&auto=format&fit=crop&q=60',
+  },
+  {
+    id: 'case-5-abdur-rahman-ckd4',
+    scenario_id: 'GOLDEN_05_ABDUR_RAHMAN_CKD4',
+    badge: '48% STAGE 4 CKD',
+    badgeVariant: 'warning',
+    title: 'Case 5: Md. Abdur Rahman (65M)',
+    subtitle: 'CKD Stage 4 Nephrology — Metformin Deprescribing & Linagliptin',
+    patient_name: 'মোঃ আব্দুর রহমান',
+    patient_summary: '65M, CKD-4, eGFR 28.4, Cr 2.5 | Rx: Amlodipine, Linagliptin, Losartan, Calcium Carbonate',
+    risk_score: 48,
+    highlight: 'Severe renal impairment (eGFR 28.4). Metformin contraindicated (MALA risk). Prescribed renal-safe Linagliptin & Losartan monitoring.',
+    patient_context: DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT.patient_context,
+    analysis_result: DEMO_SCENARIO_5_ABDUR_RAHMAN_RESULT,
+    sample_file_name: 'prescription_abdur_rahman_ckd4.jpg',
+    preview_image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&auto=format&fit=crop&q=60',
   },
 ];

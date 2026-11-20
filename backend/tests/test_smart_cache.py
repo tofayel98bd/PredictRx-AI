@@ -9,6 +9,8 @@ from app.cache.smart_cache import (
     GOLDEN_SCENARIO_1_CKD_KETOROLAC,
     GOLDEN_SCENARIO_2_TRIPLE_WHAMMY,
     GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN,
+    GOLDEN_SCENARIO_4_PORAG_DLB,
+    GOLDEN_SCENARIO_5_ABDUR_RAHMAN_CKD4,
 )
 from app.main import app
 from app.schemas.analysis import PrescriptionAnalysisResult
@@ -36,6 +38,17 @@ def test_golden_scenarios_preseeded():
     assert s3 is not None
     assert s3["name"] == "Master Ayan"
     assert s3["risk"]["risk_score"] == 84.0
+
+    s4 = smart_cache.get_scenario("GOLDEN_04_PORAG_DLB")
+    assert s4 is not None
+    assert s4["name"] == "Porag"
+    assert s4["risk"]["risk_score"] == 32.0
+
+    s5 = smart_cache.get_scenario("GOLDEN_05_ABDUR_RAHMAN_CKD4")
+    assert s5 is not None
+    assert "আব্দুর রহমান" in s5["name"]
+    assert s5["risk"]["risk_score"] == 48.0
+    assert len(s5["medications"]) == 4
 
 
 def test_match_by_binary_hash():
@@ -105,7 +118,7 @@ def test_to_analysis_result_schema_validity():
 def test_cache_stats_tracking():
     """Verify stats tracking in cache."""
     stats = smart_cache.get_stats()
-    assert stats["golden_scenarios_preseeded"] == 3
+    assert stats["golden_scenarios_preseeded"] == 5
     assert stats["cache_hits"] >= 1
     assert "hit_ratio_pct" in stats
 
@@ -117,14 +130,15 @@ def test_api_cache_endpoints(client):
     assert resp.status_code == 200
     data = resp.json()
     assert "cache_hits" in data
-    assert data["golden_scenarios_preseeded"] == 3
+    assert data["golden_scenarios_preseeded"] == 5
 
     # 2. Scenarios list endpoint
     resp = client.get("/api/v1/predict-rx/scenarios")
     assert resp.status_code == 200
     scenarios = resp.json()
-    assert len(scenarios) == 3
+    assert len(scenarios) == 5
     assert scenarios[0]["scenario_id"] == "GOLDEN_01_CKD_KETOROLAC"
+    assert scenarios[4]["scenario_id"] == "GOLDEN_05_ABDUR_RAHMAN_CKD4"
 
     # 3. Direct Scenario Run endpoint (< 15ms)
     resp = client.get("/api/v1/predict-rx/scenarios/GOLDEN_01_CKD_KETOROLAC")

@@ -31,10 +31,41 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
 
   const getScoreColor = (score: number) => {
     if (score >= 75) return 'text-red-600 dark:text-red-400';
-    if (score >= 50) return 'text-amber-600 dark:text-amber-400';
-    if (score >= 25) return 'text-blue-600 dark:text-blue-400';
+    if (score >= 50) return 'text-orange-600 dark:text-orange-400';
+    if (score >= 25) return 'text-amber-600 dark:text-amber-400';
     return 'text-emerald-600 dark:text-emerald-400';
   };
+
+  const getContainerStyles = () => {
+    if (risk.risk_score >= 75 || risk.risk_classification === 'CRITICAL') {
+      return 'border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20';
+    }
+    if (risk.risk_score >= 50 || risk.risk_classification === 'HIGH') {
+      return 'border-orange-200 dark:border-orange-900/60 bg-orange-50/50 dark:bg-orange-950/20';
+    }
+    if (risk.risk_score >= 25 || risk.risk_classification === 'MODERATE') {
+      return 'border-amber-200 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20';
+    }
+    return 'border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20';
+  };
+
+  const getThresholdLabel = () => {
+    if (risk.risk_score >= 75) return isBn ? 'মারাত্মক (>৭৫)' : 'Critical (>75)';
+    if (risk.risk_score >= 50) return isBn ? 'উচ্চ ঝুঁকি (৫০-৭৪)' : 'High (50-74)';
+    if (risk.risk_score >= 25) return isBn ? 'মাঝারি ঝুঁকি (২৫-৪৯)' : 'Moderate (25-49)';
+    return isBn ? 'স্বাভাবিক / নিরাপদ (<২৫)' : 'Normal / Safe (<25)';
+  };
+
+  const getThresholdColor = () => {
+    if (risk.risk_score >= 75) return 'text-red-600 dark:text-red-400';
+    if (risk.risk_score >= 50) return 'text-orange-600 dark:text-orange-400';
+    if (risk.risk_score >= 25) return 'text-amber-600 dark:text-amber-400';
+    return 'text-emerald-600 dark:text-emerald-400';
+  };
+
+  const akiVal = risk.aki_risk_percentage ?? 10;
+  const giVal = risk.gi_bleed_risk_percentage ?? 12;
+  const cvVal = risk.cardiovascular_risk_percentage ?? 18;
 
   const formatRiskBadge = (classification: string) => {
     if (isBn) {
@@ -75,7 +106,7 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
 
       <CardContent className="space-y-6">
         {/* Main Score Display */}
-        <div className="flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl border border-red-200 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/20 gap-4">
+        <div className={`flex flex-col sm:flex-row items-center justify-between p-4 rounded-xl border gap-4 ${getContainerStyles()}`}>
           <div className="flex items-center space-x-4">
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-card shadow-sm border border-border">
               <span className={`text-3xl font-extrabold tracking-tight ${getScoreColor(risk.risk_score)}`}>
@@ -96,12 +127,20 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
           <div className="w-full sm:w-48 text-right sm:text-left space-y-1">
             <div className="flex justify-between text-xs font-semibold">
               <span className="text-muted-foreground">{t('results.riskGauge.threshold', 'Threshold:')}</span>
-              <span className="text-red-600">{t('results.riskGauge.thresholdCritical', 'Critical (>75)')}</span>
+              <span className={`font-bold ${getThresholdColor()}`}>{getThresholdLabel()}</span>
             </div>
             <Progress
               value={risk.risk_score}
-              className="h-2.5 bg-red-100 dark:bg-red-950"
-              indicatorClassName={risk.risk_score > 70 ? 'bg-red-600' : 'bg-amber-500'}
+              className="h-2.5 bg-muted"
+              indicatorClassName={
+                risk.risk_score >= 75
+                  ? 'bg-red-600'
+                  : risk.risk_score >= 50
+                  ? 'bg-orange-500'
+                  : risk.risk_score >= 25
+                  ? 'bg-amber-500'
+                  : 'bg-emerald-500'
+              }
             />
           </div>
         </div>
@@ -113,15 +152,19 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
               <span className="text-muted-foreground font-medium">
                 {t('results.riskGauge.aki', 'Acute Kidney Injury (AKI)')}
               </span>
-              <span className="font-bold text-red-600 font-mono">{risk.aki_risk_percentage || 84}%</span>
+              <span className={`font-bold font-mono ${akiVal >= 60 ? 'text-red-600' : akiVal >= 30 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                {akiVal}%
+              </span>
             </div>
             <Progress
-              value={risk.aki_risk_percentage || 84}
-              className="h-1.5 mt-2 bg-red-100 dark:bg-red-950"
-              indicatorClassName="bg-red-600"
+              value={akiVal}
+              className="h-1.5 mt-2 bg-muted"
+              indicatorClassName={akiVal >= 60 ? 'bg-red-600' : akiVal >= 30 ? 'bg-amber-500' : 'bg-emerald-500'}
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              {t('results.riskGauge.akiDesc', 'Renal hemodynamic uncoupling')}
+              {akiVal >= 50
+                ? (isBn ? 'রেনাল হেমোডাইনামিক জটিলতা / নেফ্রোটক্সিক ঝুঁকি' : 'Renal hemodynamic uncoupling')
+                : (isBn ? 'স্বাভাবিক রেনাল ক্লিয়ারেন্স ও নিরাপদ পরিসীমা' : 'Preserved renal hemodynamic status')}
             </p>
           </div>
 
@@ -130,15 +173,19 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
               <span className="text-muted-foreground font-medium">
                 {t('results.riskGauge.giBleed', 'Gastrointestinal Bleeding')}
               </span>
-              <span className="font-bold text-amber-600 font-mono">{risk.gi_bleed_risk_percentage || 68}%</span>
+              <span className={`font-bold font-mono ${giVal >= 50 ? 'text-red-600' : giVal >= 25 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                {giVal}%
+              </span>
             </div>
             <Progress
-              value={risk.gi_bleed_risk_percentage || 68}
-              className="h-1.5 mt-2 bg-amber-100 dark:bg-amber-950"
-              indicatorClassName="bg-amber-500"
+              value={giVal}
+              className="h-1.5 mt-2 bg-muted"
+              indicatorClassName={giVal >= 50 ? 'bg-red-600' : giVal >= 25 ? 'bg-amber-500' : 'bg-emerald-500'}
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              {t('results.riskGauge.giBleedDesc', 'COX-1 inhibition > 5 days')}
+              {giVal >= 50
+                ? (isBn ? 'COX-1 ব্লকেজ ও আলসারেশনের ঝুঁকি' : 'COX-1 inhibition > 5 days')
+                : (isBn ? 'স্বাভাবিক গ্যাস্ট্রোইনটেস্টাইনাল সহনশীলতা' : 'Normal gastrointestinal tolerance')}
             </p>
           </div>
 
@@ -147,15 +194,19 @@ export const RiskGaugeCard: React.FC<RiskGaugeCardProps> = ({ risk }) => {
               <span className="text-muted-foreground font-medium">
                 {t('results.riskGauge.cv', 'Cardiovascular Event')}
               </span>
-              <span className="font-bold text-blue-600 font-mono">{risk.cardiovascular_risk_percentage || 42}%</span>
+              <span className={`font-bold font-mono ${cvVal >= 50 ? 'text-blue-600' : cvVal >= 25 ? 'text-blue-500' : 'text-emerald-600'}`}>
+                {cvVal}%
+              </span>
             </div>
             <Progress
-              value={risk.cardiovascular_risk_percentage || 42}
-              className="h-1.5 mt-2 bg-blue-100 dark:bg-blue-950"
-              indicatorClassName="bg-blue-500"
+              value={cvVal}
+              className="h-1.5 mt-2 bg-muted"
+              indicatorClassName={cvVal >= 50 ? 'bg-blue-600' : cvVal >= 25 ? 'bg-blue-500' : 'bg-emerald-500'}
             />
             <p className="text-[10px] text-muted-foreground mt-1.5">
-              {t('results.riskGauge.cvDesc', 'BP blunting & fluid retention')}
+              {cvVal >= 40
+                ? (isBn ? 'রক্তচাপ বৃদ্ধি বা ভাস্কুলার সংবেদনশীলতা' : 'BP blunting & fluid retention')
+                : (isBn ? 'স্বাভাবিক কার্ডিওভাসকুলার স্থিতিশীলতা' : 'Stable cardiovascular baseline')}
             </p>
           </div>
         </div>
