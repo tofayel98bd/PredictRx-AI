@@ -26,7 +26,8 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
       .replace('86% AKI RISK', '৮৬% AKI ঝুঁকি')
       .replace('78% COLLAPSE RISK', '৭৮% কলাপস ঝুঁকি')
       .replace("84% REYE'S SYNDROME", '৮৪% রে সিন্ড্রোম')
-      .replace('32% NEURO-GERIATRIC', '৩২% নিউরো-জেরিয়াট্রিক');
+      .replace('32% NEURO-GERIATRIC', '৩২% নিউরো-জেরিয়াট্রিক')
+      .replace('48% STAGE 4 CKD', '৪৮% স্টেজ ৪ সিকেডি');
   };
 
   return (
@@ -47,7 +48,7 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {GOLDEN_DEMO_SCENARIOS.map((scenario) => {
           const isActive = activeScenarioId === scenario.scenario_id;
 

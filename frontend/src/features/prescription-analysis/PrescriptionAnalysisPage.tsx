@@ -53,7 +53,10 @@ import { toast } from 'sonner';
 const patientFormSchema = z.object({
   patient_id: z.string().optional(),
   name: z.string().optional(),
-  age: z.coerce.number().min(1, 'Age must be valid').max(120, 'Age must be realistic'),
+  age: z.preprocess(
+    (val) => (val === '' || val === undefined || val === null ? undefined : Number(val)),
+    z.number().min(1, 'Age must be valid').max(120, 'Age must be realistic').optional()
+  ),
   gender: z.enum(['Male', 'Female', 'Other']).default('Male'),
   weight_kg: z.coerce.number().optional(),
   creatinine: z.coerce.number().optional(),
@@ -304,7 +307,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
     const patientContext: PatientContext = {
       patient_id: values.patient_id,
       name: values.name,
-      age: values.age,
+      age: values.age || 45,
       gender: values.gender,
       weight_kg: values.weight_kg,
       creatinine: values.creatinine,
@@ -377,7 +380,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
             <span>
               {showReferenceCases
                 ? (isBn ? 'কেস লুকান ▲' : 'Hide Sample Cases ▲')
-                : (isBn ? 'নমুনা কেস দেখুন (৩টি) ▼' : 'Sample Clinical Cases (3) ▼')}
+                : (isBn ? 'নমুনা কেস দেখুন (৫টি) ▼' : 'Sample Clinical Cases (5) ▼')}
             </span>
           </Button>
 
@@ -739,7 +742,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           )}
 
           {/* Clinical Alert Top Banner if Critical */}
-          {analysisResult.clinical_risk.risk_classification === 'CRITICAL' && (
+          {analysisResult.clinical_risk?.risk_classification === 'CRITICAL' && (
             <Alert variant="critical">
               <ShieldAlert className="h-5 w-5 text-red-600" />
               <AlertTitle className="text-sm font-bold text-red-900 dark:text-red-200">
@@ -751,18 +754,18 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 {isBn
                   ? (analysisResult.prescription_id?.includes('TRIPLE') || (analysisResult as any).alerts?.some((a: any) => a.code?.includes('TRIPLE'))
                       ? 'জরুরি সতর্কতা: প্রেসক্রিপশনে উচ্চ রক্তচাপের ওষুধ (Ramipril), পানির ওষুধ (Lasix) এবং ব্যথার ওষুধ (Diclofenac) একত্রে রয়েছে। চিকিৎসাবিজ্ঞানে একে "ট্রিপল হোয়ামি" বলা হয়—যা আকস্মিকভাবে কিডনি অকেজো করে দেয়। ব্যথার ওষুধটি বাদ দিয়ে নিরাপদ বিকল্প ব্যবহার আবশ্যক।'
-                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
+                      : (analysisResult.extracted_prescription || []).some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
                       ? 'গুরুতর সতর্কতা: ভাইরাল জ্বরে আক্রান্ত শিশুর ক্ষেত্রে অ্যাসপিরিন সেবনে প্রাণঘাতী রে সিন্ড্রোমের মারাত্মক ঝুঁকি রয়েছে। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।'
-                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('rolac') || m.brand_name.toLowerCase().includes('ketorolac') || m.generic_name?.toLowerCase().includes('ketorolac'))
+                      : (analysisResult.extracted_prescription || []).some((m) => m.brand_name.toLowerCase().includes('rolac') || m.brand_name.toLowerCase().includes('ketorolac') || m.generic_name?.toLowerCase().includes('ketorolac'))
                       ? 'কিটোরোলাক (Rolac 10) ১৪ দিনের মেয়াদ সর্বোচ্চ সুরক্ষা সীমা অতিক্রম করেছে এবং রোগীর সিকেডি স্টেজ ৩ (eGFR 34.5)-এর ক্ষেত্রে সম্পূর্ণ নিষিদ্ধ। একই সাথে ওলমেসারটান সেবনে তীব্র কিডনি ক্ষতির (AKI) ঝুঁকি বাড়িয়ে দেয়। অনতিবিলম্বে চিকিৎসকের বিকল্প ওষুধ নির্ধারণ প্রয়োজন।'
-                      : (analysisResult.clinical_risk.calibrated_probability_note || 'প্রেসক্রিপশনে ঝুঁকিপূর্ণ ওষুধের সংমিশ্রণ পাওয়া গেছে। তাৎক্ষণিক চিকিৎসকের পর্যালোচনা প্রয়োজন।'))
+                      : (analysisResult.clinical_risk?.calibrated_probability_note || 'প্রেসক্রিপশনে ঝুঁকিপূর্ণ ওষুধের সংমিশ্রণ পাওয়া গেছে। তাৎক্ষণিক চিকিৎসকের পর্যালোচনা প্রয়োজন।'))
                   : (analysisResult.prescription_id?.includes('TRIPLE')
                       ? 'Triple Whammy detected: Concomitant ACEi/ARB + Diuretic + NSAID creates high risk of acute kidney injury.'
-                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
+                      : (analysisResult.extracted_prescription || []).some((m) => m.brand_name.toLowerCase().includes('aspirin') || m.brand_name.toLowerCase().includes('ecospirin'))
                       ? 'Pediatric Aspirin contraindicated: high risk of fatal Reye syndrome.'
-                      : analysisResult.extracted_prescription.some((m) => m.brand_name.toLowerCase().includes('rolac') || m.brand_name.toLowerCase().includes('ketorolac') || m.generic_name?.toLowerCase().includes('ketorolac'))
+                      : (analysisResult.extracted_prescription || []).some((m) => m.brand_name.toLowerCase().includes('rolac') || m.brand_name.toLowerCase().includes('ketorolac') || m.generic_name?.toLowerCase().includes('ketorolac'))
                       ? "Ketorolac (Rolac 10) 14-day duration exceeds safety ceilings and is contraindicated in patient's CKD Stage 3 (eGFR 34.5). Concomitant Olmesartan increases Acute Kidney Injury hazard. Immediate clinician substitution required."
-                      : (analysisResult.clinical_risk.calibrated_probability_note || 'High-risk medication combination detected. Immediate clinician review required.'))}
+                      : (analysisResult.clinical_risk?.calibrated_probability_note || 'High-risk medication combination detected. Immediate clinician review required.'))}
               </AlertDescription>
             </Alert>
           )}
@@ -1049,20 +1052,30 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
             {/* TAB 3: Explainable Risk & SHAP */}
             <TabsContent value="risk" className="space-y-6 mt-4">
-              <RiskGaugeCard risk={analysisResult.clinical_risk} />
-              <ShapWaterfallChart
-                features={analysisResult.clinical_risk.shap_features}
-                isDemo={analysisResult.clinical_risk.is_synthetic_demo}
-              />
+              {analysisResult.clinical_risk && (
+                <>
+                  <RiskGaugeCard risk={analysisResult.clinical_risk} />
+                  <ShapWaterfallChart
+                    features={analysisResult.clinical_risk.shap_features || []}
+                    isDemo={Boolean(analysisResult.clinical_risk.is_synthetic_demo)}
+                  />
+                </>
+              )}
             </TabsContent>
 
             {/* TAB 4: Patient Companion */}
             <TabsContent value="bangla" className="mt-4">
-              <BanglaPatientCompanion
-                data={analysisResult.bangla_companion}
-                patientName={analysisResult.patient_context.name}
-                lang={isBn ? 'bn' : 'en'}
-              />
+              {analysisResult.bangla_companion ? (
+                <BanglaPatientCompanion
+                  data={analysisResult.bangla_companion}
+                  patientName={analysisResult.patient_context?.name}
+                  lang={isBn ? 'bn' : 'en'}
+                />
+              ) : (
+                <div className="p-8 text-center text-muted-foreground">
+                  {isBn ? 'বাংলা কমপ্যানিয়ন তথ্য পাওয়া যায়নি।' : 'Patient companion data not available.'}
+                </div>
+              )}
             </TabsContent>
           </Tabs>
         </div>

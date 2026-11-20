@@ -9,7 +9,7 @@ export const MOCK_LATENCY_MS = isTestEnv ? 50 : (Number(import.meta.env.VITE_MOC
 
 export const apiClient: AxiosInstance = axios.create({
   baseURL: BASE_URL,
-  timeout: 30000,
+  timeout: 180000,
   headers: {
     'Accept': 'application/json',
   },
