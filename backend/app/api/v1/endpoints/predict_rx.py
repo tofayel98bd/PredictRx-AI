@@ -160,26 +160,57 @@ async def analyze_prescription_endpoint(
 
                 # Update patient details from prescription if not explicitly set
                 detected_pat = ai_result.get("detected_patient", {})
-                if detected_pat.get("name") and (not parsed_patient_context.name or parsed_patient_context.name in ("Unnamed Patient", "")):
-                    parsed_patient_context.name = str(detected_pat["name"]).strip()
-                if detected_pat.get("age") and (not parsed_patient_context.age or parsed_patient_context.age == 45):
+                raw_meta = (ai_result.get("meta") or {}).get("raw_extraction", {})
+
+                # Patient Name: only accept if genuine on-paper name
+                det_name = detected_pat.get("name") or raw_meta.get("patient_name")
+                if det_name and str(det_name).strip().lower() not in ("none", "null", "unnamed patient", "demo patient", "unknown", "redacted", "porag"):
+                    if not parsed_patient_context.name or parsed_patient_context.name in ("Unnamed Patient", ""):
+                        parsed_patient_context.name = str(det_name).strip()
+
+                # Patient Age: update from paper
+                det_age = detected_pat.get("age") or raw_meta.get("patient_age_years")
+                if det_age:
                     try:
-                        parsed_patient_context.age = int(detected_pat["age"])
-                    except (ValueError, TypeError):
-                        pass
-                if detected_pat.get("gender") and (not parsed_patient_context.gender or parsed_patient_context.gender == "Male"):
-                    parsed_patient_context.gender = str(detected_pat["gender"]).capitalize()
-                if detected_pat.get("weight_kg") and not parsed_patient_context.weight_kg:
-                    try:
-                        parsed_patient_context.weight_kg = float(detected_pat["weight_kg"])
+                        extracted_age = int(float(det_age))
+                        if extracted_age > 0 and (not parsed_patient_context.age or parsed_patient_context.age in (0, 45)):
+                            parsed_patient_context.age = extracted_age
                     except (ValueError, TypeError):
                         pass
 
-                raw_meta = (ai_result.get("meta") or {}).get("raw_extraction", {})
+                # Patient Gender
+                det_gender = detected_pat.get("gender") or raw_meta.get("patient_gender")
+                if det_gender and str(det_gender).strip().lower() not in ("none", "null"):
+                    if not parsed_patient_context.gender or parsed_patient_context.gender in ("Male", "Other"):
+                        parsed_patient_context.gender = str(det_gender).capitalize()
+
+                # Patient Weight
+                det_weight = detected_pat.get("weight_kg") or raw_meta.get("patient_weight_kg")
+                if det_weight and not parsed_patient_context.weight_kg:
+                    try:
+                        parsed_patient_context.weight_kg = float(det_weight)
+                    except (ValueError, TypeError):
+                        pass
+
+                # Blood Pressure from paper (e.g. 130/90)
+                det_sys = detected_pat.get("systolic_bp") or raw_meta.get("systolic_bp")
+                det_dia = detected_pat.get("diastolic_bp") or raw_meta.get("diastolic_bp")
+                if det_sys and not parsed_patient_context.systolic_bp:
+                    try:
+                        parsed_patient_context.systolic_bp = int(det_sys)
+                    except (ValueError, TypeError):
+                        pass
+                if det_dia and not parsed_patient_context.diastolic_bp:
+                    try:
+                        parsed_patient_context.diastolic_bp = int(det_dia)
+                    except (ValueError, TypeError):
+                        pass
+
+                # Diagnosis / Chief Complaints
                 detected_diagnosis = raw_meta.get("diagnosis_or_cc")
                 if detected_diagnosis and not parsed_patient_context.conditions:
                     parsed_patient_context.conditions = [
-                        c.strip() for c in str(detected_diagnosis).split(",") if c.strip()
+                        c.strip() for c in str(detected_diagnosis).replace(";", ",").split(",") if c.strip()
                     ]
             else:
                 logger.warning("Vision LLM returned 0 medications.")
@@ -271,13 +302,8 @@ async def analyze_prescription_endpoint(
             if cached_abdur:
                 return smart_cache.to_analysis_result(cached_abdur, file_name=file_name)
 
-        # Check if Porag / Lewy Body Dementia scenario
-        is_dlb_scenario = (
-            any("dementia" in c.lower() or "dlb" in c.lower() or "memory" in c.lower() for c in parsed_patient_context.conditions)
-            or any(k in fname for k in ["porag", "dlb", "dementia", "case_4", "case4", "golden_04", "rakan", "zaman", "nins", "231af39d", "media_1795126659738"])
-            or "porag" in (parsed_patient_context.name or "").lower()
-            or parsed_patient_context.age == 63
-        )
+        # Check if Porag / Lewy Body Dementia scenario (Only for named demo files)
+        is_dlb_scenario = any(k in fname for k in ["golden_04", "case_4", "case4"])
 
         if not raw_meds and is_dlb_scenario:
             cached_dlb = smart_cache.get_scenario("GOLDEN_04_PORAG_DLB")

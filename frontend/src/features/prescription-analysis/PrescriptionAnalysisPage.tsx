@@ -102,7 +102,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [showReferenceCases, setShowReferenceCases] = useState<boolean>(() => {
-    return searchParams.get('demo') === 'true' || searchParams.get('scenarios') === 'true';
+    return true;
   });
 
   const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
@@ -191,7 +191,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
   const loadDemoData = () => {
     setShowReferenceCases(true);
     const defaultScenario = GOLDEN_DEMO_SCENARIOS[0];
-    handleSelectScenario(defaultScenario, false);
+    handleSelectScenario(defaultScenario, true);
   };
 
   const handleResetForm = () => {
@@ -279,35 +279,42 @@ export const PrescriptionAnalysisPage: React.FC = () => {
     try {
       const result = await analyzePrescription(selectedFile, {
         name: '',
-        age: 45,
+        age: 0,
         gender: 'Male',
         conditions: [],
         current_medications: [],
       });
 
-      // 1. Autofill Patient Name
+      // 1. Autofill Patient Name (only genuine on-prescription name, never fake/demo placeholders)
       const pName = (result.detected_patient as any)?.name || result.patient_context?.name;
-      if (pName && pName !== 'Demo Patient' && pName !== 'Unnamed Patient') {
+      const isBogusName =
+        !pName ||
+        ['demo patient', 'unnamed patient', 'porag', 'none', 'null', 'unknown', 'redacted'].includes(
+          String(pName).trim().toLowerCase()
+        ) ||
+        String(pName).includes('অপ্রকাশিত');
+
+      if (!isBogusName) {
         setValue('name', pName);
-      } else if (result.patient_context?.name) {
-        setValue('name', result.patient_context.name);
+      } else {
+        setValue('name', '');
       }
 
-      // 2. Autofill Age
+      // 2. Autofill Age (extracted from prescription)
       const pAge = result.detected_patient?.age || result.patient_context?.age;
-      if (pAge) {
+      if (pAge && pAge > 0) {
         setValue('age', pAge);
       }
 
       // 3. Autofill Gender
       const pGender = result.detected_patient?.gender || result.patient_context?.gender;
-      if (pGender) {
+      if (pGender && String(pGender).toLowerCase() !== 'none') {
         setValue('gender', (pGender as any) || 'Male');
       }
 
       // 4. Autofill Weight
       const pWeight = result.detected_patient?.weight_kg || result.patient_context?.weight_kg;
-      if (pWeight) {
+      if (pWeight && pWeight > 0) {
         setValue('weight_kg', pWeight);
       }
 
@@ -318,13 +325,14 @@ export const PrescriptionAnalysisPage: React.FC = () => {
       if (result.patient_context?.diastolic_bp) {
         setValue('diastolic_bp', result.patient_context.diastolic_bp);
       }
-      if (result.patient_context?.creatinine) {
+      // Only set creatinine/egfr/hba1c if present and genuine
+      if (result.patient_context?.creatinine && result.patient_context.creatinine !== 0.9) {
         setValue('creatinine', result.patient_context.creatinine);
       }
-      if (result.patient_context?.egfr) {
+      if (result.patient_context?.egfr && result.patient_context.egfr !== 91.0) {
         setValue('egfr', result.patient_context.egfr);
       }
-      if (result.patient_context?.hba1c) {
+      if (result.patient_context?.hba1c && result.patient_context.hba1c !== 5.4) {
         setValue('hba1c', result.patient_context.hba1c);
       }
 

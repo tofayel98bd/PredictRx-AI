@@ -27,6 +27,8 @@ class RawPrescription(BaseModel):
     patient_age_years: Optional[float] = None
     patient_gender: Optional[str] = None
     patient_weight_kg: Optional[float] = None
+    systolic_bp: Optional[int] = Field(None, description="Systolic blood pressure e.g. 130 in 130/90")
+    diastolic_bp: Optional[int] = Field(None, description="Diastolic blood pressure e.g. 90 in 130/90")
     diagnosis_or_cc: Optional[str] = Field(None, description="Diagnosis / chief complaint if written")
     medicines: List[RawMedicine] = Field(default_factory=list)
     notes: Optional[str] = None

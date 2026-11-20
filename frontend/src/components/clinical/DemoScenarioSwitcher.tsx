@@ -98,7 +98,7 @@ export const DemoScenarioSwitcher: React.FC<DemoScenarioSwitcherProps> = ({
                   size="sm"
                   aria-label={`Autofill ${scenario.title}`}
                   disabled={isLoading}
-                  onClick={() => onSelectScenario(scenario, false)}
+                  onClick={() => onSelectScenario(scenario, true)}
                   className={`h-7 px-2.5 text-[11px] flex-1 font-medium ${
                     isActive
                       ? 'bg-teal-700 hover:bg-teal-800 text-white'

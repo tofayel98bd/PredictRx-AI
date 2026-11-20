@@ -448,15 +448,15 @@ GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN = {
 
 GOLDEN_SCENARIO_4_PORAG_DLB = {
     "scenario_id": "GOLDEN_04_PORAG_DLB",
-    "name": "Porag",
+    "name": "প্রেসক্রিপশনে অপ্রকাশিত (Redacted)",
     "age": 63,
     "gender": "Male",
-    "weight_kg": 64.0,
+    "weight_kg": None,
     "conditions": ["Lewy Body Dementia (DLB)", "Impaired memory", "Slowness of movement", "Visual hallucination"],
-    "current_medications": ["Cap. Rivacap 3 (1+0+1)", "Tab. Dementa 5 (1+0+1)", "Tab. Syndopa 110 (1+1+1)"],
-    "creatinine": 0.9,
-    "egfr": 91.0,
-    "hba1c": 5.4,
+    "current_medications": [],
+    "creatinine": None,
+    "egfr": None,
+    "hba1c": None,
     "systolic_bp": 130,
     "diastolic_bp": 90,
     "medications": [
@@ -862,7 +862,6 @@ class SmartCacheService:
         # porag.jpeg (Lewy Body Dementia / Dr. Rakan-Uz-Zaman)
         "2c4474cbe01468273185b6a337cbca9f73b03d41ac7c40a32e2452afdf8937c6": "GOLDEN_04_PORAG_DLB",
         "2e6e2e126dce6e74aaac59ba1fe160ed391993d0994aceb2a4b44233dabec91f": "GOLDEN_04_PORAG_DLB",
-        "ce581ec3921dc6b41614c34a8269b6875dd1dcaf6adbe473a93caf9ab751601f": "GOLDEN_04_PORAG_DLB",
         # ai_engine/samples/rx01.jpg (Case 1: Md. Abdul Karim - CKD 3a + 14d Ketorolac Contraindication)
         "6a88cd39db4a30b974d2e24789f3a685d6261ffbb74d2e23ac6b001e7dadf890": "GOLDEN_01_CKD_KETOROLAC",
         # ai_engine/samples/rx02.jpg (Case 2: Begum Rokeya Sultana - Triple Whammy)
@@ -913,18 +912,13 @@ class SmartCacheService:
         Smart heuristic matching to intercept and serve pre-computed golden scenarios
         in < 15ms without touching external LLMs.
         """
-        # 1. Direct hash and file length match
+        # 1. Direct hash match
         if file_bytes:
             h = hashlib.sha256(file_bytes).hexdigest()
             cached = self.get_by_hash(h)
             if cached:
                 logger.info(f"Smart Cache HIT via binary SHA-256 hash [{h[:8]}...]")
                 return cached
-            # Direct match by exact file byte length of user's uploaded Dr. Rakan DLB prescription
-            if len(file_bytes) in (69517, 69516, 69518) or (68500 <= len(file_bytes) <= 71000):
-                self._cache_stats["hits"] += 1
-                logger.info(f"Smart Cache HIT via byte length ({len(file_bytes)}) -> Scenario 4 (Porag DLB)")
-                return GOLDEN_SCENARIO_4_PORAG_DLB
 
         # 2. Filename match (for offline tests and filename-based mock runs)
         fname = (file_name or "").lower()
@@ -948,7 +942,7 @@ class SmartCacheService:
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 3")
             return GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
 
-        if any(k in fname for k in ["porag", "dement", "dlb", "riva", "syndopa", "queta", "golden_04", "rakan", "zaman", "nins", "231af39d", "media_1795126659738"]):
+        if any(k in fname for k in ["golden_04", "sample_case_4"]):
             self._cache_stats["hits"] += 1
             logger.info(f"Smart Cache HIT via filename keyword match [{fname}] -> Scenario 4 (Porag DLB)")
             return GOLDEN_SCENARIO_4_PORAG_DLB
@@ -980,7 +974,7 @@ class SmartCacheService:
             logger.info("Smart Cache HIT via patient clinical profile (Ayan / Pediatric) -> Scenario 3")
             return GOLDEN_SCENARIO_3_PEDIATRIC_ASPIRIN
 
-        if "porag" in p_name or p_age == 63 or "dementia" in "".join(p_cond) or "dlb" in "".join(p_cond) or "memory" in "".join(p_cond):
+        if "porag" in p_name and ("dementia" in "".join(p_cond) or "dlb" in "".join(p_cond)):
             self._cache_stats["hits"] += 1
             logger.info("Smart Cache HIT via patient clinical profile (Porag / DLB) -> Scenario 4")
             return GOLDEN_SCENARIO_4_PORAG_DLB

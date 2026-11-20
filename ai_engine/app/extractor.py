@@ -24,7 +24,7 @@ RULES
 9. confidence: 0.95+ clear print, 0.8 readable handwriting, <0.6 guessing. legibility: whole-image quality 0-1.
 If the image is not a prescription set is_prescription=false and medicines=[]."""
 
-USER_PROMPT = "Extract every medicine and the patient name, age, gender, and weight (if written) from this prescription."
+USER_PROMPT = "Extract every medicine, patient name, age, gender, weight, blood pressure (systolic_bp and diastolic_bp if written e.g. 130/90), and diagnosis / chief complaints from this prescription."
 
 _MED = {
     "type": "object",
@@ -47,7 +47,9 @@ TOOL = {
             "doctor_name": {"type": ["string", "null"]}, "prescription_date": {"type": ["string", "null"]},
             "patient_name": {"type": ["string", "null"]},
             "patient_age_years": {"type": ["number", "null"]}, "patient_gender": {"type": ["string", "null"]},
-            "patient_weight_kg": {"type": ["number", "null"]}, "diagnosis_or_cc": {"type": ["string", "null"]},
+            "patient_weight_kg": {"type": ["number", "null"]},
+            "systolic_bp": {"type": ["integer", "null"]}, "diastolic_bp": {"type": ["integer", "null"]},
+            "diagnosis_or_cc": {"type": ["string", "null"]},
             "medicines": {"type": "array", "items": _MED}, "notes": {"type": ["string", "null"]},
         },
         "required": ["is_prescription", "legibility", "medicines"],

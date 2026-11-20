@@ -257,9 +257,10 @@ def validate_medicine(med: RawMedicine, age: Optional[float] = None, gender: Opt
 def validate_prescription(raw: RawPrescription, patient_context: Optional[dict] = None) -> dict:
     """Patient context (from DB/form) wins over values read from the paper."""
     ctx = patient_context or {}
-    age = ctx.get("age", raw.patient_age_years)
-    gender = ctx.get("gender", raw.patient_gender)
-    weight = ctx.get("weight_kg", raw.patient_weight_kg)
+    ctx_age = ctx.get("age")
+    age = ctx_age if (ctx_age is not None and ctx_age > 0) else raw.patient_age_years
+    gender = ctx.get("gender") or raw.patient_gender
+    weight = ctx.get("weight_kg") or raw.patient_weight_kg
 
     # Smart Fallback: If AI placed dosage or timing inside instructions_raw, recover them!
     for m in raw.medicines:
@@ -292,10 +293,20 @@ def validate_prescription(raw: RawPrescription, patient_context: Optional[dict] 
         rx_alerts.append({"code": "NOT_A_PRESCRIPTION", "severity": "CRITICAL",
                           "message": "Image does not appear to be a prescription."})
 
+    raw_name = getattr(raw, "patient_name", None)
+    clean_name = raw_name if (raw_name and str(raw_name).strip().lower() not in ("none", "null", "unknown", "unnamed patient", "demo patient", "redacted", "porag")) else None
+
     return {
         "extracted_prescription": [m.model_dump() for m in meds],
         "prescription_level_alerts": rx_alerts,
-        "detected_patient": {"name": getattr(raw, "patient_name", None), "age": age, "gender": gender, "weight_kg": weight},
+        "detected_patient": {
+            "name": clean_name,
+            "age": raw.patient_age_years if (raw.patient_age_years is not None and raw.patient_age_years > 0) else age,
+            "gender": raw.patient_gender or gender,
+            "weight_kg": raw.patient_weight_kg or weight,
+            "systolic_bp": getattr(raw, "systolic_bp", None),
+            "diastolic_bp": getattr(raw, "diastolic_bp", None),
+        },
         "summary": {
             "medicine_count": len(meds),
             "syntax_errors_count": sum(not m.syntax_valid for m in meds),

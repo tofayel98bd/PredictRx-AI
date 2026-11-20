@@ -24,7 +24,7 @@ export const DEMO_SCENARIO_4_PORAG_RESULT: PrescriptionAnalysisResult = {
   patient_context: {
     id: 'PT-BD-2026-081',
     patient_id: 'PRX-BD-2026-081',
-    name: 'Porag',
+    name: 'প্রেসক্রিপশনে অপ্রকাশিত (Redacted)',
     age: 63,
     gender: 'Male',
     weight_kg: 64.0,

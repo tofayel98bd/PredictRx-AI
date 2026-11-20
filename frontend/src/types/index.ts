@@ -149,6 +149,7 @@ export interface PrescriptionAnalysisResult {
     is_prescription: boolean;
   };
   detected_patient: {
+    name?: string;
     age?: number;
     gender?: string;
     weight_kg?: number;

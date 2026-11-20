@@ -35,31 +35,11 @@ function resolveDynamicAnalysisResult(
   const pCreatinine = patientContext.creatinine ?? 0.9;
   const pEgfr = patientContext.egfr ?? (pCreatinine > 1.4 ? 34.5 : 91.0);
 
-  // 1. MATCH: Porag / Lewy Body Dementia (DLB) / Neuro-Geriatric Polypharmacy
+  // 1. MATCH: Case 4 / Lewy Body Dementia (DLB) Demo Scenario (Only for explicit demo trigger or demo sample files)
   const isPoragDlb =
-    fileName.includes('porag') ||
-    fileName.includes('dement') ||
-    fileName.includes('dlb') ||
-    fileName.includes('riva') ||
-    fileName.includes('syndopa') ||
-    fileName.includes('queta') ||
-    fileName.includes('rakan') ||
-    fileName.includes('zaman') ||
-    fileName.includes('nins') ||
-    fileName.includes('231af39d') ||
-    fileName.includes('media_1795126659738') ||
-    (file.size >= 68000 && file.size <= 72000) ||
-    file.size === 69517 ||
-    pAge === 63 ||
-    pName.includes('porag') ||
-    condText.includes('dementia') ||
-    condText.includes('dlb') ||
-    condText.includes('memory') ||
-    condText.includes('hallucination') ||
-    medText.includes('rivacap') ||
-    medText.includes('dementa') ||
-    medText.includes('syndopa') ||
-    medText.includes('queta');
+    fileName.includes('golden_04') ||
+    fileName.includes('sample_case_4') ||
+    fileName.includes('scenario_4');
 
   if (isPoragDlb) {
     const res: PrescriptionAnalysisResult = JSON.parse(
@@ -70,13 +50,14 @@ function resolveDynamicAnalysisResult(
     res.patient_context = {
       ...res.patient_context,
       ...patientContext,
-      name: patientContext.name || 'Porag',
-      age: patientContext.age || 63,
-      creatinine: pCreatinine,
-      egfr: pEgfr,
-      hba1c: patientContext.hba1c || 5.4,
+      name: patientContext.name || res.patient_context.name,
+      age: patientContext.age || res.patient_context.age || 63,
+      creatinine: patientContext.creatinine,
+      egfr: patientContext.egfr,
+      hba1c: patientContext.hba1c,
     };
     res.detected_patient = {
+      name: patientContext.name || undefined,
       age: res.patient_context.age,
       gender: res.patient_context.gender,
       weight_kg: res.patient_context.weight_kg,
