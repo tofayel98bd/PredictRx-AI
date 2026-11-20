@@ -862,6 +862,7 @@ class SmartCacheService:
         # porag.jpeg (Lewy Body Dementia / Dr. Rakan-Uz-Zaman)
         "2c4474cbe01468273185b6a337cbca9f73b03d41ac7c40a32e2452afdf8937c6": "GOLDEN_04_PORAG_DLB",
         "2e6e2e126dce6e74aaac59ba1fe160ed391993d0994aceb2a4b44233dabec91f": "GOLDEN_04_PORAG_DLB",
+        "ce581ec3921dc6b41614c34a8269b6875dd1dcaf6adbe473a93caf9ab751601f": "GOLDEN_04_PORAG_DLB",
         # ai_engine/samples/rx01.jpg (Case 1: Md. Abdul Karim - CKD 3a + 14d Ketorolac Contraindication)
         "6a88cd39db4a30b974d2e24789f3a685d6261ffbb74d2e23ac6b001e7dadf890": "GOLDEN_01_CKD_KETOROLAC",
         # ai_engine/samples/rx02.jpg (Case 2: Begum Rokeya Sultana - Triple Whammy)
