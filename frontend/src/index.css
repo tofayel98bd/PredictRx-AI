@@ -140,3 +140,49 @@
     padding: 0 !important;
   }
 }
+
+/* AI Prescription Laser Scanner Keyframes */
+@keyframes laser-sweep {
+  0% {
+    top: 2%;
+    opacity: 0.85;
+  }
+  50% {
+    top: 94%;
+    opacity: 1;
+  }
+  100% {
+    top: 2%;
+    opacity: 0.85;
+  }
+}
+
+.animate-laser-sweep {
+  animation: laser-sweep 2.6s ease-in-out infinite;
+}
+
+@keyframes laser-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(20, 184, 166, 0.7), 0 0 20px rgba(6, 182, 212, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(20, 184, 166, 1), 0 0 35px rgba(6, 182, 212, 0.8);
+  }
+}
+
+.animate-laser-pulse {
+  animation: laser-pulse 2s ease-in-out infinite;
+}
+
+@keyframes grid-pulse {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.animate-grid-pulse {
+  animation: grid-pulse 3s ease-in-out infinite;
+}

@@ -36,6 +36,7 @@ import { RiskGaugeCard } from '@/components/clinical/RiskGaugeCard';
 import { BanglaPatientCompanion } from '@/components/clinical/BanglaPatientCompanion';
 import { ClinicianReviewModal } from '@/components/clinical/ClinicianReviewModal';
 import { DemoScenarioSwitcher } from '@/components/clinical/DemoScenarioSwitcher';
+import { PrescriptionScanningModal } from '@/components/clinical/PrescriptionScanningModal';
 import { analyzePrescription, fetchScenarioAnalysis } from '@/services/prescriptionService';
 import { PatientContext, PrescriptionAnalysisResult } from '@/types';
 import { MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario, DEMO_PATIENTS_LIST } from '@/constants';
@@ -102,8 +103,9 @@ export const PrescriptionAnalysisPage: React.FC = () => {
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null);
   const [showReferenceCases, setShowReferenceCases] = useState<boolean>(() => {
-    return true;
+    return searchParams.get('demo') === 'true' || searchParams.get('scenarios') === 'true';
   });
+  const [isScanningModalDismissed, setIsScanningModalDismissed] = useState(false);
 
   const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
 
@@ -269,6 +271,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
     toast.success(`Selected file: ${selectedFile.name}`);
 
     // AUTOMATIC AI SCANNING & FORM AUTOFILING ON UPLOAD
+    setIsScanningModalDismissed(false);
     setIsScanningFile(true);
     toast.info(
       isBn
@@ -400,6 +403,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
       return;
     }
 
+    setIsScanningModalDismissed(false);
     setIsAnalyzing(true);
     setCurrentStageIndex(0);
 
@@ -497,7 +501,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
       {/* Collapsible Reference Cases Panel - Only shown when requested */}
       {showReferenceCases && (
-        <div className="rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/20 dark:bg-teal-950/20 p-4 transition animate-in fade-in duration-200">
+        <div className="w-full min-w-0 overflow-hidden rounded-xl border border-teal-200 dark:border-teal-900/60 bg-teal-50/20 dark:bg-teal-950/20 p-3 sm:p-4 transition animate-in fade-in duration-200 shadow-sm">
           <DemoScenarioSwitcher
             activeScenarioId={activeScenarioId}
             onSelectScenario={handleSelectScenario}
@@ -1222,6 +1226,15 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           }}
         />
       )}
+
+      {/* Premium AI Prescription Optical Scanning Modal */}
+      <PrescriptionScanningModal
+        isOpen={(isScanningFile || isAnalyzing) && !isScanningModalDismissed}
+        onClose={() => setIsScanningModalDismissed(true)}
+        filePreview={filePreview}
+        fileName={file?.name}
+        isAnalyzing={isAnalyzing}
+      />
     </div>
   );
 };
