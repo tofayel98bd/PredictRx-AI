@@ -95,6 +95,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
 
   // Workflow states
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isScanningFile, setIsScanningFile] = useState(false);
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [analysisResult, setAnalysisResult] = useState<PrescriptionAnalysisResult | null>(null);
   const [activeTab, setActiveTab] = useState('clinical');
@@ -247,7 +248,7 @@ export const PrescriptionAnalysisPage: React.FC = () => {
     }
   };
 
-  const processSelectedFile = (selectedFile: File) => {
+  const processSelectedFile = async (selectedFile: File) => {
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
     if (!validTypes.includes(selectedFile.type)) {
       toast.error('Invalid file format. Please upload JPG, PNG, WEBP, or PDF.');
@@ -266,6 +267,96 @@ export const PrescriptionAnalysisPage: React.FC = () => {
       setFilePreview(null);
     }
     toast.success(`Selected file: ${selectedFile.name}`);
+
+    // AUTOMATIC AI SCANNING & FORM AUTOFILING ON UPLOAD
+    setIsScanningFile(true);
+    toast.info(
+      isBn
+        ? '🤖 AI প্রেসক্রিপশন স্ক্যান করছে... রোগীর তথ্য ও ওষুধ ফর্মটিতে অটো-ফিল হচ্ছে'
+        : '🤖 AI Vision scanning prescription... Autofilling patient details & medications into form'
+    );
+
+    try {
+      const result = await analyzePrescription(selectedFile, {
+        name: '',
+        age: 45,
+        gender: 'Male',
+        conditions: [],
+        current_medications: [],
+      });
+
+      // 1. Autofill Patient Name
+      const pName = (result.detected_patient as any)?.name || result.patient_context?.name;
+      if (pName && pName !== 'Demo Patient' && pName !== 'Unnamed Patient') {
+        setValue('name', pName);
+      } else if (result.patient_context?.name) {
+        setValue('name', result.patient_context.name);
+      }
+
+      // 2. Autofill Age
+      const pAge = result.detected_patient?.age || result.patient_context?.age;
+      if (pAge) {
+        setValue('age', pAge);
+      }
+
+      // 3. Autofill Gender
+      const pGender = result.detected_patient?.gender || result.patient_context?.gender;
+      if (pGender) {
+        setValue('gender', (pGender as any) || 'Male');
+      }
+
+      // 4. Autofill Weight
+      const pWeight = result.detected_patient?.weight_kg || result.patient_context?.weight_kg;
+      if (pWeight) {
+        setValue('weight_kg', pWeight);
+      }
+
+      // 5. Autofill Clinical Labs & BP
+      if (result.patient_context?.systolic_bp) {
+        setValue('systolic_bp', result.patient_context.systolic_bp);
+      }
+      if (result.patient_context?.diastolic_bp) {
+        setValue('diastolic_bp', result.patient_context.diastolic_bp);
+      }
+      if (result.patient_context?.creatinine) {
+        setValue('creatinine', result.patient_context.creatinine);
+      }
+      if (result.patient_context?.egfr) {
+        setValue('egfr', result.patient_context.egfr);
+      }
+      if (result.patient_context?.hba1c) {
+        setValue('hba1c', result.patient_context.hba1c);
+      }
+
+      // 6. Autofill Conditions / Diagnosis
+      if (result.patient_context?.conditions && result.patient_context.conditions.length > 0) {
+        setValue('conditions_text', result.patient_context.conditions.join(', '));
+      }
+
+      // 7. Autofill Current Medications from extracted Rx
+      const medList =
+        result.extracted_prescription && result.extracted_prescription.length > 0
+          ? result.extracted_prescription
+              .map((m) => `${m.brand_name} (${m.dosage_syntax || '1+0+1'})`)
+              .join(', ')
+          : (result.patient_context?.current_medications || []).join(', ');
+      if (medList) {
+        setValue('current_meds_text', medList);
+      }
+
+      // 8. Mount full CDSS evaluation results immediately
+      setAnalysisResult(result);
+
+      toast.success(
+        isBn
+          ? '✨ AI প্রেসক্রিপশন স্ক্যান করে রোগীর নাম, বয়স, রক্তচাপ ও ওষুধের তালিকা সফলভাবে ফর্মে যুক্ত করেছে!'
+          : '✨ AI Vision successfully extracted prescription details directly into the form!'
+      );
+    } catch (err) {
+      console.warn('Auto-scan on file upload encountered an issue:', err);
+    } finally {
+      setIsScanningFile(false);
+    }
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -487,6 +578,18 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                       />
                     </div>
                   )}
+
+                  {isScanningFile && (
+                    <div className="mt-2.5 p-2 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-800 dark:text-teal-200 text-xs flex items-center justify-between animate-pulse">
+                      <div className="flex items-center space-x-2">
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin text-teal-600" />
+                        <span className="font-semibold text-[11px]">
+                          {isBn ? 'AI প্রেসক্রিপশন বিশ্লেষণ ও ফর্ম পূরণ করছে...' : 'AI Vision scanning & autofilling form...'}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono bg-teal-600 text-white px-2 py-0.5 rounded-full font-bold">AI OCR</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -505,6 +608,12 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                   <CardTitle className="text-sm font-bold flex items-center space-x-2">
                     <Stethoscope className="h-4 w-4 text-primary" />
                     <span>{t('patientForm.title', '2. Patient Baseline Clinical Profile')}</span>
+                    {isScanningFile && (
+                      <Badge variant="outline" className="animate-pulse bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border-teal-400 text-[10px] ml-2 font-normal flex items-center space-x-1">
+                        <RefreshCw className="h-3 w-3 animate-spin mr-1" />
+                        <span>{isBn ? 'AI স্ক্যান ও ফর্ম অটো-ফিল হচ্ছে...' : 'AI scanning & autofilling...'}</span>
+                      </Badge>
+                    )}
                   </CardTitle>
                   <CardDescription className="text-xs mt-0.5">
                     {t('patientForm.subtitle', 'Essential for contraindication screening (renal eGFR, diabetic control, and comorbidities).')}
@@ -651,13 +760,17 @@ export const PrescriptionAnalysisPage: React.FC = () => {
                 <Button
                   type="submit"
                   size="default"
-                  disabled={isAnalyzing || !file}
+                  disabled={isAnalyzing || isScanningFile || !file}
                   className="w-full sm:w-auto font-semibold flex items-center space-x-2"
                 >
-                  {isAnalyzing ? (
+                  {isAnalyzing || isScanningFile ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin" />
-                      <span>{t('patientForm.btnAnalyzing', 'Executing Clinical Analysis Pipeline...')}</span>
+                      <span>
+                        {isScanningFile
+                          ? (isBn ? 'AI প্রেসক্রিপশন স্ক্যান ও ফর্ম পূরণ করছে...' : 'AI Autofilling Patient Form...')
+                          : t('patientForm.btnAnalyzing', 'Executing Clinical Analysis Pipeline...')}
+                      </span>
                     </>
                   ) : (
                     <>
