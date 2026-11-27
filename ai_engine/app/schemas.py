@@ -29,6 +29,10 @@ class RawPrescription(BaseModel):
     patient_weight_kg: Optional[float] = None
     systolic_bp: Optional[int] = Field(None, description="Systolic blood pressure e.g. 130 in 130/90")
     diastolic_bp: Optional[int] = Field(None, description="Diastolic blood pressure e.g. 90 in 130/90")
+    creatinine_mg_dl: Optional[float] = Field(None, description="Serum creatinine in mg/dL if written")
+    egfr: Optional[float] = Field(None, description="eGFR mL/min/1.73m2 if written")
+    hba1c: Optional[float] = Field(None, description="HbA1c percentage if written")
+    allergies: List[str] = Field(default_factory=list, description="Documented drug allergies if written")
     diagnosis_or_cc: Optional[str] = Field(None, description="Diagnosis / chief complaint if written")
     medicines: List[RawMedicine] = Field(default_factory=list)
     notes: Optional[str] = None

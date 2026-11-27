@@ -394,8 +394,8 @@
   <!-- Screen Navigation Bar -->
   <header class="deck-header no-print">
     <div class="deck-title">
-      <span class="badge">LIVE DECK</span>
-      <span>PredictRx BD — Executive Pitch Presentation</span>
+      <span class="badge">FINAL ROUND DECK</span>
+      <span>PredictRx-AI (PredictRx BD) — Executive Pitch Presentation</span>
     </div>
     <div class="deck-controls">
       <span class="slide-counter" id="counterDisplay">Slide 1 / 10</span>
@@ -442,23 +442,23 @@
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
           <div class="card" style="border-left: 3px solid #06b6d4;">
             <div style="font-size: 11px; font-weight: 800; color: #06b6d4; text-transform: uppercase; margin-bottom: 4px;">Perception</div>
-            <div style="font-size: 14px; font-weight: 700; color: #fff;">Vision OCR Pipeline</div>
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Digitizes handwritten & printed Rx slips into structured clinical entities.</div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff;">Adaptive Vision OCR</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">1→3 pass self-consistency, PDF + image support &amp; multi-provider failover.</div>
           </div>
           <div class="card" style="border-left: 3px solid #10b981;">
             <div style="font-size: 11px; font-weight: 800; color: #10b981; text-transform: uppercase; margin-bottom: 4px;">Safety Core</div>
-            <div style="font-size: 14px; font-weight: 700; color: #fff;">Deterministic Rules</div>
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">260+ DGDA drugs, KDIGO renal ceilings, 0% AI hallucination risk.</div>
+            <div style="font-size: 14px; font-weight: 700; color: #fff;">5-Domain Guardrails</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">408 DGDA drugs, Allergy, Renal, Hepatic, Pregnancy &amp; Pediatric checks.</div>
           </div>
           <div class="card" style="border-left: 3px solid #3b82f6;">
             <div style="font-size: 11px; font-weight: 800; color: #3b82f6; text-transform: uppercase; margin-bottom: 4px;">Inference</div>
             <div style="font-size: 14px; font-weight: 700; color: #fff;">XGBoost + SHAP</div>
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Calibrated adverse event risk ($R^2=0.987$) with clinical feature attribution.</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Calibrated adverse event risk (R<sup>2</sup>=0.9873) with clinical feature attribution.</div>
           </div>
           <div class="card" style="border-left: 3px solid #f59e0b;">
             <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; margin-bottom: 4px;">Equity</div>
             <div style="font-size: 14px; font-weight: 700; color: #fff;">Bangla Patient Voice</div>
-            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Web Speech audio synthesis & single-page pictogram prescription cards.</div>
+            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Natural gTTS Bangla audio &amp; single-page pictogram prescription cards.</div>
           </div>
         </div>
       </div>
@@ -590,10 +590,10 @@
               <span style="font-size: 15px; font-weight: 700; color: #6ee7b7;">PredictRx Neuro-Symbolic Architecture</span>
             </div>
             <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; color: #cbd5e1;">
-              <li>✅ <strong>Zero Hallucination:</strong> Deterministic rule engine executes immutable DGDA & KDIGO safety constraints.</li>
-              <li>✅ <strong>Bangladeshi Drug Grounding:</strong> 260+ authentic DGDA medicines with fuzzy normalization (`difflib` + soundex).</li>
-              <li>✅ <strong>Calibrated Machine Learning:</strong> XGBoost risk scoring ($R^2=0.987$) trained on verified clinical parameters.</li>
-              <li>✅ <strong>Clinician-In-The-Loop:</strong> Full SHAP attribution and documented override workflows for medicolegal safety.</li>
+              <li>✅ <strong>Zero Hallucination:</strong> 5-domain deterministic guardrails (Allergy, CKD, Hepatic, Pregnancy, Pediatric).</li>
+              <li>✅ <strong>Bangladeshi Drug Grounding:</strong> 408 authentic DGDA medicines with O(1) in-memory fuzzy normalization.</li>
+              <li>✅ <strong>Calibrated Machine Learning:</strong> XGBoost risk scoring (R<sup>2</sup>=0.9873) trained on verified clinical parameters.</li>
+              <li>✅ <strong>Resilient &amp; Auditable:</strong> Adaptive 1→3 pass OCR, provider failover, OWASP security &amp; clinician sign-off logs.</li>
             </ul>
           </div>
         </div>
@@ -743,7 +743,7 @@
       </div>
 
       <div class="slide-footer">
-        <span>XGBoost TreeExplainer attributions validated on 5,000 synthetic patient cohorts ($R^2=0.9873$)</span>
+        <span>XGBoost TreeExplainer attributions validated on 5,000 synthetic patient cohorts (R<sup>2</sup>=0.9873)</span>
         <span>Explainable AI Engine • Zero Blind Trust</span>
       </div>
 
@@ -786,9 +786,9 @@
             <div class="stat-desc">Zero external LLM API dependency for core safety path—zero recurring cloud cost for hospitals.</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value rose">260+</div>
+            <div class="stat-value rose">408</div>
             <div class="stat-label">DGDA Drugs Pre-Seeded</div>
-            <div class="stat-desc">Instant offline resolution of Bangladesh's most prescribed generics across 27 therapeutic classes.</div>
+            <div class="stat-desc">Sub-millisecond O(1) resolution across 130+ therapeutic classes with fuzzy brand matching.</div>
           </div>
         </div>
 
@@ -798,10 +798,10 @@
               <span>⚡</span> The Smart Local Cache Engine
             </div>
             <p style="font-size: 12.5px; color: #cbd5e1; line-height: 1.5; margin-bottom: 10px;">
-              High-frequency prescription patterns are normalized, hashed, and pre-seeded into an in-memory/local cache. When a common polypharmacy scenario is submitted, the engine bypasses network latency and serves instant clinical safety reports.
+              High-frequency prescription patterns are normalized, SHA-256 hashed, and pre-seeded into an in-memory cache. Degraded fallback also preserves clinician-entered meds if external LLM quotas drop.
             </p>
             <div style="font-family: 'JetBrains Mono'; font-size: 11px; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 6px; color: #34d399;">
-              GET /api/v1/prescription-analysis/scenarios/1 ➔ 200 OK (14.2ms)
+              GET /api/v1/predict-rx/scenarios/GOLDEN_01_CKD_KETOROLAC ➔ 200 OK (14ms)
             </div>
           </div>
 
@@ -841,8 +841,8 @@
       </div>
 
       <div class="slide-header">
-        <h2 class="slide-title">The 3 Golden Clinical Scenarios: Proven on Real Cases</h2>
-        <p class="slide-subtitle">Integrated directly into our UI with a 1-click switcher for instant verification by hackathon judges.</p>
+        <h2 class="slide-title">Golden Clinical Scenarios: Proven on 5 Real-World Cases</h2>
+        <p class="slide-subtitle">Integrated directly into our UI with a 1-click switcher (plus DLB Neuro-Geriatric &amp; CKD-4 Nephrology) for instant verification by judges.</p>
       </div>
 
       <div class="slide-body" style="gap: 18px;">
@@ -1041,30 +1041,30 @@
 
       <div class="slide-header">
         <h2 class="slide-title">Engineered with Precision: Production-Grade Benchmarks</h2>
-        <p class="slide-subtitle">Not a fragile proof-of-concept. PredictRx is verified by 69 automated tests and rigorous statistical modeling.</p>
+        <p class="slide-subtitle">Not a fragile proof-of-concept. PredictRx-AI is verified by 107 automated tests, OWASP hardening, and statistical modeling.</p>
       </div>
 
       <div class="slide-body" style="flex-direction: column; gap: 20px;">
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
           <div class="stat-card">
             <div class="stat-value emerald">0.9873</div>
-            <div class="stat-label">XGBoost $R^2$ Score</div>
+            <div class="stat-label">XGBoost R<sup>2</sup> Score</div>
             <div class="stat-desc">Calibrated on 5,000 synthetic clinical records across KDIGO CKD stages, pediatric, and geriatric profiles (MSE: 0.0013).</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value cyan">69 / 69</div>
+            <div class="stat-value cyan">107 / 107</div>
             <div class="stat-label">Automated Tests Passing</div>
-            <div class="stat-desc">36 Backend Pytest + 18 Frontend Vitest + 15 AI Engine Pytest with 100% test green status.</div>
+            <div class="stat-desc">52 Backend Pytest + 37 Frontend Vitest + 18 AI Engine Pytest with zero console warnings.</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value amber">260+</div>
+            <div class="stat-value amber">408</div>
             <div class="stat-label">DGDA Medicines Seeded</div>
-            <div class="stat-desc">27 therapeutic classes with `difflib` + soundex fuzzy brand-to-generic matching.</div>
+            <div class="stat-desc">130+ therapeutic classes with O(1) in-memory indexing &amp; guarded fuzzy brand-to-generic matching.</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value rose">0.0%</div>
-            <div class="stat-label">Safety Rule Hallucination</div>
-            <div class="stat-desc">Deterministic KDIGO & DGDA rules guarantee zero false-negative ceiling escapes.</div>
+            <div class="stat-value rose">5 Domains</div>
+            <div class="stat-label">Zero-Hallucination Guardrails</div>
+            <div class="stat-desc">Allergy cross-reactivity, CKD/eGFR, Hepatic, Pregnancy &amp; Pediatric weight-based safety rules.</div>
           </div>
         </div>
 
@@ -1073,16 +1073,16 @@
             <div style="font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px;">Automated Test Suite Verification Summary</div>
             <div style="display: flex; flex-direction: column; gap: 8px; font-family: 'JetBrains Mono'; font-size: 11.5px;">
               <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px;">
-                <span style="color: #94a3b8;">backend/tests (FastAPI Endpoints, DB seeds, Auth)</span>
-                <span style="color: #34d399; font-weight: 700;">36 / 36 PASSED (1.82s)</span>
+                <span style="color: #94a3b8;">backend/tests (Guardrails, OCR Fallback, OWASP Security)</span>
+                <span style="color: #34d399; font-weight: 700;">52 / 52 PASSED</span>
               </div>
               <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px;">
-                <span style="color: #94a3b8;">frontend/src/test (Vitest, Scenario Switcher, UI)</span>
-                <span style="color: #34d399; font-weight: 700;">18 / 18 PASSED (1.56s)</span>
+                <span style="color: #94a3b8;">frontend/src/test (Vitest, i18n, SHAP, Rx Analysis)</span>
+                <span style="color: #34d399; font-weight: 700;">37 / 37 PASSED</span>
               </div>
               <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px;">
-                <span style="color: #94a3b8;">ai_engine/tests (OCR Parser, XGBoost, Rule Engine)</span>
-                <span style="color: #34d399; font-weight: 700;">15 / 15 PASSED (1.47s)</span>
+                <span style="color: #94a3b8;">ai_engine/tests (Adaptive 3-Vote, PDF, Syntax Rules)</span>
+                <span style="color: #34d399; font-weight: 700;">18 / 18 PASSED</span>
               </div>
             </div>
           </div>
@@ -1225,18 +1225,18 @@
           </div>
           <div class="card" style="padding: 14px;">
             <div style="font-size: 11px; font-weight: 800; color: #10b981; margin-bottom: 4px;">DAY 3</div>
-            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">XGBoost & SHAP</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Risk model training ($R^2=0.987$), TreeExplainer XAI integration.</div>
+            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">XGBoost &amp; SHAP</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Risk model training (R<sup>2</sup>=0.9873), TreeExplainer XAI integration.</div>
           </div>
           <div class="card" style="padding: 14px;">
             <div style="font-size: 11px; font-weight: 800; color: #f59e0b; margin-bottom: 4px;">DAY 4</div>
-            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">React 19 & Voice</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Demo Scenario Switcher, Web Speech Bangla TTS, print cards.</div>
+            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">React 19 &amp; Voice</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">5 Golden Scenarios, gTTS Bangla voice, optical scan modal, print cards.</div>
           </div>
           <div class="card" style="padding: 14px;">
-            <div style="font-size: 11px; font-weight: 800; color: #ef4444; margin-bottom: 4px;">DAY 5</div>
-            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">69 Tests & Polish</div>
-            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">14ms Smart Cache, 100% test green status, winning pitch deck.</div>
+            <div style="font-size: 11px; font-weight: 800; color: #ef4444; margin-bottom: 4px;">FINAL ROUND</div>
+            <div style="font-size: 12.5px; font-weight: 700; color: #fff;">107 Tests &amp; Hardened</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">408 DGDA drugs, 5-domain guardrails, OWASP security &amp; adaptive OCR.</div>
           </div>
         </div>
 
@@ -1264,7 +1264,7 @@
 
       <div class="notes-panel">
         <div class="notes-title">🎙️ Speaker Script (3:25 - 3:45 / Closing)</div>
-        In just 5 days, our 2-person squad went from an ambitious concept to a full-stack, 69-test-verified clinical safety platform running in under 15ms. We built PredictRx BD because no patient in Bangladesh should lose their kidney or their life to a preventable prescription error. Thank you, judges—the floor is yours!
+        Our 2-person squad built a full-stack, 107-test-verified clinical safety platform grounded in 408 DGDA medicines, 5-domain deterministic guardrails, adaptive Vision OCR, and sub-15ms edge caching. We built PredictRx-AI because no patient in Bangladesh should lose their kidney or their life to a preventable prescription error. Thank you, judges—the floor is yours!
       </div>
     </section>
 

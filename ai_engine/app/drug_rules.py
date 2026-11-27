@@ -30,7 +30,21 @@ BRAND_SEED = {
     "theopen": "Theophylline", "theophylline": "Theophylline",
     "comformin": "Metformin", "glucomin": "Metformin", "metformin": "Metformin",
     "atova": "Atorvastatin", "lipicon": "Atorvastatin", "atorvastatin": "Atorvastatin",
+    "atorva": "Atorvastatin", "lipitor": "Atorvastatin", "rosuva": "Rosuvastatin", "crestor": "Rosuvastatin",
     "verapamil": "Verapamil", "diltiazem": "Diltiazem",
+    "etorix": "Etoricoxib", "arcoxia": "Etoricoxib", "etoricoxib": "Etoricoxib",
+    "aclo": "Aceclofenac", "flexi": "Aceclofenac", "aceclofenac": "Aceclofenac",
+    "naprox": "Naproxen", "naprosyn": "Naproxen", "naproxen": "Naproxen",
+    "pantonix": "Pantoprazole", "rabe": "Rabeprazole", "domidon": "Domperidone", "motigut": "Domperidone",
+    "azin": "Azithromycin", "zithrin": "Azithromycin", "cefim": "Cefixime", "cef-3": "Cefixime",
+    "cefotil": "Cefuroxime", "zinnat": "Cefuroxime", "levoxin": "Levofloxacin", "tavanic": "Levofloxacin",
+    "augmentin": "Amoxicillin + Clavulanic Acid", "moxaclav": "Amoxicillin + Clavulanic Acid",
+    "comet": "Metformin", "glucophage": "Metformin", "amaryl": "Glimepiride",
+    "galvus": "Vildagliptin", "dapa": "Dapagliflozin", "empa": "Empagliflozin",
+    "xarelto": "Rivaroxaban", "eliquis": "Apixaban", "deplatt": "Clopidogrel", "clopid": "Clopidogrel",
+    "telfast": "Fexofenadine", "rupa": "Rupatadine", "bilatin": "Bilastine", "montair": "Montelukast",
+    "deltasone": "Prednisolone", "wysolone": "Prednisolone", "prelica": "Pregabalin", "gabapen": "Gabapentin",
+    "queta": "Quetiapine", "qutipin": "Quetiapine", "rivotril": "Clonazepam", "pase": "Clonazepam",
 }
 
 # key = lowercase generic substring. All fields optional.
@@ -80,6 +94,14 @@ RULES = {
     "atorvastatin": dict(pregnancy="INFO"),
     "rosuvastatin": dict(pregnancy="INFO"),
     "simvastatin":  dict(pregnancy="INFO"),
+    "etoricoxib":   dict(max_daily_mg=120, max_duration_days=8, beers="COX-2 NSAID in elderly: CV, GI, and AKI risk.", pregnancy="WARNING"),
+    "aceclofenac":  dict(max_daily_mg=200, beers="NSAID in elderly: GI-bleed and AKI risk."),
+    "rivaroxaban":  dict(max_daily_mg=30, pregnancy="WARNING", note="DOAC: monitor renal function; avoid concurrent systemic NSAIDs."),
+    "apixaban":     dict(max_daily_mg=20, pregnancy="WARNING", note="DOAC: check age/weight/creatinine dose reduction criteria."),
+    "prednisolone": dict(max_daily_mg=80, note="Systemic steroid: give after meal; taper if > 2 weeks."),
+    "pregabalin":   dict(max_daily_mg=600, beers="Gabapentinoid in elderly: falls, dizziness; reduce dose in CKD."),
+    "gabapentin":   dict(max_daily_mg=3600, beers="Gabapentinoid in elderly: sedation/ataxia; reduce dose in CKD."),
+    "quetiapine":   dict(beers="Antipsychotic in elderly: orthostatic hypotension and cerebrovascular risk."),
 }
 
 

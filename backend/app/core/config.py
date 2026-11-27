@@ -7,6 +7,9 @@ from pydantic import computed_field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+DEFAULT_DEV_SECRET_KEY = "predictrx_super_secret_jwt_key_change_in_production_2026_xyz"
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
@@ -22,19 +25,25 @@ class Settings(BaseSettings):
     DEBUG: bool = True
 
     # Security & JWT
-    SECRET_KEY: str = "predictrx_super_secret_jwt_key_change_in_production_2026_xyz"
+    SECRET_KEY: str = DEFAULT_DEV_SECRET_KEY
+    ENFORCE_PROD_SECRETS: bool = False
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 
-    # CORS
+    # Rate Limiting (per IP per minute)
+    RATE_LIMIT_ENABLED: bool = True
+    RATE_LIMIT_AUTH_PER_MIN: int = 30
+    RATE_LIMIT_AI_PER_MIN: int = 45
+
+    # CORS (no wildcard '*' with allow_credentials=True)
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://localhost:8000",
         "https://predict-rx-ai.vercel.app",
-        "*",
     ]
+    BACKEND_CORS_ORIGIN_REGEX: Optional[str] = r"^https://predict-rx-ai(-[a-z0-9-]+)?\.vercel\.app$"
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

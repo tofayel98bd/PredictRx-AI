@@ -41,7 +41,19 @@ if (isTestEnv) {
 
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const config = error.config as (typeof error.config & { _retried?: boolean }) | undefined;
+    const isIdempotentGet = config?.method?.toLowerCase() === 'get';
+    const statusCode = error.response?.status;
+    const isTransientColdStart =
+      !statusCode || statusCode === 502 || statusCode === 503 || statusCode === 504;
+
+    if (!isTestEnv && config && !config._retried && isIdempotentGet && isTransientColdStart) {
+      config._retried = true;
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return apiClient.request(config);
+    }
+
     // Only warn if not in silent test mode
     if (!isTestEnv) {
       console.warn(`[API Client] ${error.config?.method?.toUpperCase()} ${error.config?.url} failed: ${error.message}`);
@@ -49,6 +61,13 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export function warmUpBackend(): void {
+  if (isTestEnv) return;
+  axios.get(`${BASE_URL}/health`, { timeout: 6000 }).catch(() => {
+    // Silent background wake-up for Railway cold starts
+  });
+}
 
 export async function checkBackendHealth(): Promise<{ online: boolean; message: string }> {
   try {

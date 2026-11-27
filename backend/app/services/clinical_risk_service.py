@@ -1,6 +1,6 @@
 """Clinical risk evaluation, real XGBoost + SHAP factor breakdown, and safer alternatives service."""
 
-from typing import List, Optional, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 from app.ml.risk_predictor import ClinicalRiskPredictor
 from app.schemas.analysis import (
@@ -12,6 +12,9 @@ from app.schemas.analysis import (
     ValidatedMedicineSchema,
     DrugInteractionSchema,
 )
+
+if TYPE_CHECKING:
+    from app.services.clinical_guardrail_service import GuardrailReport
 
 
 class ClinicalRiskService:
@@ -25,6 +28,7 @@ class ClinicalRiskService:
         patient: PatientContextSchema,
         medications: List[ValidatedMedicineSchema],
         interactions: List[DrugInteractionSchema],
+        guardrail_report: Optional["GuardrailReport"] = None,
     ) -> Tuple[ClinicalRiskAnalysisSchema, List[SaferAlternativeSchema]]:
         if not medications:
             return ClinicalRiskAnalysisSchema(
@@ -87,15 +91,50 @@ class ClinicalRiskService:
             factors.append(f"Elevated serum creatinine ({patient.creatinine} mg/dL)")
         for condition in patient.conditions:
             factors.append(f"Co-existing condition: {condition}")
+        if guardrail_report and guardrail_report.clinical_factors:
+            for gf in guardrail_report.clinical_factors:
+                if gf not in factors:
+                    factors.append(gf)
         risk_analysis.patient_specific_factors = factors
+
+        # Calibrate risk floor & SHAP if deterministic critical/warning guardrails triggered
+        if guardrail_report:
+            if guardrail_report.critical_count > 0:
+                if risk_analysis.risk_score < 78.0:
+                    risk_analysis.risk_score = 78.0
+                    risk_analysis.risk_classification = "CRITICAL"
+                    risk_analysis.calibrated_probability_note = (
+                        f"Critical deterministic clinical contraindication triggered: {guardrail_report.top_critical_reason}"
+                    )
+                if guardrail_report.top_critical_reason:
+                    risk_analysis.shap_features.insert(
+                        0,
+                        ShapContributionSchema(
+                            feature="Deterministic Contraindication Guardrail",
+                            value="CRITICAL",
+                            impact_score=0.42,
+                            category="Patient Condition",
+                            clinical_explanation=guardrail_report.top_critical_reason,
+                        ),
+                    )
+            elif guardrail_report.warning_count > 0 and risk_analysis.risk_score < 42.0:
+                risk_analysis.risk_score = 42.0
+                risk_analysis.risk_classification = "MODERATE"
 
         # 4. Safer Alternatives Generator
         safer_alternatives: List[SaferAlternativeSchema] = []
+        seen_alt_generics = set()
+
+        def _append_alt(alt: SaferAlternativeSchema) -> None:
+            key = alt.original_generic.lower()
+            if key not in seen_alt_generics:
+                seen_alt_generics.add(key)
+                safer_alternatives.append(alt)
 
         # Rule A: Ketorolac in renal impairment or duration > 5 days -> Paracetamol (Napa Extend)
         for med in medications:
             if med.generic_name and "ketorolac" in med.generic_name.lower():
-                safer_alternatives.append(
+                _append_alt(
                     SaferAlternativeSchema(
                         original_brand=med.brand_name,
                         original_generic="Ketorolac Tromethamine",
@@ -112,7 +151,7 @@ class ClinicalRiskService:
         if patient.age < 16:
             for med in medications:
                 if med.generic_name and "aspirin" in med.generic_name.lower():
-                    safer_alternatives.append(
+                    _append_alt(
                         SaferAlternativeSchema(
                             original_brand=med.brand_name,
                             original_generic="Aspirin",
@@ -129,8 +168,8 @@ class ClinicalRiskService:
         has_triple_whammy = any("triple whammy" in i.clinical_significance.lower() for i in interactions)
         if has_triple_whammy and not safer_alternatives:
             for med in medications:
-                if med.generic_name and any(n in med.generic_name.lower() for n in ["diclofenac", "naproxen", "ibuprofen", "aceclofenac"]):
-                    safer_alternatives.append(
+                if med.generic_name and any(n in med.generic_name.lower() for n in ["diclofenac", "naproxen", "ibuprofen", "aceclofenac", "etoricoxib"]):
+                    _append_alt(
                         SaferAlternativeSchema(
                             original_brand=med.brand_name,
                             original_generic=med.generic_name,
@@ -146,7 +185,7 @@ class ClinicalRiskService:
         # Rule D: ACEi/ARB + Potassium collision -> Discontinue Potassium Supplement
         has_k_collision = any("hyperkalemia" in i.clinical_significance.lower() or "potassium" in i.clinical_significance.lower() for i in interactions)
         if has_k_collision:
-            safer_alternatives.append(
+            _append_alt(
                 SaferAlternativeSchema(
                     original_brand="Potassium Supplement",
                     original_generic="Potassium Chloride",
@@ -158,5 +197,28 @@ class ClinicalRiskService:
                     requires_clinician_approval=True,
                 )
             )
+
+        # Rule E: Clopidogrel + Omeprazole/Esomeprazole -> Pantoprazole (Pantonix 20/40)
+        has_clopid_ppi = any("cyp2c19" in (i.mechanism or "").lower() for i in interactions)
+        if has_clopid_ppi:
+            for med in medications:
+                if med.generic_name and any(p in med.generic_name.lower() for p in ("omeprazole", "esomeprazole")):
+                    _append_alt(
+                        SaferAlternativeSchema(
+                            original_brand=med.brand_name,
+                            original_generic=med.generic_name,
+                            alternative_brand="Pantonix 20mg / Trupan 20mg",
+                            alternative_generic="Pantoprazole",
+                            clinical_rationale="Omeprazole/Esomeprazole inhibit CYP2C19 bioactivation of Clopidogrel. Pantoprazole preserves full antiplatelet efficacy.",
+                            safety_benefit="Prevents stent thrombosis and recurrent ischemic events.",
+                            precautions="Take once daily 30 minutes before breakfast.",
+                            requires_clinician_approval=True,
+                        )
+                    )
+
+        # Merge guardrail safer alternatives (Allergy, Renal Metformin/NSAID, Pregnancy)
+        if guardrail_report:
+            for alt in guardrail_report.safer_alternatives:
+                _append_alt(alt)
 
         return risk_analysis, safer_alternatives

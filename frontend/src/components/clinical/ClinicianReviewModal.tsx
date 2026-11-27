@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -11,9 +11,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { saveClinicianReview } from '@/services/prescriptionService';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { PrescriptionAnalysisResult } from '@/types';
+
+type ClinicianReviewState = PrescriptionAnalysisResult['clinician_review'];
 import { toast } from 'sonner';
 import { UserCheck, ShieldCheck, CheckCircle2, AlertOctagon, Edit3 } from 'lucide-react';
 
@@ -22,7 +24,8 @@ interface ClinicianReviewModalProps {
   onClose: () => void;
   analysisId: string;
   currentDecision?: 'APPROVED' | 'MODIFIED' | 'REJECTED';
-  onReviewSaved: () => void;
+  defaultNotes?: string;
+  onReviewSaved: (updatedReview?: ClinicianReviewState) => void;
 }
 
 export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
@@ -30,9 +33,10 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
   onClose,
   analysisId,
   currentDecision,
+  defaultNotes,
   onReviewSaved,
 }) => {
-  const { t, i18n } = useTranslation(['reports', 'common']);
+  const { i18n } = useTranslation(['reports', 'common']);
   const isBn = Boolean(i18n.language && i18n.language.startsWith('bn'));
   const { user } = useAuth();
   const [reviewerName, setReviewerName] = useState(
@@ -45,9 +49,23 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
     currentDecision || 'MODIFIED'
   );
   const [notes, setNotes] = useState(
-    'Discontinued Ketorolac due to CKD Stage 3 (eGFR 34.5). Substituted with Napa Extend 665mg PRN. Maintained Bizoran 5/20 with renal panel repeat in 14 days.'
+    defaultNotes ||
+      (isBn
+        ? 'ক্লিনিক্যাল সেফটি অ্যালার্ট পর্যালোচনা করে নিরাপদ চিকিৎসা পরিকল্পনা নির্ধারণ করা হয়েছে।'
+        : 'Reviewed CDSS safety alerts and confirmed adjusted therapeutic plan with patient monitoring.')
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (currentDecision) {
+        setDecision(currentDecision);
+      }
+      if (defaultNotes) {
+        setNotes(defaultNotes);
+      }
+    }
+  }, [isOpen, analysisId, currentDecision, defaultNotes]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,8 +82,16 @@ export const ClinicianReviewModal: React.FC<ClinicianReviewModalProps> = ({
         decision,
         notes,
       });
+      const updatedState: ClinicianReviewState = {
+        reviewed: true,
+        reviewer_name: reviewerName,
+        reviewer_license: reviewerLicense,
+        decision,
+        notes,
+        review_timestamp: new Date().toISOString(),
+      };
       toast.success(isBn ? 'ক্লিনিক্যাল সিদ্ধান্ত সফলভাবে সংরক্ষিত এবং বিএমডিসি ভেরিফিকেশনে লক করা হয়েছে।' : 'Clinical decision recorded and locked with BMDC verification timestamp.');
-      onReviewSaved();
+      onReviewSaved(updatedState);
       onClose();
     } catch {
       toast.error(isBn ? 'ক্লিনিক্যাল পর্যালোচনা জমা দিতে ব্যর্থ হয়েছে। আবার চেষ্টা করুন।' : 'Failed to submit clinical review. Please try again.');

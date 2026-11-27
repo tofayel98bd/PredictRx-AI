@@ -15,11 +15,15 @@ import {
 describe('Bilingual Internationalization (i18n) System', () => {
   beforeEach(async () => {
     localStorage.clear();
-    await setLanguage('en');
+    await act(async () => {
+      await setLanguage('en');
+    });
   });
 
   afterEach(async () => {
-    await setLanguage('en');
+    await act(async () => {
+      await setLanguage('en');
+    });
   });
 
   describe('Language Switcher & State Management', () => {
@@ -84,6 +88,7 @@ describe('Bilingual Internationalization (i18n) System', () => {
       const bnButton = screen.getByRole('button', { name: /ইন্টারফেস ভাষা বাংলায় পরিবর্তন করুন/i });
       await act(async () => {
         fireEvent.click(bnButton);
+        await Promise.resolve();
       });
 
       expect(getCurrentLanguage()).toBe('bn');

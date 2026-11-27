@@ -4021,3 +4021,7 @@ BD_DRUGS_SEED_DATA: List[Dict[str, Any]] = [
         "hepatic_dose_adjustment": "No adjustment required.",
     },
 ]
+
+from app.db.seeds.bd_drugs_data_ext import BD_DRUGS_SEED_EXT_DATA
+
+BD_DRUGS_SEED_DATA.extend(BD_DRUGS_SEED_EXT_DATA)

@@ -42,14 +42,14 @@ def test_triple_whammy_syndrome_detection(client: TestClient):
 
 
 def test_expanded_dgda_catalog_coverage(client: TestClient):
-    """Verify that catalog contains 200+ drugs and search finds multiple classes."""
-    response = client.get("/api/v1/drugs", params={"limit": 300})
+    """Verify that catalog contains 400+ drugs and search finds newly added BD brands."""
+    response = client.get("/api/v1/drugs", params={"limit": 500})
     assert response.status_code == 200
     drugs = response.json()
-    assert len(drugs) >= 200
+    assert len(drugs) >= 400
 
     # Search for diabetes medication
-    resp_diab = client.get("/api/v1/drugs", params={"search": "Comformin"})
+    resp_diab = client.get("/api/v1/drugs", params={"search": "Comet"})
     assert resp_diab.status_code == 200
     assert len(resp_diab.json()) >= 1
     assert any("Metformin" in d["generic_name"] for d in resp_diab.json())
@@ -65,3 +65,9 @@ def test_expanded_dgda_catalog_coverage(client: TestClient):
     assert resp_traj.status_code == 200
     assert len(resp_traj.json()) >= 1
     assert "Linagliptin" in resp_traj.json()[0]["generic_name"]
+
+    # Search for newly added high-frequency BD brands (Etorix, Pantonix, Telfast)
+    for brand, expected_gen in [("Etorix", "Etoricoxib"), ("Pantonix", "Pantoprazole"), ("Telfast", "Fexofenadine")]:
+        resp = client.get("/api/v1/drugs", params={"search": brand})
+        assert resp.status_code == 200
+        assert any(expected_gen in d["generic_name"] for d in resp.json()), f"Missing {brand}"
