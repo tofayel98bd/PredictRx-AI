@@ -1,7 +1,7 @@
 """Health check and diagnostic endpoint."""
 
 from typing import Any, Dict
-from fastapi import APIRouter
+from fastapi import APIRouter, Response, status
 from app.core.config import settings
 from app.core.constants import MEDICAL_SAFETY_DISCLAIMER
 
@@ -33,3 +33,28 @@ def get_health() -> Dict[str, Any]:
         "clinical_safety": "active",
         "disclaimer": MEDICAL_SAFETY_DISCLAIMER,
     }
+
+
+@router.get("/ready", summary="Production Readiness Probe")
+def get_readiness(response: Response) -> Dict[str, Any]:
+    """Readiness probe verifying DB, DGDA catalog seed, and ML risk predictor availability."""
+    checks: Dict[str, Any] = {"database": False, "dgda_catalog_count": 0, "ml_model_loaded": False}
+    try:
+        from sqlalchemy import func, select
+        from app.db.session import SessionLocal, check_database_connection
+        from app.models.drug import BDDrugCatalog
+        from app.ml.risk_predictor import ClinicalRiskPredictor
+
+        db_ok = check_database_connection().get("status") == "healthy"
+        checks["database"] = db_ok
+        if db_ok:
+            with SessionLocal() as db:
+                checks["dgda_catalog_count"] = int(db.scalar(select(func.count(BDDrugCatalog.id))) or 0)
+        checks["ml_model_loaded"] = ClinicalRiskPredictor().model is not None
+    except Exception:
+        pass
+
+    ready = bool(checks["database"] and checks["dgda_catalog_count"] > 0 and checks["ml_model_loaded"])
+    if not ready:
+        response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    return {"ready": ready, "checks": checks, "version": settings.PROJECT_VERSION}

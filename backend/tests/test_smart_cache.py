@@ -41,7 +41,7 @@ def test_golden_scenarios_preseeded():
 
     s4 = smart_cache.get_scenario("GOLDEN_04_PORAG_DLB")
     assert s4 is not None
-    assert s4["name"] == "Porag"
+    assert s4["name"] == "প্রেসক্রিপশনে অপ্রকাশিত (Redacted)"
     assert s4["risk"]["risk_score"] == 32.0
 
     s5 = smart_cache.get_scenario("GOLDEN_05_ABDUR_RAHMAN_CKD4")

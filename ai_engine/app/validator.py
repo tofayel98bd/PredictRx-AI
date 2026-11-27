@@ -306,6 +306,10 @@ def validate_prescription(raw: RawPrescription, patient_context: Optional[dict] 
             "weight_kg": raw.patient_weight_kg or weight,
             "systolic_bp": getattr(raw, "systolic_bp", None),
             "diastolic_bp": getattr(raw, "diastolic_bp", None),
+            "creatinine": getattr(raw, "creatinine_mg_dl", None),
+            "egfr": getattr(raw, "egfr", None),
+            "hba1c": getattr(raw, "hba1c", None),
+            "allergies": getattr(raw, "allergies", []) or [],
         },
         "summary": {
             "medicine_count": len(meds),

@@ -42,6 +42,7 @@ except Exception as _e:
 
 from app.api.deps import get_optional_user
 from app.cache.smart_cache import smart_cache
+from app.core.config import settings
 from app.core.exceptions import ResourceNotFoundError
 from app.core.logging import get_logger
 from app.db.session import get_db
@@ -86,6 +87,16 @@ async def analyze_prescription_endpoint(
     if active_file:
         file_name = active_file.filename
         file_bytes = await active_file.read()
+        if len(file_bytes) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Uploaded prescription file is empty.",
+            )
+        if len(file_bytes) > settings.MAX_UPLOAD_SIZE_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail="Uploaded prescription file exceeds the 10 MB size limit.",
+            )
 
     # Parse patient context from form data if provided
     if patient_context:
@@ -212,6 +223,32 @@ async def analyze_prescription_endpoint(
                     parsed_patient_context.conditions = [
                         c.strip() for c in str(detected_diagnosis).replace(";", ",").split(",") if c.strip()
                     ]
+
+                # On-paper Labs & Allergies (if clinician did not pre-fill)
+                det_cr = detected_pat.get("creatinine") or raw_meta.get("creatinine_mg_dl")
+                if det_cr is not None and parsed_patient_context.creatinine is None:
+                    try:
+                        parsed_patient_context.creatinine = float(det_cr)
+                    except (ValueError, TypeError):
+                        pass
+
+                det_egfr = detected_pat.get("egfr") or raw_meta.get("egfr")
+                if det_egfr is not None and parsed_patient_context.egfr is None:
+                    try:
+                        parsed_patient_context.egfr = float(det_egfr)
+                    except (ValueError, TypeError):
+                        pass
+
+                det_hba1c = detected_pat.get("hba1c") or raw_meta.get("hba1c")
+                if det_hba1c is not None and parsed_patient_context.hba1c is None:
+                    try:
+                        parsed_patient_context.hba1c = float(det_hba1c)
+                    except (ValueError, TypeError):
+                        pass
+
+                det_allergies = detected_pat.get("allergies") or raw_meta.get("allergies") or []
+                if det_allergies and not parsed_patient_context.allergies:
+                    parsed_patient_context.allergies = [str(a).strip() for a in det_allergies if str(a).strip()]
             else:
                 logger.warning("Vision LLM returned 0 medications.")
         except Exception as exc:
@@ -430,6 +467,45 @@ async def analyze_prescription_endpoint(
                 },
             ]
 
+    # Graceful Degraded Fallback: if an arbitrary image failed OCR or yielded 0 meds,
+    # NEVER discard clinician-entered current_medications — evaluate them via CDSS instead.
+    if not raw_meds and parsed_patient_context.current_medications:
+        parsed_meds = []
+        for med in parsed_patient_context.current_medications:
+            med_str = med.strip()
+            if not med_str:
+                continue
+            dose_syn = "1+0+1"
+            brand_part = med_str
+            if "(" in med_str and ")" in med_str:
+                brand_part = med_str.split("(", 1)[0].strip()
+                inner = med_str.split("(", 1)[1].split(")", 1)[0].strip()
+                if inner:
+                    dose_syn = inner
+            parsed_meds.append(
+                {
+                    "brand_name": brand_part,
+                    "dosage_syntax": dose_syn,
+                    "frequency": dose_syn,
+                    "timing": "After Meal",
+                    "duration": "14 days",
+                }
+            )
+        if parsed_meds:
+            raw_meds = parsed_meds
+            if file_bytes is not None:
+                ai_prescription_alerts = list(ai_prescription_alerts or [])
+                ai_prescription_alerts.append(
+                    {
+                        "code": "OCR_DEGRADED_FALLBACK",
+                        "severity": "WARNING",
+                        "message": (
+                            "Vision OCR could not extract medications from this file; "
+                            "CDSS safety checks ran on the clinician-entered medication list."
+                        ),
+                    }
+                )
+
     orchestrator = AnalysisOrchestrator(db)
     client_ip = request.client.host if request.client else None
     user_id = current_user.id if current_user else None
@@ -445,7 +521,11 @@ async def analyze_prescription_endpoint(
         ai_prescription_alerts=ai_prescription_alerts,
     )
 
-    if file_bytes:
+    non_cacheable_codes = {"AI_API_KEY_INVALID", "AI_API_QUOTA_EXCEEDED", "OCR_EXTRACTION_FAILED", "OCR_DEGRADED_FALLBACK"}
+    has_ocr_degradation = bool(
+        ai_prescription_alerts and any(isinstance(a, dict) and a.get("code") in non_cacheable_codes for a in ai_prescription_alerts)
+    )
+    if file_bytes and raw_meds and not has_ocr_degradation:
         try:
             h = hashlib.sha256(file_bytes).hexdigest()
             smart_cache.save_analysis(h, result.model_dump())

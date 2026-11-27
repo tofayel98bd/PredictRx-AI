@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import { BanglaPatientCompanion } from '@/components/clinical/BanglaPatientCompanion';
 import { DEMO_ANALYSIS_RESULT } from '@/constants';
 
@@ -30,13 +30,26 @@ describe('BanglaPatientCompanion', () => {
     expect(screen.getByText(/Medication Schedule & Instructions/i)).toBeInTheDocument();
   });
 
-  it('triggers speech synthesis when clicking listen button', () => {
+  it('triggers speech synthesis when clicking listen button', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('offline test fallback'));
+    const voicesSpy = vi
+      .spyOn(window.speechSynthesis, 'getVoices')
+      .mockReturnValue([{ lang: 'bn-BD', name: 'Bangla Voice' } as SpeechSynthesisVoice]);
+    const speakSpy = vi.spyOn(window.speechSynthesis, 'speak');
+
     render(<BanglaPatientCompanion data={data} patientName="Md. Rafiqul Islam" lang="bn" />);
     const listenBtn = screen.getByRole('button', { name: /শব্দে শুনুন/i });
     expect(listenBtn).toBeInTheDocument();
-    fireEvent.click(listenBtn);
+    await act(async () => {
+      fireEvent.click(listenBtn);
+      await Promise.resolve();
+    });
+    expect(speakSpy).toHaveBeenCalled();
     // Button state toggles to Stop
     expect(screen.getByText(/বন্ধ করুন/i)).toBeInTheDocument();
+    fetchSpy.mockRestore();
+    voicesSpy.mockRestore();
+    speakSpy.mockRestore();
   });
 
   it('triggers print card when clicking print button', () => {
@@ -46,5 +59,13 @@ describe('BanglaPatientCompanion', () => {
     fireEvent.click(printBtn);
     expect(printSpy).toHaveBeenCalled();
     printSpy.mockRestore();
+  });
+
+  it('renders visual dose pictograms and toggles daily dose reminder', () => {
+    render(<BanglaPatientCompanion data={data} patientName="Md. Rafiqul Islam" lang="bn" />);
+    const mornBtns = screen.getAllByRole('button', { name: /সকাল/i });
+    expect(mornBtns.length).toBeGreaterThan(0);
+    fireEvent.click(mornBtns[0]);
+    expect(screen.getByRole('button', { name: /SMS কপি/i })).toBeInTheDocument();
   });
 });

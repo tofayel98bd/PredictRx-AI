@@ -27,6 +27,7 @@ from app.schemas.analysis import (
     ValidatedMedicineSchema,
 )
 from app.services.bangla_companion_service import BanglaCompanionService
+from app.services.clinical_guardrail_service import ClinicalGuardrailService
 from app.services.clinical_risk_service import ClinicalRiskService
 from app.services.drug_normalization_service import DrugNormalizationService
 from app.services.interaction_service import InteractionService
@@ -43,6 +44,7 @@ class AnalysisOrchestrator:
         self.normalization_service = DrugNormalizationService(db)
         self.syntax_service = PrescriptionSyntaxService()
         self.interaction_service = InteractionService(db)
+        self.guardrail_service = ClinicalGuardrailService()
         self.risk_service = ClinicalRiskService()
         self.bangla_service = BanglaCompanionService()
         self.patient_repo = PatientRepository(db)
@@ -158,7 +160,7 @@ class AnalysisOrchestrator:
                 generics_for_interaction.append(norm_cur.generic_name)
 
         # -------------------------------------------------------------
-        # Stage 5: Drug Interactions & Triple Whammy Detection
+        # Stage 5: Drug Interactions, Triple Whammy & Clinical Guardrails
         # -------------------------------------------------------------
         detected_interactions = self.interaction_service.evaluate_interactions(generics_for_interaction)
         for interaction in detected_interactions:
@@ -170,6 +172,12 @@ class AnalysisOrchestrator:
                 )
             )
 
+        guardrail_report = self.guardrail_service.evaluate(
+            patient=patient_context,
+            medications=validated_meds,
+        )
+        prescription_alerts.extend(guardrail_report.prescription_alerts)
+
         # -------------------------------------------------------------
         # Stage 6 & 7: Multi-factor Clinical Risk & Safer Alternatives
         # -------------------------------------------------------------
@@ -177,6 +185,7 @@ class AnalysisOrchestrator:
             patient=patient_context,
             medications=validated_meds,
             interactions=detected_interactions,
+            guardrail_report=guardrail_report,
         )
 
         # -------------------------------------------------------------
@@ -229,9 +238,9 @@ class AnalysisOrchestrator:
             risk_level=clinical_risk.risk_classification.lower(),
             findings_summary=f"Analysis identified {len(detected_interactions)} interaction(s) and {len(validated_meds)} prescribed item(s). Risk classification: {clinical_risk.risk_classification}.",
             detected_interactions=[i.model_dump() for i in detected_interactions],
-            drug_disease_conflicts=[],
+            drug_disease_conflicts=guardrail_report.drug_disease_conflicts,
             dosing_issues=[i.model_dump() for m in validated_meds for i in m.issues],
-            contraindications=[],
+            contraindications=guardrail_report.contraindications,
             shap_risk_factors=[s.model_dump() for s in clinical_risk.shap_features],
             safer_alternatives=[a.model_dump() for a in safer_alternatives],
             patient_bangla_explanation=bangla_companion.overview_bengali,
@@ -268,24 +277,39 @@ class AnalysisOrchestrator:
         elif clinical_risk.risk_classification in ("HIGH", "MODERATE"):
             overall_rating = "CAUTION_REQUIRED"
 
+        ocr_error_codes = {"AI_API_KEY_INVALID", "AI_API_QUOTA_EXCEEDED", "OCR_EXTRACTION_FAILED"}
+        has_fatal_ocr_error = bool(
+            ai_prescription_alerts
+            and any(isinstance(a, dict) and a.get("code") in ocr_error_codes for a in ai_prescription_alerts)
+            and len(validated_meds) == 0
+        )
+        effective_legibility = ai_pipeline_meta.get("legibility", 0.96) if ai_pipeline_meta else 0.96
+
         return PrescriptionAnalysisResult(
             analysis_id=str(saved_analysis.id),
             prescription_id=saved_prescription.prescription_number,
             timestamp=datetime.now(timezone.utc).isoformat(),
             image_url=file_name,
             file_name=file_name or "prescription_upload.png",
-            status="FAILED" if (ai_prescription_alerts and any(isinstance(a, dict) and a.get("code") in ("AI_API_KEY_INVALID", "AI_API_QUOTA_EXCEEDED") for a in ai_prescription_alerts)) else "COMPLETED",
+            status="FAILED" if has_fatal_ocr_error else "COMPLETED",
             meta=AnalysisMetaSchema(
                 votes=ai_pipeline_meta.get("votes", 1) if ai_pipeline_meta else 1,
                 latency_ms=ai_pipeline_meta.get("latency_ms", latency_ms) if ai_pipeline_meta else latency_ms,
                 ocr_engine=ai_pipeline_meta.get("ocr_engine", "PredictRx Multi-Pass Vision LLM + BD Deterministic Rule Engine") if ai_pipeline_meta else "PredictRx Hybrid Vision Pipeline v1.0",
-                legibility=ai_pipeline_meta.get("legibility", 0.96) if ai_pipeline_meta else 0.96,
+                legibility=effective_legibility,
                 is_prescription=ai_pipeline_meta.get("is_prescription", True) if ai_pipeline_meta else True,
             ),
             detected_patient={
+                "name": patient_context.name,
                 "age": patient_context.age,
                 "gender": patient_context.gender,
                 "weight_kg": patient_context.weight_kg,
+                "systolic_bp": patient_context.systolic_bp,
+                "diastolic_bp": patient_context.diastolic_bp,
+                "creatinine": patient_context.creatinine,
+                "egfr": patient_context.egfr,
+                "hba1c": patient_context.hba1c,
+                "allergies": patient_context.allergies,
             },
             patient_context=patient_context,
             extracted_prescription=validated_meds,
@@ -299,7 +323,7 @@ class AnalysisOrchestrator:
                 syntax_errors_count=syntax_errors,
                 critical_issues_count=critical_count,
                 needs_review_count=needs_review_count,
-                legibility=0.96,
+                legibility=effective_legibility,
                 overall_safety_rating=overall_rating,
             ),
             clinician_review=ClinicianReviewStateSchema(

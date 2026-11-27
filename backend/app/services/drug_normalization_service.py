@@ -89,6 +89,49 @@ CANONICAL_GENERICS: Dict[str, str] = {
     "fluoxetine": "Fluoxetine",
     "montelukast": "Montelukast",
     "fexofenadine": "Fexofenadine",
+    "etoricoxib": "Etoricoxib",
+    "prednisolone": "Prednisolone",
+    "deflazacort": "Deflazacort",
+    "levothyroxine": "Levothyroxine Sodium",
+    "vildagliptin": "Vildagliptin",
+    "sitagliptin": "Sitagliptin",
+    "rupatadine": "Rupatadine",
+    "bilastine": "Bilastine",
+    "desloratadine": "Desloratadine",
+    "domperidone": "Domperidone",
+    "ondansetron": "Ondansetron",
+    "tiemonium": "Tiemonium Methylsulphate",
+    "cefixime": "Cefixime",
+    "cefuroxime": "Cefuroxime Axetil",
+    "amoxicillin": "Amoxicillin",
+    "moxifloxacin": "Moxifloxacin",
+    "meropenem": "Meropenem",
+    "fluconazole": "Fluconazole",
+    "albendazole": "Albendazole",
+    "ivermectin": "Ivermectin",
+    "doxycycline": "Doxycycline",
+    "linezolid": "Linezolid",
+    "fenofibrate": "Fenofibrate",
+    "nitroglycerin": "Nitroglycerin",
+    "trimetazidine": "Trimetazidine",
+    "febuxostat": "Febuxostat",
+    "colchicine": "Colchicine",
+    "pregabalin": "Pregabalin",
+    "gabapentin": "Gabapentin",
+    "amitriptyline": "Amitriptyline",
+    "clonazepam": "Clonazepam",
+    "alprazolam": "Alprazolam",
+    "diazepam": "Diazepam",
+    "quetiapine": "Quetiapine Fumarate",
+    "rivastigmine": "Rivastigmine",
+    "memantine": "Memantine Hydrochloride",
+    "tamsulosin": "Tamsulosin Hydrochloride",
+    "finasteride": "Finasteride",
+    "betahistine": "Betahistine Dihydrochloride",
+    "tranexamic acid": "Tranexamic Acid",
+    "salbutamol": "Salbutamol",
+    "doxofylline": "Doxofylline",
+    "acetylcysteine": "Acetylcysteine",
 }
 
 # Fallback seed of major Bangladesh brands if not found in catalog
@@ -160,8 +203,70 @@ BRAND_SEED: Dict[str, str] = {
     # Diabetes
     "comformin": "Metformin",
     "glucomin": "Metformin",
+    "comet": "Metformin",
+    "glucophage": "Metformin",
+    "amaryl": "Glimepiride",
+    "diamicron": "Gliclazide",
+    "galvus": "Vildagliptin",
+    "vildaglip": "Vildagliptin",
     "trajenta": "Linagliptin",
+    "linaglip": "Linagliptin",
     "jardiance": "Empagliflozin",
+    "empa": "Empagliflozin",
+    "dapa": "Dapagliflozin",
+    "forxiga": "Dapagliflozin",
+    "thyrox": "Levothyroxine Sodium",
+    # GI & Pain & Cardio & Resp additions
+    "pantonix": "Pantoprazole",
+    "rabe": "Rabeprazole Sodium",
+    "domidon": "Domperidone",
+    "motigut": "Domperidone",
+    "algin": "Tiemonium Methylsulphate",
+    "onaseron": "Ondansetron",
+    "emistat": "Ondansetron",
+    "etorix": "Etoricoxib",
+    "arcoxia": "Etoricoxib",
+    "aclo": "Aceclofenac",
+    "flexi": "Aceclofenac",
+    "naprox": "Naproxen",
+    "deltasone": "Prednisolone",
+    "wysolone": "Prednisolone",
+    "bislol": "Bisoprolol Fumarate",
+    "concor": "Bisoprolol Fumarate",
+    "cardobis": "Bisoprolol Fumarate",
+    "atorva": "Atorvastatin",
+    "lipitor": "Atorvastatin",
+    "rosuva": "Rosuvastatin",
+    "crestor": "Rosuvastatin",
+    "deplatt": "Clopidogrel",
+    "clopid": "Clopidogrel",
+    "xarelto": "Rivaroxaban",
+    "eliquis": "Apixaban",
+    "telfast": "Fexofenadine",
+    "rupa": "Rupatadine",
+    "bilatin": "Bilastine",
+    "montair": "Montelukast",
+    "azin": "Azithromycin",
+    "zithrin": "Azithromycin",
+    "cefim": "Cefixime",
+    "cef-3": "Cefixime",
+    "cefotil": "Cefuroxime Axetil",
+    "zinnat": "Cefuroxime Axetil",
+    "levoxin": "Levofloxacin",
+    "tavanic": "Levofloxacin",
+    "augmentin": "Amoxicillin + Clavulanic Acid",
+    "moxaclav": "Amoxicillin + Clavulanic Acid",
+    "flugal": "Fluconazole",
+    "almex": "Albendazole",
+    "prelica": "Pregabalin",
+    "gabapen": "Gabapentin",
+    "uromax": "Tamsulosin Hydrochloride",
+    "tamsin": "Tamsulosin Hydrochloride",
+    "queta": "Quetiapine Fumarate",
+    "qutipin": "Quetiapine Fumarate",
+    "rivacap": "Rivastigmine",
+    "dementa": "Memantine Hydrochloride",
+    "syndopa": "Levodopa + Carbidopa",
     # Others
     "dextrose": "Dextrose",
     "ors": "Oral Rehydration Salts",
@@ -172,12 +277,13 @@ BRAND_SEED: Dict[str, str] = {
 class DrugNormalizationService:
     """
     Service to normalize extracted brand names to generic names and DGDA catalog entries.
-    Features exact database matching, generic canonical mapping, prefix matching,
+    Features O(1) in-memory catalog indexing, generic canonical mapping, prefix matching,
     difflib fuzzy matching with phonetic/length guardrails, and generic fallback resolution.
     """
 
     _catalog_cache: Optional[List[BDDrugCatalog]] = None
     _brand_map: Optional[Dict[str, BDDrugCatalog]] = None
+    _brand_base_map: Optional[Dict[str, BDDrugCatalog]] = None
     _brand_names: Optional[List[str]] = None
     _generic_names: Optional[List[str]] = None
 
@@ -187,16 +293,20 @@ class DrugNormalizationService:
         self._ensure_cache()
 
     def _ensure_cache(self) -> None:
-        """Cache all active catalog entries in memory for sub-millisecond fuzzy lookups."""
+        """Cache all active catalog entries in memory for sub-millisecond lookups."""
         if DrugNormalizationService._catalog_cache is None:
             entries = self.repo.get_all_catalog_entries()
             DrugNormalizationService._catalog_cache = entries
             b_map: Dict[str, BDDrugCatalog] = {}
+            b_base_map: Dict[str, BDDrugCatalog] = {}
             b_names: List[str] = []
             g_names: set[str] = set()
             for e in entries:
                 key = e.brand_name.strip().lower()
                 b_map[key] = e
+                base_key = self._clean_token(e.brand_name).lower()
+                if base_key and base_key not in b_base_map:
+                    b_base_map[base_key] = e
                 b_names.append(e.brand_name.strip())
                 g_names.add(e.generic_name.strip())
 
@@ -210,6 +320,7 @@ class DrugNormalizationService:
                 g_names.add(g)
 
             DrugNormalizationService._brand_map = b_map
+            DrugNormalizationService._brand_base_map = b_base_map
             DrugNormalizationService._brand_names = sorted(list(set(b_names)))
             DrugNormalizationService._generic_names = sorted(list(g_names))
 
@@ -218,6 +329,7 @@ class DrugNormalizationService:
         """Clear cache if catalog updates."""
         cls._catalog_cache = None
         cls._brand_map = None
+        cls._brand_base_map = None
         cls._brand_names = None
         cls._generic_names = None
 
@@ -225,17 +337,27 @@ class DrugNormalizationService:
         """
         Normalize a brand or raw medicine token into a catalog generic entry.
         Example: "Tab. Sergil 20mg" -> Generic: "Esomeprazole", Catalog: Sergel 20 mg
-        Example: "Potassium Supplements" -> Generic: "Potassium"
-        Example: "Lisinopril 5mg" -> Generic: "Lisinopril"
+        Example: "Tab. Sergel-20mg" -> Generic: "Esomeprazole", Catalog: Sergel
+        Example: "Cap. Cef-3 400mg" -> Generic: "Cefixime", Catalog: Cef-3 400
         """
         raw = brand_input.strip()
+        prefix_stripped = self._strip_dosage_form(raw)
+        prefix_lower = prefix_stripped.lower()
         cleaned = self._clean_token(raw)
         cleaned_lower = cleaned.lower()
 
-        # 1. Exact match in database catalog
-        exact_match = self.repo.find_by_brand_exact(cleaned)
-        if exact_match:
-            return self._build_result(exact_match, confidence=0.98, source="database_exact")
+        # 1. O(1) In-memory exact match (full brand+strength first, then cleaned base brand)
+        if self._brand_map:
+            if prefix_lower in self._brand_map:
+                return self._build_result(self._brand_map[prefix_lower], confidence=0.99, source="database_exact")
+            if cleaned_lower in self._brand_map:
+                return self._build_result(self._brand_map[cleaned_lower], confidence=0.98, source="database_exact")
+            if self._brand_base_map and cleaned_lower in self._brand_base_map:
+                return self._build_result(self._brand_base_map[cleaned_lower], confidence=0.97, source="database_exact")
+        else:
+            exact_match = self.repo.find_by_brand_exact(cleaned)
+            if exact_match:
+                return self._build_result(exact_match, confidence=0.98, source="database_exact")
 
         # 2. Curated brand seed dictionary
         if cleaned_lower in BRAND_SEED:
@@ -278,14 +400,25 @@ class DrugNormalizationService:
                     normalized_source="canonical_token",
                 )
 
-        # 5. Substring/prefix search in database catalog (for tokens >= 4 chars)
-        candidates = self.repo.find_by_brand_prefix_or_contains(cleaned) if len(cleaned) >= 4 else []
-        if candidates:
-            for c in candidates:
-                if c.brand_name.lower() == cleaned_lower:
-                    return self._build_result(c, confidence=0.98, source="database_exact")
-            best = candidates[0]
-            return self._build_result(best, confidence=0.90, source="database_prefix")
+        # 5. In-memory prefix/contains search (eliminates per-drug SQL roundtrips)
+        if len(cleaned) >= 4:
+            if self._catalog_cache:
+                prefix_hits = [c for c in self._catalog_cache if c.brand_name.lower().startswith(cleaned_lower)]
+                if prefix_hits:
+                    return self._build_result(prefix_hits[0], confidence=0.92, source="database_prefix")
+                contains_hits = [
+                    c for c in self._catalog_cache
+                    if cleaned_lower in c.brand_name.lower() or cleaned_lower in c.generic_name.lower()
+                ]
+                if contains_hits:
+                    return self._build_result(contains_hits[0], confidence=0.90, source="database_prefix")
+            else:
+                candidates = self.repo.find_by_brand_prefix_or_contains(cleaned)
+                if candidates:
+                    for c in candidates:
+                        if c.brand_name.lower() == cleaned_lower:
+                            return self._build_result(c, confidence=0.98, source="database_exact")
+                    return self._build_result(candidates[0], confidence=0.90, source="database_prefix")
 
         # 6. Guarded Fuzzy Brand Match via difflib (Cutoff 0.75, First-letter match required for length >= 5)
         # Prevents tragic cross-class collisions like 'lisinopril' -> 'bisoprolol'
@@ -375,10 +508,26 @@ class DrugNormalizationService:
             normalized_source=source,
         )
 
+    def _strip_dosage_form(self, text: str) -> str:
+        """Strip leading dosage form tokens like 'Tab.', 'Cap.', 'Syp.', 'Inj.'."""
+        return re.sub(
+            r"^(tab|tablet|cap|capsule|syr|syrup|inj|injection|drop|drops|susp|suspension|inh|inhaler|spray|gel|cream|oint|ointment|supp)\.?\s*",
+            "",
+            text.strip(),
+            flags=re.IGNORECASE,
+        ).strip()
+
     def _clean_token(self, text: str) -> str:
-        """Strip prefixes like 'Tab.', 'Cap.', 'Syr.', and trailing strengths / dosages / qualifiers."""
-        t = re.sub(r"^(tab|tablet|cap|capsule|syr|syrup|inj|injection|drop|drops)\.?\s*", "", text, flags=re.IGNORECASE)
+        """Strip prefixes, attached strengths ('Sergel-20mg'), and trailing schedules while preserving 'Cef-3'."""
+        t = self._strip_dosage_form(text)
+        # Strip space-separated trailing strength & dosage schedule
         t = re.sub(r"\s+\d+([/.]\d+)?(\s*(mg|g|ml|mcg|iu|%))?.*$", "", t, flags=re.IGNORECASE)
-        # Strip trailing dosage schedule abbreviations like OD, BD, TDS, HS, etc.
-        t = re.sub(r"\s+\b(od|bd|bid|tds|tid|qds|qid|hs|prn|sos|stat|daily|supplements|supplement)\b.*$", "", t, flags=re.IGNORECASE)
+        # Strip hyphen-attached strengths (>=10 or with unit/slash, e.g., Sergel-20, Napa-500mg, Bizoran-5/20), keeping Cef-3
+        t = re.sub(r"-(\d{2,}|\d+/\d+|\d+\s*(?:mg|g|ml|mcg|iu|%))(?:\s*(?:mg|g|ml|mcg|iu|%))?.*$", "", t, flags=re.IGNORECASE)
+        t = re.sub(
+            r"\s+\b(od|bd|bid|tds|tid|qds|qid|hs|prn|sos|stat|daily|supplements|supplement)\b.*$",
+            "",
+            t,
+            flags=re.IGNORECASE,
+        )
         return t.strip()

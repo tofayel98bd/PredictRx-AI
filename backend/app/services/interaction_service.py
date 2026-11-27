@@ -24,6 +24,7 @@ DIURETIC_GENERICS = {
 NSAID_GENERICS = {
     "ketorolac", "ketorolac tromethamine", "ibuprofen", "naproxen",
     "diclofenac", "indomethacin", "meloxicam", "piroxicam", "aceclofenac", "mefenamic acid",
+    "etoricoxib", "celecoxib",
 }
 ANTICOAGULANT_GENERICS = {
     "warfarin", "heparin", "enoxaparin", "rivaroxaban", "apixaban", "dabigatran",
@@ -274,6 +275,21 @@ class InteractionService:
                 evidence_source="FDA Safety Advisory / ACCP Practice Guidelines",
                 recommended_action="Substitute omeprazole/esomeprazole with pantoprazole or famotidine, which lack significant CYP2C19 interaction.",
                 management_protocol="Substitute with Pantoprazole",
+            )
+
+        # J. Febuxostat / Allopurinol + Azathioprine / Mercaptopurine (CRITICAL)
+        if (_matches(g1, {"febuxostat", "allopurinol"}) and _matches(g2, {"azathioprine", "mercaptopurine"})) or \
+           (_matches(g2, {"febuxostat", "allopurinol"}) and _matches(g1, {"azathioprine", "mercaptopurine"})):
+            return DrugInteractionSchema(
+                id=f"GUARD-XO-THIOL-{abs(hash(g1+g2)) % 10000}",
+                drug_a=g1.title(),
+                drug_b=g2.title(),
+                severity="CRITICAL",
+                mechanism="Xanthine oxidase inhibition blocks inactivation of 6-mercaptopurine/azathioprine.",
+                clinical_significance="Life-threatening pancytopenia, severe bone marrow suppression, and fatal sepsis.",
+                evidence_source="FDA Black Box Warning / BNF 86",
+                recommended_action="Contraindicated with Febuxostat; with Allopurinol reduce Azathioprine dose by 75% and monitor CBC.",
+                management_protocol="Emergency Hematology Review",
             )
 
         return None

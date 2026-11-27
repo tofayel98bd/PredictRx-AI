@@ -26,3 +26,13 @@ def test_api_v1_health(client: TestClient):
     data = response.json()
     assert data["api_status"] == "online"
     assert data["database_status"] == "connected"
+
+
+def test_readiness_probe(client: TestClient):
+    response = client.get("/ready")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["ready"] is True
+    assert data["checks"]["database"] is True
+    assert data["checks"]["dgda_catalog_count"] >= 400
+    assert data["checks"]["ml_model_loaded"] is True

@@ -1,16 +1,19 @@
 """Bilingual Clinical Decision Support System (CDSS) PDF Report Generator."""
 
+import html as html_lib
 import os
-from pathlib import Path
 import subprocess
-import sys
 import tempfile
 from typing import Any, Dict, Optional
 
 from app.core.logging import get_logger
-from app.i18n.translator import translator, t
+from app.i18n.translator import t
 
 logger = get_logger("app.services.pdf_report")
+
+
+def _esc(val: Any) -> str:
+    return html_lib.escape("" if val is None else str(val))
 
 
 def find_browser_executable() -> Optional[str]:
@@ -115,34 +118,76 @@ class PdfReportService:
             inter_rows = f"<tr><td colspan='3' class='empty-cell'>{'কোনো বিপজ্জনক ড্রাগ কলিশন পাওয়া যায়নি।' if is_bn else 'No critical drug collisions detected.'}</td></tr>"
         else:
             for item in interactions:
-                sev = item.get("severity", "MODERATE")
+                sev = str(item.get("severity", "MODERATE")).upper()
                 sev_color = "#dc2626" if sev == "CRITICAL" else ("#ea580c" if sev == "HIGH" else "#d97706")
-                d_pair = f"{item.get('drug_a', '')} + {item.get('drug_b', '')}"
-                desc = item.get("clinical_implication") or item.get("description", "")
-                proto = item.get("management_protocol", "")
+                d_pair = f"{_esc(item.get('drug_a', ''))} + {_esc(item.get('drug_b', ''))}"
+                desc = _esc(
+                    item.get("clinical_significance")
+                    or item.get("clinical_implication")
+                    or item.get("mechanism")
+                    or item.get("description", "")
+                )
+                proto = _esc(item.get("recommended_action") or item.get("management_protocol") or "")
                 inter_rows += f"""
                 <tr>
                   <td><strong>{d_pair}</strong></td>
-                  <td><span class="sev-tag" style="background-color: {sev_color}20; color: {sev_color}; border: 1px solid {sev_color}40;">{sev}</span></td>
+                  <td><span class="sev-tag" style="background-color: {sev_color}20; color: {sev_color}; border: 1px solid {sev_color}40;">{_esc(sev)}</span></td>
                   <td>
                     <div>{desc}</div>
-                    <div class="proto-line"><strong>{'প্রটোকল:' if is_bn else 'Protocol:'}</strong> {proto}</div>
+                    <div class="proto-line"><strong>{'প্রস্তাবিত পদক্ষেপ:' if is_bn else 'Action / Protocol:'}</strong> {proto}</div>
                   </td>
                 </tr>
                 """
 
+        # Safer Alternatives HTML
+        alts_title = "সুপারিশকৃত নিরাপদ বিকল্প (Safer Alternatives)" if is_bn else "Recommended Safer Therapeutic Alternatives"
+        alts_html = ""
+        for alt in safer_alts[:5]:
+            orig = _esc(f"{alt.get('original_brand', '')} ({alt.get('original_generic', '')})")
+            repl = _esc(f"{alt.get('alternative_brand', '')} ({alt.get('alternative_generic', '')})")
+            rat = _esc(alt.get("clinical_rationale", ""))
+            alts_html += f"""
+            <div class="shap-box" style="border-left: 3px solid #10b981;">
+              <div class="shap-header">
+                <span class="shap-name" style="color:#065f46;">{orig} &rarr; {repl}</span>
+              </div>
+              <p class="shap-desc">{rat}</p>
+            </div>
+            """
+
+        # Clinician Review Sign-Off HTML
+        review = rx_data.get("clinician_review") or {}
+        review_html = ""
+        if review.get("reviewed"):
+            rev_dec = _esc(review.get("decision") or "APPROVED")
+            rev_name = _esc(review.get("reviewer_name") or "Verified Clinician")
+            rev_lic = _esc(review.get("reviewer_license") or "")
+            rev_notes = _esc(review.get("notes") or "")
+            rev_ts = _esc(review.get("review_timestamp") or "")
+            review_title = "চিকিৎসকের চূড়ান্ত অডিট ও অনুমোদন" if is_bn else "Human-in-the-Loop Clinician Sign-Off"
+            review_html = f"""
+            <div class="section-title"><span>{review_title}</span></div>
+            <div class="shap-box" style="border-left: 3px solid #0284c7; background: #f0f9ff; margin-bottom: 14px;">
+              <div class="shap-header">
+                <span class="shap-name" style="color:#0c4a6e;">{rev_name} ({rev_lic})</span>
+                <span class="shap-score" style="color:#0369a1;">{rev_dec}</span>
+              </div>
+              <p class="shap-desc">{rev_notes}</p>
+              <p class="shap-desc" style="margin-top:4px; font-size:7.5pt; color:#64748b;">Signed: {rev_ts}</p>
+            </div>
+            """
+
         # SHAP factor cards
         shap_html = ""
         for s in shap_factors[:4]:
-            feat = s.get("feature", "")
-            val = s.get("value", "")
+            feat = _esc(s.get("feature", ""))
             score_imp = s.get("impact_score", 0)
-            expl = s.get("clinical_explanation", "")
+            expl = _esc(s.get("clinical_explanation", ""))
             shap_html += f"""
             <div class="shap-box">
               <div class="shap-header">
                 <span class="shap-name">{feat}</span>
-                <span class="shap-score">+{abs(round(score_imp * 100, 1))}%</span>
+                <span class="shap-score">{'+' if score_imp >= 0 else ''}{round(score_imp * 100, 1)}%</span>
               </div>
               <p class="shap-desc">{expl}</p>
             </div>
@@ -480,6 +525,15 @@ class PdfReportService:
 
 {f'''
 <div class="section-title">
+  <span>{alts_title}</span>
+</div>
+<div class="shap-grid">
+  {alts_html}
+</div>
+''' if alts_html else ''}
+
+{f'''
+<div class="section-title">
   <span>{shap_title}</span>
 </div>
 <div class="shap-grid">
@@ -487,13 +541,15 @@ class PdfReportService:
 </div>
 ''' if shap_html else ''}
 
+{review_html}
+
 <div class="disclaimer-box">
   <strong>{disclaimer_title}:</strong> {disclaimer_text}
 </div>
 
 <div class="sign-section">
   <div style="font-size: 7.5pt; color: #64748b;">
-    Report ID: REP-{rx_data.get('prescription_id', '001')} • Generated by PredictRx-AI v1.0.0
+    Report ID: REP-{_esc(rx_data.get('prescription_id', '001'))} • Generated by PredictRx-AI v1.4.0
   </div>
   <div class="sign-box">
     {sign_label}
@@ -504,6 +560,172 @@ class PdfReportService:
 </html>"""
         return html
 
+    def _write_minimal_pdf(self, lines: list[str], output_path: str) -> str:
+        """Zero-dependency valid %PDF-1.4 writer when neither Chromium nor reportlab is installed."""
+        safe_lines = [ln.encode("latin-1", errors="replace").decode("latin-1") for ln in lines[:45]]
+        escaped = [ln.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)") for ln in safe_lines]
+        stream_ops = ["BT", "/F1 10 Tf", "40 790 Td", "14 TL"]
+        for idx, text in enumerate(escaped):
+            stream_ops.append(f"({text}) Tj" if idx == 0 else f"T* ({text}) Tj")
+        stream_ops.append("ET")
+        stream_bytes = "\n".join(stream_ops).encode("latin-1")
+
+        objs = [
+            b"1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n",
+            b"2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n",
+            b"3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj\n",
+            b"4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n",
+            f"5 0 obj << /Length {len(stream_bytes)} >>\nstream\n".encode("ascii") + stream_bytes + b"\nendstream endobj\n",
+        ]
+        pdf = bytearray(b"%PDF-1.4\n")
+        offsets = [0]
+        for obj in objs:
+            offsets.append(len(pdf))
+            pdf.extend(obj)
+        xref_pos = len(pdf)
+        pdf.extend(f"xref\n0 {len(objs) + 1}\n0000000000 65535 f \n".encode("ascii"))
+        for off in offsets[1:]:
+            pdf.extend(f"{off:010d} 00000 n \n".encode("ascii"))
+        pdf.extend(f"trailer << /Size {len(objs) + 1} /Root 1 0 R >>\nstartxref\n{xref_pos}\n%%EOF\n".encode("ascii"))
+        with open(output_path, "wb") as f:
+            f.write(pdf)
+        return output_path
+
+    def _generate_reportlab_pdf(self, report_data: Dict[str, Any], output_path: str, lang: str = "en") -> str:
+        """Pure-Python ReportLab PDF generator for Linux/Docker environments without headless Chromium."""
+        rx_data = report_data.get("prescription_data", {})
+        patient = rx_data.get("patient_context", {})
+        clinical_risk = rx_data.get("clinical_risk", {})
+        interactions = rx_data.get("drug_interactions", [])
+        meds = rx_data.get("extracted_prescription", [])
+        safer_alts = rx_data.get("safer_alternatives", [])
+        shap_factors = clinical_risk.get("shap_features", [])
+        review = rx_data.get("clinician_review") or {}
+
+        try:
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+        except ImportError:
+            logger.warning("reportlab not installed; generating minimal stdlib %PDF-1.4 fallback.")
+            lines = [
+                f"PredictRx-AI Clinical Audit Report ({lang.upper()})",
+                f"Prescription ID: {rx_data.get('prescription_id', 'N/A')}",
+                f"Patient: {patient.get('name') or 'Unnamed'} | Age: {patient.get('age')} | eGFR: {patient.get('egfr') or 'N/A'}",
+                f"Risk: {clinical_risk.get('risk_classification', 'LOW')} ({clinical_risk.get('risk_score', 0)}%)",
+                "--- Prescribed Medications ---",
+                *[f"- {m.get('brand_name')} ({m.get('generic_name')}) | {m.get('dosage_syntax')} | {m.get('timing')}" for m in meds],
+                "--- Interactions ---",
+                *[f"- [{i.get('severity')}] {i.get('drug_a')} + {i.get('drug_b')}: {i.get('clinical_significance') or ''}" for i in interactions],
+                "--- Safer Alternatives ---",
+                *[f"- {a.get('original_brand')} -> {a.get('alternative_brand')} ({a.get('alternative_generic')})" for a in safer_alts],
+            ]
+            if review.get("reviewed"):
+                lines.append(f"Clinician Sign-Off ({review.get('decision')}): {review.get('reviewer_name')} ({review.get('reviewer_license')})")
+            return self._write_minimal_pdf(lines, output_path)
+
+        doc = SimpleDocTemplate(output_path, pagesize=A4, leftMargin=36, rightMargin=36, topMargin=36, bottomMargin=36)
+        styles = getSampleStyleSheet()
+        story = []
+
+        story.append(Paragraph("<b>PredictRx-AI (PredictRx BD) — CDSS Clinical Audit Report</b>", styles["Title"]))
+        story.append(
+            Paragraph(
+                f"Prescription Ref: {_esc(rx_data.get('prescription_id', 'N/A'))} | "
+                f"Language: {lang.upper()} | Patient: {_esc(patient.get('name') or 'Unnamed')} "
+                f"(Age: {_esc(patient.get('age'))}, Gender: {_esc(patient.get('gender'))}, eGFR: {_esc(patient.get('egfr') or 'N/A')})",
+                styles["Normal"],
+            )
+        )
+        story.append(Spacer(1, 10))
+        story.append(
+            Paragraph(
+                f"<b>Risk Classification:</b> {_esc(clinical_risk.get('risk_classification', 'LOW'))} "
+                f"({round(float(clinical_risk.get('risk_score', 0)), 1)}%) — "
+                f"{_esc(clinical_risk.get('calibrated_probability_note', ''))}",
+                styles["Normal"],
+            )
+        )
+        story.append(Spacer(1, 12))
+
+        if meds:
+            story.append(Paragraph("<b>Prescribed Medications (DGDA Normalization)</b>", styles["Heading3"]))
+            med_table = [["Brand", "Generic", "Dosage", "Timing", "Duration"]]
+            for m in meds:
+                dur = f"{m.get('duration_days')} days" if m.get("duration_days") else (m.get("duration") or "N/A")
+                med_table.append([
+                    str(m.get("brand_name", "")),
+                    str(m.get("generic_name") or "N/A"),
+                    str(m.get("dosage_syntax") or "N/A"),
+                    str(m.get("timing") or "N/A"),
+                    str(dur),
+                ])
+            t_med = Table(med_table, repeatRows=1)
+            t_med.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#0f766e")),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("FONTSIZE", (0, 0), (-1, -1), 8.5),
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("PADDING", (0, 0), (-1, -1), 5),
+            ]))
+            story.append(t_med)
+            story.append(Spacer(1, 10))
+
+        if interactions:
+            story.append(Paragraph("<b>Detected Drug Interactions & Guardrails</b>", styles["Heading3"]))
+            for inter in interactions:
+                sig = inter.get("clinical_significance") or inter.get("mechanism") or ""
+                act = inter.get("recommended_action") or ""
+                story.append(
+                    Paragraph(
+                        f"<b>[{_esc(inter.get('severity'))}] {_esc(inter.get('drug_a'))} + {_esc(inter.get('drug_b'))}:</b> "
+                        f"{_esc(sig)} <i>Action: {_esc(act)}</i>",
+                        styles["Normal"],
+                    )
+                )
+            story.append(Spacer(1, 8))
+
+        if safer_alts:
+            story.append(Paragraph("<b>Safer Therapeutic Alternatives</b>", styles["Heading3"]))
+            for alt in safer_alts:
+                story.append(
+                    Paragraph(
+                        f"Replace <b>{_esc(alt.get('original_brand'))}</b> with "
+                        f"<b>{_esc(alt.get('alternative_brand'))} ({_esc(alt.get('alternative_generic'))})</b>: "
+                        f"{_esc(alt.get('clinical_rationale'))}",
+                        styles["Normal"],
+                    )
+                )
+            story.append(Spacer(1, 8))
+
+        if shap_factors:
+            story.append(Paragraph("<b>Explainable AI (SHAP Feature Drivers)</b>", styles["Heading3"]))
+            for s in shap_factors[:5]:
+                pct = round(float(s.get("impact_score", 0)) * 100, 1)
+                story.append(
+                    Paragraph(
+                        f"• <b>{_esc(s.get('feature'))}</b> ({'+' if pct >= 0 else ''}{pct}%): "
+                        f"{_esc(s.get('clinical_explanation'))}",
+                        styles["Normal"],
+                    )
+                )
+            story.append(Spacer(1, 8))
+
+        if review.get("reviewed"):
+            story.append(
+                Paragraph(
+                    f"<b>Clinician Sign-Off ({_esc(review.get('decision'))}):</b> "
+                    f"{_esc(review.get('reviewer_name'))} ({_esc(review.get('reviewer_license'))}) — {_esc(review.get('notes'))}",
+                    styles["Normal"],
+                )
+            )
+            story.append(Spacer(1, 8))
+
+        story.append(Paragraph(f"<i>{_esc(t('reports.safety_disclaimer', lang='en'))}</i>", styles["Normal"]))
+        doc.build(story)
+        return output_path
+
     def generate_pdf(
         self,
         report_data: Dict[str, Any],
@@ -511,43 +733,47 @@ class PdfReportService:
         lang: str = "en",
     ) -> str:
         """
-        Compile bilingual HTML report and render to PDF using headless Chromium.
-        Returns the absolute path to the generated PDF.
+        Compile bilingual HTML report and render to PDF via headless Chromium,
+        falling back cleanly to ReportLab pure-Python PDF generation when no browser binary exists.
         """
         html_content = self.generate_html(report_data, lang=lang)
         temp_dir = tempfile.gettempdir()
         temp_html = os.path.join(temp_dir, f"report_{lang}_{os.getpid()}.html")
         temp_pdf = os.path.join(temp_dir, f"report_{lang}_{os.getpid()}.pdf")
-
-        final_path = output_path or os.path.join(temp_dir, f"PredictRx_Report_{lang}.pdf")
-
-        with open(temp_html, "w", encoding="utf-8") as f:
-            f.write(html_content)
+        final_path = output_path or os.path.join(temp_dir, f"PredictRx_Report_{lang}_{os.getpid()}.pdf")
 
         browser_path = find_browser_executable()
-        if not browser_path:
-            logger.warning("No Chromium/Edge browser found for PDF rendering. Writing HTML to output.")
-            return temp_html
+        if browser_path:
+            try:
+                with open(temp_html, "w", encoding="utf-8") as f:
+                    f.write(html_content)
+                cmd = [
+                    browser_path,
+                    "--headless",
+                    "--no-sandbox",
+                    "--disable-gpu",
+                    f"--print-to-pdf={temp_pdf}",
+                    f"file:///{temp_html.replace(os.sep, '/')}",
+                ]
+                logger.info(f"Rendering {lang} PDF via {browser_path}...")
+                res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+                if res.returncode == 0 and os.path.exists(temp_pdf):
+                    with open(temp_pdf, "rb") as src, open(final_path, "wb") as dst:
+                        dst.write(src.read())
+                    logger.info(f"Successfully generated bilingual PDF at {final_path} ({os.path.getsize(final_path)} bytes)")
+                    return final_path
+            except Exception as exc:
+                logger.warning(f"Headless browser PDF failed ({exc}); falling back to ReportLab.")
+            finally:
+                for tmp in (temp_html, temp_pdf):
+                    if os.path.exists(tmp) and tmp != final_path:
+                        try:
+                            os.remove(tmp)
+                        except OSError:
+                            pass
 
-        cmd = [
-            browser_path,
-            "--headless",
-            "--no-sandbox",
-            "--disable-gpu",
-            f"--print-to-pdf={temp_pdf}",
-            f"file:///{temp_html.replace(os.sep, '/')}",
-        ]
-
-        logger.info(f"Rendering {lang} PDF via {browser_path}...")
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-        if res.returncode == 0 and os.path.exists(temp_pdf):
-            with open(temp_pdf, "rb") as src, open(final_path, "wb") as dst:
-                dst.write(src.read())
-            logger.info(f"Successfully generated bilingual PDF at {final_path} ({os.path.getsize(final_path)} bytes)")
-            return final_path
-        else:
-            logger.error(f"Chromium PDF render failed with code {res.returncode}: {res.stderr}")
-            raise RuntimeError(f"PDF generation failed: {res.stderr}")
+        logger.info("Using ReportLab pure-Python PDF generator fallback.")
+        return self._generate_reportlab_pdf(report_data, final_path, lang=lang)
 
 
 # Singleton instance

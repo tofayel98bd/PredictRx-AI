@@ -8,10 +8,10 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16--Alpine-336791.svg?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Docker](https://img.shields.io/badge/Docker-Orchestrated-2496ED.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4+-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-[![Backend Tests](https://img.shields.io/badge/Pytest-36%2F36%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](backend/tests/)
-[![Frontend Tests](https://img.shields.io/badge/Vitest-18%2F18%20Passed-brightgreen.svg?style=flat&logo=vitest&logoColor=white)](frontend/src/test/)
-[![AI Engine Tests](https://img.shields.io/badge/AI%20Engine-15%2F15%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](ai_engine/tests/)
-[![Total Tests](https://img.shields.io/badge/Total%20Tests-69%2F69%20Passed%20(100%25)-brightgreen.svg?style=flat&logo=checkmarx&logoColor=white)]()
+[![Backend Tests](https://img.shields.io/badge/Pytest-52%2F52%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](backend/tests/)
+[![Frontend Tests](https://img.shields.io/badge/Vitest-37%2F37%20Passed-brightgreen.svg?style=flat&logo=vitest&logoColor=white)](frontend/src/test/)
+[![AI Engine Tests](https://img.shields.io/badge/AI%20Engine-18%2F18%20Passed-brightgreen.svg?style=flat&logo=pytest&logoColor=white)](ai_engine/tests/)
+[![Total Tests](https://img.shields.io/badge/Total%20Tests-107%2F107%20Passed%20(100%25)-brightgreen.svg?style=flat&logo=checkmarx&logoColor=white)]()
 
 ---
 
@@ -502,26 +502,25 @@ npm run dev
 
 PredictRx-AI maintains full test coverage across both frontend and backend suites:
 
-### Complete Test Suite (69 / 69 Tests Passing — 100% Green):
+### Complete Test Suite (107 / 107 Tests Passing — 100% Green):
 
-#### 1. Backend Pytest Suite (36 / 36 Passing):
+#### 1. Backend Pytest Suite (52 / 52 Passing):
 ```powershell
 pytest backend/tests/
-# ============================= 36 passed in 1.29s =============================
+# 52 passed (5-Domain Guardrails, OCR Resilience, OWASP Security, PDF Fallback, Readiness)
 ```
 
-#### 2. Frontend Vitest Suite (18 / 18 Passing):
+#### 2. Frontend Vitest Suite (37 / 37 Passing — Zero Warnings):
 ```powershell
-npm test -- --run
-# Test Files  6 passed (6)
-#      Tests  18 passed (18)
-#   Duration  2.84s
+cd frontend ; npx vitest run
+# Test Files  7 passed (7)
+#      Tests  37 passed (37)
 ```
 
-#### 3. AI Engine Pytest Suite (15 / 15 Passing):
+#### 3. AI Engine Pytest Suite (18 / 18 Passing):
 ```powershell
 pytest ai_engine/tests/
-# ============================= 15 passed in 0.19s =============================
+# 18 passed (Adaptive 1->3 Voting, PDF Pass-Through, Provider Failover, Syntax Rules)
 ```
 
 ### Frontend Production Build:

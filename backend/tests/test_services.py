@@ -88,6 +88,19 @@ def test_drug_normalization(db_session):
     assert res_generic_typo.is_matched is True
     assert res_generic_typo.generic_name == "Paracetamol"
 
+    # Test hyphenated attached strength and preserved numbered brands (Milestone 2)
+    res_hyphen = service.normalize("Tab. Sergel-20mg")
+    assert res_hyphen.is_matched is True
+    assert res_hyphen.generic_name == "Esomeprazole"
+
+    res_cef3 = service.normalize("Cap. Cef-3 400mg")
+    assert res_cef3.is_matched is True
+    assert "Cefixime" in (res_cef3.generic_name or "")
+
+    res_etorix = service.normalize("Tab. Etorix 90mg")
+    assert res_etorix.is_matched is True
+    assert res_etorix.generic_name == "Etoricoxib"
+
 
 def test_interaction_triple_whammy(db_session):
     service = InteractionService(db_session)

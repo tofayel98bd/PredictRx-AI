@@ -1,11 +1,30 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Volume2, VolumeX, Printer, AlertTriangle, ShieldCheck, HeartHandshake, Loader2 } from 'lucide-react';
+import { Volume2, VolumeX, Printer, AlertTriangle, ShieldCheck, HeartHandshake, Loader2, Sun, Sunset, Moon, CheckSquare, Square, Copy, Check } from 'lucide-react';
 import { BanglaPatientCompanion as BanglaData } from '@/types';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+
+const TTS_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/predict-rx/tts`;
+
+function parseDoseSlots(dosageText: string): { morning: boolean; noon: boolean; night: boolean } {
+  const txt = (dosageText || '').toLowerCase();
+  const bnDigits = txt.replace(/[০-৯]/g, (d) => String('০১২৩৪৫৬৭৮৯'.indexOf(d)));
+  const slotMatch = bnDigits.match(/(\d+(?:\.\d+)?|½)\s*[+\-/]\s*(\d+(?:\.\d+)?|½)\s*[+\-/]\s*(\d+(?:\.\d+)?|½)/);
+  if (slotMatch) {
+    return {
+      morning: slotMatch[1] !== '0',
+      noon: slotMatch[2] !== '0',
+      night: slotMatch[3] !== '0',
+    };
+  }
+  const morning = txt.includes('সকাল') || txt.includes('morning') || txt.includes('৩ বার') || txt.includes('3 times') || txt.includes('২ বার') || txt.includes('twice') || txt.includes('প্রতিদিন ১ বার');
+  const noon = txt.includes('দুপুর') || txt.includes('noon') || txt.includes('৩ বার') || txt.includes('3 times') || txt.includes('৬ ঘণ্টা');
+  const night = txt.includes('রাত') || txt.includes('night') || txt.includes('শোবার') || txt.includes('bedtime') || txt.includes('৩ বার') || txt.includes('3 times') || txt.includes('২ বার') || txt.includes('twice');
+  return { morning, noon, night };
+}
 
 interface BanglaCompanionProps {
   data: BanglaData;
@@ -79,6 +98,9 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [speechRate, setSpeechRate] = useState<0.9 | 1.0>(1.0);
+  const [takenDoses, setTakenDoses] = useState<Record<string, boolean>>({});
+  const [copiedSummary, setCopiedSummary] = useState(false);
   const [cachedAudioUrl, setCachedAudioUrl] = useState<string | null>(null);
   const [cachedAudioText, setCachedAudioText] = useState<string>('');
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -202,7 +224,7 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     }
 
     // Silently pre-fetch TTS in background so clicking Play is instantaneous
-    fetch('/api/v1/predict-rx/tts', {
+    fetch(TTS_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: speechText, lang: isBn ? 'bn' : 'en' }),
@@ -249,6 +271,7 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
 
   const playAudioFromUrl = (url: string) => {
     const audio = new Audio(url);
+    audio.playbackRate = speechRate;
     audioRef.current = audio;
 
     audio.onplay = () => {
@@ -300,7 +323,7 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
     setIsPlaying(true);
 
     try {
-      const response = await fetch('/api/v1/predict-rx/tts', {
+      const response = await fetch(TTS_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: fullSpeechText, lang: isBn ? 'bn' : 'en' }),
@@ -365,7 +388,7 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
       utterance.lang = isBn ? 'bn-BD' : 'en-US';
     }
 
-    utterance.rate = 0.95;
+    utterance.rate = speechRate === 0.9 ? 0.85 : 0.98;
     utterance.pitch = 1.0;
 
     utterance.onend = () => setIsPlaying(false);
@@ -594,7 +617,17 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
             </div>
           </div>
 
-          <div className="no-print flex items-center space-x-2">
+          <div className="no-print flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setSpeechRate((r) => (r === 1.0 ? 0.9 : 1.0))}
+              className="text-[11px] h-8 px-2 text-muted-foreground hover:text-foreground font-mono"
+              title={isBn ? 'অডিও গতি পরিবর্তন করুন' : 'Toggle speech speed'}
+            >
+              {speechRate === 0.9 ? (isBn ? '০.৯x ধীর' : '0.9x Slow') : (isBn ? '১.০x স্বাভাবিক' : '1.0x Normal')}
+            </Button>
             <Button
               variant="outline"
               size="sm"
@@ -613,6 +646,24 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
                   ? (isBn ? 'বন্ধ করুন (Stop)' : 'Stop Audio')
                   : (isBn ? 'শব্দে শুনুন (Listen)' : 'Listen (Voice Guide)')}
               </span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const text = buildSpeechText();
+                if (navigator?.clipboard?.writeText) {
+                  navigator.clipboard.writeText(text).catch(() => {});
+                }
+                setCopiedSummary(true);
+                toast.success(isBn ? 'রোগী নির্দেশিকা SMS/WhatsApp-এর জন্য কপি হয়েছে।' : 'Patient guide copied for SMS/WhatsApp.');
+                setTimeout(() => setCopiedSummary(false), 2000);
+              }}
+              className="text-xs flex items-center space-x-1.5"
+            >
+              {copiedSummary ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
+              <span>{isBn ? 'SMS কপি' : 'Copy Guide'}</span>
             </Button>
             <Button
               variant="outline"
@@ -707,6 +758,59 @@ export const BanglaPatientCompanion: React.FC<BanglaCompanionProps> = ({
                   </div>
 
                   <div className="mt-3 space-y-2 text-xs">
+                    {/* Visual Morning / Noon / Night Dosage Pictograms */}
+                    {(() => {
+                      const slots = parseDoseSlots(med.dosage_bengali);
+                      return (
+                        <div className="grid grid-cols-3 gap-1.5 py-1.5 px-2 rounded-lg bg-muted/40 border border-border/60 text-[11px]">
+                          <button
+                            type="button"
+                            onClick={() => setTakenDoses((prev) => ({ ...prev, [`${idx}-m`]: !prev[`${idx}-m`] }))}
+                            className={`flex items-center justify-center gap-1 py-1 rounded transition ${
+                              slots.morning
+                                ? takenDoses[`${idx}-m`]
+                                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold'
+                                  : 'bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 font-medium'
+                                : 'opacity-40 text-muted-foreground'
+                            }`}
+                          >
+                            <Sun className="h-3 w-3" />
+                            <span>{isBn ? 'সকাল' : 'Morn'}</span>
+                            {slots.morning && (takenDoses[`${idx}-m`] ? <CheckSquare className="h-3 w-3" /> : <Square className="h-3 w-3" />)}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTakenDoses((prev) => ({ ...prev, [`${idx}-n`]: !prev[`${idx}-n`] }))}
+                            className={`flex items-center justify-center gap-1 py-1 rounded transition ${
+                              slots.noon
+                                ? takenDoses[`${idx}-n`]
+                                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold'
+                                  : 'bg-sky-50 dark:bg-sky-950/30 text-sky-800 dark:text-sky-300 font-medium'
+                                : 'opacity-40 text-muted-foreground'
+                            }`}
+                          >
+                            <Sunset className="h-3 w-3" />
+                            <span>{isBn ? 'দুপুর' : 'Noon'}</span>
+                            {slots.noon && (takenDoses[`${idx}-n`] ? <CheckSquare className="h-3 w-3" /> : <Square className="h-3 w-3" />)}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTakenDoses((prev) => ({ ...prev, [`${idx}-e`]: !prev[`${idx}-e`] }))}
+                            className={`flex items-center justify-center gap-1 py-1 rounded transition ${
+                              slots.night
+                                ? takenDoses[`${idx}-e`]
+                                  ? 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-semibold'
+                                  : 'bg-indigo-50 dark:bg-indigo-950/30 text-indigo-800 dark:text-indigo-300 font-medium'
+                                : 'opacity-40 text-muted-foreground'
+                            }`}
+                          >
+                            <Moon className="h-3 w-3" />
+                            <span>{isBn ? 'রাত' : 'Night'}</span>
+                            {slots.night && (takenDoses[`${idx}-e`] ? <CheckSquare className="h-3 w-3" /> : <Square className="h-3 w-3" />)}
+                          </button>
+                        </div>
+                      );
+                    })()}
                     <div className="flex justify-between py-1 border-b border-muted">
                       <span className="text-muted-foreground">{isBn ? 'খাওয়ার নিয়ম:' : 'Dosage / Directions:'}</span>
                       <span className="font-semibold text-foreground text-right">{getDosageDisplay(med.dosage_bengali)}</span>

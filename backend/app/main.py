@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from app.core.config import settings
+from app.core.config import DEFAULT_DEV_SECRET_KEY, settings
 from app.core.exceptions import (
     PredictRxException,
     generic_exception_handler,
@@ -12,6 +12,7 @@ from app.core.exceptions import (
     validation_exception_handler,
 )
 from app.core.logging import logger
+from app.core.security_middleware import SecurityHeadersAndTraceMiddleware
 from app.api.v1.router import api_router
 from app.api.v1.endpoints import health
 
@@ -22,6 +23,14 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.PROJECT_NAME} v{settings.PROJECT_VERSION} [{settings.ENVIRONMENT}]")
     settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Production secret safety check
+    if settings.ENVIRONMENT.lower() == "production" and settings.SECRET_KEY == DEFAULT_DEV_SECRET_KEY:
+        msg = "SECURITY CRITICAL: Default SECRET_KEY is active in production! Configure SECRET_KEY and ENFORCE_PROD_SECRETS=true."
+        if settings.ENFORCE_PROD_SECRETS:
+            logger.critical(msg)
+            raise RuntimeError(msg)
+        logger.critical(msg)
+
     # Sync Vision LLM configuration to os.environ for ai_engine
     import os
     if settings.GEMINI_API_KEY and not os.getenv("GEMINI_API_KEY"):
@@ -30,6 +39,21 @@ async def lifespan(app: FastAPI):
         os.environ["ANTHROPIC_API_KEY"] = settings.ANTHROPIC_API_KEY
     if settings.LLM_PROVIDER and not os.getenv("LLM_PROVIDER"):
         os.environ["LLM_PROVIDER"] = settings.LLM_PROVIDER
+
+    # Idempotent DGDA catalog sync so new seed drugs are available automatically
+    try:
+        from sqlalchemy import func, select
+        from app.db.session import SessionLocal
+        from app.db.init_db import seed_bd_drugs
+        from app.db.seeds.bd_drugs_data import BD_DRUGS_SEED_DATA
+        from app.models.drug import BDDrugCatalog
+
+        with SessionLocal() as db:
+            catalog_count = db.scalar(select(func.count(BDDrugCatalog.id))) or 0
+            if catalog_count < len(BD_DRUGS_SEED_DATA):
+                seed_bd_drugs(db)
+    except Exception as exc:
+        logger.warning(f"Startup DGDA catalog sync skipped: {exc}")
 
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}")
@@ -49,14 +73,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS Middleware
-if settings.BACKEND_CORS_ORIGINS:
+# Security Headers, Request-ID Traceability & Rate Limiting
+app.add_middleware(SecurityHeadersAndTraceMiddleware)
+
+# CORS Middleware (explicit origins + Vercel preview regex, never wildcard '*')
+if settings.BACKEND_CORS_ORIGINS or settings.BACKEND_CORS_ORIGIN_REGEX:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.BACKEND_CORS_ORIGINS,
+        allow_origin_regex=settings.BACKEND_CORS_ORIGIN_REGEX,
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "Accept", "Accept-Language", "X-Request-ID"],
     )
 
 # Exception Handlers

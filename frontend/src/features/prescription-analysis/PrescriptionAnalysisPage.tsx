@@ -17,6 +17,7 @@ import {
   Stethoscope,
   Activity,
   Printer,
+  Download,
   ExternalLink,
   ChevronRight,
   RefreshCw,
@@ -38,6 +39,7 @@ import { ClinicianReviewModal } from '@/components/clinical/ClinicianReviewModal
 import { DemoScenarioSwitcher } from '@/components/clinical/DemoScenarioSwitcher';
 import { PrescriptionScanningModal } from '@/components/clinical/PrescriptionScanningModal';
 import { analyzePrescription, fetchScenarioAnalysis } from '@/services/prescriptionService';
+import { downloadReportPdf } from '@/services/reportService';
 import { PatientContext, PrescriptionAnalysisResult } from '@/types';
 import { MEDICAL_SAFETY_DISCLAIMER, GOLDEN_DEMO_SCENARIOS, GoldenDemoScenario, DEMO_PATIENTS_LIST } from '@/constants';
 import {
@@ -910,7 +912,32 @@ export const PrescriptionAnalysisPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    await downloadReportPdf(analysisResult.prescription_id, isBn ? 'bn' : 'en');
+                    toast.success(isBn ? 'বাইলিঙ্গুয়াল PDF রিপোর্ট ডাউনলোড হয়েছে।' : 'Bilingual PDF report downloaded.');
+                  } catch {
+                    window.print();
+                  }
+                }}
+                className="text-xs"
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />
+                {isBn ? 'PDF ডাউনলোড' : 'Export PDF'}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/reports/${analysisResult.prescription_id}`)}
+                className="text-xs"
+              >
+                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
+                {isBn ? 'পূর্ণাঙ্গ অডিট রিপোর্ট' : 'Full Audit Report'}
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -930,6 +957,32 @@ export const PrescriptionAnalysisPage: React.FC = () => {
               </Button>
             </div>
           </div>
+
+          {/* Verified Human-in-the-Loop Clinician Sign-Off Banner */}
+          {analysisResult.clinician_review?.reviewed && (
+            <div className="p-3.5 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+              <div className="flex items-start space-x-2.5">
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-bold text-emerald-950 dark:text-emerald-200 flex flex-wrap items-center gap-2">
+                    <span>{isBn ? 'চিকিৎসক অডিট ও চূড়ান্ত অনুমোদন সম্পন্ন' : 'HITL Clinician Sign-Off Recorded'}</span>
+                    <Badge variant={analysisResult.clinician_review.decision === 'REJECTED' ? 'critical' : 'success'} className="text-[10px]">
+                      {analysisResult.clinician_review.decision || 'APPROVED'}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground mt-0.5">
+                    {analysisResult.clinician_review.reviewer_name} ({analysisResult.clinician_review.reviewer_license})
+                    {analysisResult.clinician_review.notes ? ` — ${analysisResult.clinician_review.notes}` : ''}
+                  </p>
+                </div>
+              </div>
+              {analysisResult.clinician_review.review_timestamp && (
+                <span className="text-[11px] font-mono text-muted-foreground shrink-0">
+                  {new Date(analysisResult.clinician_review.review_timestamp).toLocaleString()}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Tabbed Results Layout */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -1213,14 +1266,29 @@ export const PrescriptionAnalysisPage: React.FC = () => {
           onClose={() => setIsReviewModalOpen(false)}
           analysisId={analysisResult.analysis_id}
           currentDecision={analysisResult.clinician_review.decision}
-          onReviewSaved={() => {
+          defaultNotes={
+            analysisResult.safer_alternatives.length > 0
+              ? analysisResult.safer_alternatives
+                  .map((a) => `Substituted ${a.original_brand} (${a.original_generic}) with ${a.alternative_brand} (${a.alternative_generic}).`)
+                  .join(' ')
+              : analysisResult.clinical_risk.calibrated_probability_note
+          }
+          onReviewSaved={(updatedReview) => {
             if (analysisResult) {
+              const nextReview = updatedReview || {
+                ...analysisResult.clinician_review,
+                reviewed: true,
+              };
               setAnalysisResult({
                 ...analysisResult,
-                clinician_review: {
-                  ...analysisResult.clinician_review,
-                  reviewed: true,
-                },
+                clinician_review: nextReview,
+                bangla_companion: analysisResult.bangla_companion
+                  ? {
+                      ...analysisResult.bangla_companion,
+                      clinician_reviewed: true,
+                      reviewer_name: nextReview.reviewer_name || analysisResult.bangla_companion.reviewer_name,
+                    }
+                  : analysisResult.bangla_companion,
               });
             }
           }}

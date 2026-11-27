@@ -1,60 +1,92 @@
-"""Vision LLM adapters. All return a validated RawPrescription."""
+"""Vision LLM adapters with resilient retries, backoff, and multi-provider failover."""
 from __future__ import annotations
-import base64, json, os
-from typing import Protocol
+
+import base64
+import logging
+import os
+import random
+import time
+from typing import List, Optional, Protocol, Tuple
 from pydantic import ValidationError
+
+from .prompts import PROMPT_VERSION, SYSTEM_PROMPT, USER_PROMPT
 from .schemas import RawPrescription
 
-SYSTEM_PROMPT = """You are a meticulous pharmacy data-entry specialist reading Bangladeshi prescriptions
-(handwritten or printed, English and/or Bangla).
-RULES
-1. Transcribe ONLY what is written. Never invent, complete or 'correct' a drug, dose or duration.
-   If a field is not visible or unreadable, return null and lower `confidence`.
-2. Bangladeshi dose pattern is morning+noon+night, e.g. '1+0+1', '১-০-১', '½+0+½'. Copy it exactly in `dosage_raw`.
-   Latin abbreviations (OD, BD, TDS, QDS, HS, SOS, STAT) are also copied exactly.
-3. Timing words: 'খাবার আগে/পরে', 'ac/pc', 'before/after meal' go in `timing_raw`.
-4. Duration goes in `duration_raw` exactly as written ('14 days', '২ সপ্তাহ', '1 month', 'continue').
-   A number written near a drug line that is a duration (e.g. 'x7') belongs here, not in strength.
-5. Brand names are usually Bangladeshi brands (Napa, Sergel, Ecospirin, Bizoran, Rolac...). Keep strength with the
-   brand if written together ('Sergel 20' -> brand 'Sergel', strength '20 mg' only if mg is implied by the product).
-   Prefix words Tab./Cap./Syp./Inj. go in `form`.
-6. `generic_name_guess`: fill ONLY if you are highly confident; otherwise null (a database resolves it later).
-7. Ignore logos, doctor letterhead, ads, patient phone numbers. Extract patient name if clearly written, otherwise null.
-8. One entry per medicine line, in the order written. Include injections, syrups, drops, creams.
-9. confidence: 0.95+ clear print, 0.8 readable handwriting, <0.6 guessing. legibility: whole-image quality 0-1.
-If the image is not a prescription set is_prescription=false and medicines=[]."""
-
-USER_PROMPT = "Extract every medicine, patient name, age, gender, weight, blood pressure (systolic_bp and diastolic_bp if written e.g. 130/90), and diagnosis / chief complaints from this prescription."
+logger = logging.getLogger("ai_engine.extractor")
 
 _MED = {
     "type": "object",
     "properties": {
-        "brand_name": {"type": "string"}, "form": {"type": ["string", "null"]},
-        "strength": {"type": ["string", "null"]}, "generic_name_guess": {"type": ["string", "null"]},
-        "dosage_raw": {"type": ["string", "null"]}, "timing_raw": {"type": ["string", "null"]},
-        "duration_raw": {"type": ["string", "null"]}, "instructions_raw": {"type": ["string", "null"]},
+        "brand_name": {"type": "string"},
+        "form": {"type": ["string", "null"]},
+        "strength": {"type": ["string", "null"]},
+        "generic_name_guess": {"type": ["string", "null"]},
+        "dosage_raw": {"type": ["string", "null"]},
+        "timing_raw": {"type": ["string", "null"]},
+        "duration_raw": {"type": ["string", "null"]},
+        "instructions_raw": {"type": ["string", "null"]},
         "confidence": {"type": "number"},
     },
     "required": ["brand_name", "confidence"],
 }
+
 TOOL = {
     "name": "record_prescription",
-    "description": "Record the structured contents of the prescription image.",
+    "description": "Record the structured contents of the prescription image or PDF.",
     "input_schema": {
         "type": "object",
         "properties": {
-            "is_prescription": {"type": "boolean"}, "legibility": {"type": "number"},
-            "doctor_name": {"type": ["string", "null"]}, "prescription_date": {"type": ["string", "null"]},
+            "is_prescription": {"type": "boolean"},
+            "legibility": {"type": "number"},
+            "doctor_name": {"type": ["string", "null"]},
+            "prescription_date": {"type": ["string", "null"]},
             "patient_name": {"type": ["string", "null"]},
-            "patient_age_years": {"type": ["number", "null"]}, "patient_gender": {"type": ["string", "null"]},
+            "patient_age_years": {"type": ["number", "null"]},
+            "patient_gender": {"type": ["string", "null"]},
             "patient_weight_kg": {"type": ["number", "null"]},
-            "systolic_bp": {"type": ["integer", "null"]}, "diastolic_bp": {"type": ["integer", "null"]},
+            "systolic_bp": {"type": ["integer", "null"]},
+            "diastolic_bp": {"type": ["integer", "null"]},
+            "creatinine_mg_dl": {"type": ["number", "null"]},
+            "egfr": {"type": ["number", "null"]},
+            "hba1c": {"type": ["number", "null"]},
+            "allergies": {"type": "array", "items": {"type": "string"}},
             "diagnosis_or_cc": {"type": ["string", "null"]},
-            "medicines": {"type": "array", "items": _MED}, "notes": {"type": ["string", "null"]},
+            "medicines": {"type": "array", "items": _MED},
+            "notes": {"type": ["string", "null"]},
         },
         "required": ["is_prescription", "legibility", "medicines"],
     },
 }
+
+
+def _is_permanent_auth_error(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    return any(
+        tok in msg
+        for tok in (
+            "api_key_invalid",
+            "api key not valid",
+            "invalid api key",
+            "authentication_error",
+            "unauthenticated",
+            "401",
+            "403",
+            "permission_denied",
+        )
+    )
+
+
+def _is_transient_error(exc: Exception) -> bool:
+    msg = str(exc).lower()
+    return any(
+        tok in msg
+        for tok in ("429", "resource_exhausted", "rate limit", "503", "502", "504", "timeout", "timed out", "temporarily", "unavailable")
+    )
+
+
+def _backoff_sleep(attempt: int, base: float = 0.35) -> None:
+    delay = base * (2 ** attempt) + random.uniform(0.0, 0.15)
+    time.sleep(delay)
 
 
 class Extractor(Protocol):
@@ -62,100 +94,210 @@ class Extractor(Protocol):
 
 
 class AnthropicExtractor:
-    """Forced tool-use => always schema-shaped JSON (main reason for 95%+ valid output)."""
-    def __init__(self, model: str | None = None, api_key: str | None = None, retries: int = 2):
-        import anthropic
-        self.client = anthropic.Anthropic(api_key=api_key or os.getenv("ANTHROPIC_API_KEY"))
-        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-sonnet-5-5")
-        self.retries = retries
+    """Forced tool-use => schema-shaped JSON for images and PDFs with exponential backoff."""
 
-    def extract(self, image: bytes, media_type: str) -> RawPrescription:
-        last = None
-        for _ in range(self.retries + 1):
-            resp = self.client.messages.create(
-                model=self.model, max_tokens=4000, temperature=0, system=SYSTEM_PROMPT,
-                tools=[TOOL], tool_choice={"type": "tool", "name": "record_prescription"},
-                messages=[{"role": "user", "content": [
-                    {"type": "image", "source": {"type": "base64", "media_type": media_type,
-                                                  "data": base64.b64encode(image).decode()}},
-                    {"type": "text", "text": USER_PROMPT}]}])
-            block = next((b for b in resp.content if b.type == "tool_use"), None)
+    def __init__(
+        self,
+        model: Optional[str] = None,
+        api_key: Optional[str] = None,
+        retries: int = 2,
+        timeout_seconds: float = 35.0,
+    ):
+        import anthropic
+
+        key = api_key or os.getenv("ANTHROPIC_API_KEY")
+        if not key:
+            raise RuntimeError("ANTHROPIC_API_KEY not set")
+        self.client = anthropic.Anthropic(api_key=key, timeout=timeout_seconds)
+        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+        self.retries = retries
+        self.last_model_used: Optional[str] = self.model
+        self.last_provider_used: str = "anthropic"
+
+    def extract(self, image: bytes, media_type: str = "image/jpeg") -> RawPrescription:
+        last: Optional[Exception] = None
+        encoded = base64.b64encode(image).decode()
+        if media_type == "application/pdf":
+            media_block = {
+                "type": "document",
+                "source": {"type": "base64", "media_type": "application/pdf", "data": encoded},
+            }
+        else:
+            media_block = {
+                "type": "image",
+                "source": {"type": "base64", "media_type": media_type, "data": encoded},
+            }
+
+        for attempt in range(self.retries + 1):
             try:
-                return RawPrescription.model_validate(block.input)
-            except (ValidationError, AttributeError) as e:
-                last = e
-        raise RuntimeError(f"Vision extraction failed schema validation after retries: {last}")
+                resp = self.client.messages.create(
+                    model=self.model,
+                    max_tokens=4000,
+                    temperature=0,
+                    system=SYSTEM_PROMPT,
+                    tools=[TOOL],
+                    tool_choice={"type": "tool", "name": "record_prescription"},
+                    messages=[{"role": "user", "content": [media_block, {"type": "text", "text": USER_PROMPT}]}],
+                )
+                block = next((b for b in resp.content if b.type == "tool_use"), None)
+                if block is None:
+                    raise ValidationError.from_exception_data("RawPrescription", [])
+                parsed = RawPrescription.model_validate(block.input)
+                self.last_model_used = self.model
+                self.last_provider_used = "anthropic"
+                return parsed
+            except Exception as exc:
+                last = exc
+                if _is_permanent_auth_error(exc):
+                    logger.error("Anthropic auth failure (%s): aborting retries.", type(exc).__name__)
+                    raise
+                if attempt < self.retries and (_is_transient_error(exc) or isinstance(exc, (ValidationError, AttributeError))):
+                    logger.warning("Anthropic attempt %d failed (%s); retrying with backoff.", attempt + 1, type(exc).__name__)
+                    _backoff_sleep(attempt)
+                    continue
+                break
+        raise RuntimeError(f"Anthropic vision extraction failed after retries: {last}")
 
 
 class GeminiExtractor:
-    def __init__(self, api_key: Optional[str] = None, model: Optional[str] = None):
+    """Gemini Vision extractor with ordered model fallback and transient backoff."""
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        model: Optional[str] = None,
+        retries_per_model: int = 1,
+    ):
         from google import genai
+
         key = api_key or os.getenv("GEMINI_API_KEY")
         if not key:
             raise RuntimeError("GEMINI_API_KEY not set")
         self.client = genai.Client(api_key=key)
-        self.model = model or os.getenv("GEMINI_MODEL", "gemini-3.8-flash")
+        self.model = model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+        self.retries_per_model = retries_per_model
         self.fallback_models = [
             self.model,
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash",
             "gemini-3.8-flash",
             "gemini-3.5-flash-lite",
-            "gemini-3.1-flash-lite",
-            "gemini-3.6-flash",
-            "gemini-3.5-flash",
-            "gemini-3.7-flash",
         ]
+        self.last_model_used: Optional[str] = None
+        self.last_provider_used: str = "gemini"
 
     def extract(self, image_bytes: bytes, media_type: str = "image/jpeg") -> RawPrescription:
         from google.genai import types
+
         part = types.Part.from_bytes(data=image_bytes, mime_type=media_type)
-        last_err = None
+        last_err: Optional[Exception] = None
         seen = set()
 
         for m in self.fallback_models:
-            if m in seen:
+            if not m or m in seen:
                 continue
             seen.add(m)
-            try:
-                print(f"[ Gemini ] Trying model: {m} ...")
-                resp = self.client.models.generate_content(
-                    model=m,
-                    contents=[part, USER_PROMPT],
-                    config=types.GenerateContentConfig(
-                        system_instruction=SYSTEM_PROMPT,
-                        temperature=0.0,
-                        response_mime_type="application/json",
-                        response_schema=RawPrescription,
-                    ),
-                )
-                print(f"[ Gemini ] Success with model: {m}!")
-                return RawPrescription.model_validate_json(resp.text)
-            except Exception as e:
-                last_err = e
-                print(f"[ Warning ] Model '{m}' busy or failed ({type(e).__name__}), switching to next fallback model...")
-                continue
+            for attempt in range(self.retries_per_model + 1):
+                try:
+                    logger.info("Gemini extraction trying model=%s (attempt=%d, prompt=%s)", m, attempt + 1, PROMPT_VERSION)
+                    resp = self.client.models.generate_content(
+                        model=m,
+                        contents=[part, USER_PROMPT],
+                        config=types.GenerateContentConfig(
+                            system_instruction=SYSTEM_PROMPT,
+                            temperature=0.0,
+                            response_mime_type="application/json",
+                            response_schema=RawPrescription,
+                        ),
+                    )
+                    parsed = RawPrescription.model_validate_json(resp.text)
+                    self.last_model_used = m
+                    self.last_provider_used = "gemini"
+                    logger.info("Gemini extraction succeeded with model=%s (%d meds)", m, len(parsed.medicines))
+                    return parsed
+                except Exception as exc:
+                    last_err = exc
+                    if _is_permanent_auth_error(exc):
+                        logger.error("Gemini permanent auth error on model=%s: %s", m, type(exc).__name__)
+                        raise
+                    if attempt < self.retries_per_model and _is_transient_error(exc):
+                        logger.warning("Gemini transient error on model=%s (%s); backing off.", m, type(exc).__name__)
+                        _backoff_sleep(attempt)
+                        continue
+                    logger.warning("Gemini model=%s unavailable (%s); trying next fallback.", m, type(exc).__name__)
+                    break
 
         raise RuntimeError(f"All Gemini fallback models failed. Last error: {last_err}")
 
 
+class ResilientExtractor:
+    """Failover wrapper across ordered Vision providers (e.g. Gemini -> Anthropic)."""
+
+    def __init__(self, providers: List[Tuple[str, Extractor]]):
+        if not providers:
+            raise RuntimeError("No Vision LLM providers configured.")
+        self.providers = providers
+        self.last_provider_used: Optional[str] = None
+        self.last_model_used: Optional[str] = None
+
+    def extract(self, image: bytes, media_type: str = "image/jpeg") -> RawPrescription:
+        errors: List[str] = []
+        for provider_name, ext in self.providers:
+            try:
+                res = ext.extract(image, media_type)
+                self.last_provider_used = getattr(ext, "last_provider_used", provider_name)
+                self.last_model_used = getattr(ext, "last_model_used", None)
+                return res
+            except Exception as exc:
+                logger.warning("Vision provider '%s' failed (%s); checking next provider.", provider_name, type(exc).__name__)
+                errors.append(f"{provider_name}: {exc}")
+        raise RuntimeError(" | ".join(errors))
+
+
 class MockExtractor:
     """Offline testing / demo fallback: returns a fixed RawPrescription."""
+
     def __init__(self, fixture: RawPrescription):
         self.fixture = fixture
+        self.last_provider_used = "mock"
+        self.last_model_used = "mock-fixture"
 
-    def extract(self, image: bytes, media_type: str) -> RawPrescription:
+    def extract(self, image: bytes, media_type: str = "image/jpeg") -> RawPrescription:
         return self.fixture.model_copy(deep=True)
 
 
-def get_extractor(provider: str | None = None) -> Extractor:
+def get_extractor(provider: Optional[str] = None) -> Extractor:
     from dotenv import load_dotenv
+
     load_dotenv()
-    if not provider:
-        provider = os.getenv("LLM_PROVIDER")
-        if not provider:
-            if os.getenv("GEMINI_API_KEY"):
-                provider = "gemini"
-            elif os.getenv("ANTHROPIC_API_KEY"):
-                provider = "anthropic"
-            else:
-                provider = "gemini"
-    return GeminiExtractor() if provider.lower() == "gemini" else AnthropicExtractor()
+    has_gemini = bool(os.getenv("GEMINI_API_KEY"))
+    has_anthropic = bool(os.getenv("ANTHROPIC_API_KEY"))
+
+    preferred = (provider or os.getenv("LLM_PROVIDER") or ("gemini" if has_gemini else "anthropic")).lower()
+    ordered: List[Tuple[str, Extractor]] = []
+
+    def _try_add_gemini() -> None:
+        if has_gemini:
+            ordered.append(("gemini", GeminiExtractor()))
+
+    def _try_add_anthropic() -> None:
+        if has_anthropic:
+            ordered.append(("anthropic", AnthropicExtractor()))
+
+    if preferred == "anthropic":
+        _try_add_anthropic()
+        _try_add_gemini()
+    else:
+        _try_add_gemini()
+        _try_add_anthropic()
+
+    if not ordered:
+        # Preserve original error behavior if no API keys are configured
+        if preferred == "anthropic":
+            return AnthropicExtractor()
+        return GeminiExtractor()
+
+    if len(ordered) == 1:
+        return ordered[0][1]
+    return ResilientExtractor(ordered)

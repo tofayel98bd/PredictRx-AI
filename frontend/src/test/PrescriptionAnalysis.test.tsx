@@ -31,7 +31,19 @@ describe('PrescriptionAnalysisPage', () => {
       });
       fireEvent.click(loadDemoBtn);
 
-      // Verify inputs populated
+      // Load Reference Case triggers autofill + instant fast-path evaluation
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(/Critical Safety Alert: High-Risk Prescription Detected/i)
+          ).toBeInTheDocument();
+          expect(screen.getAllByText(/Bizoran 5\/20/i).length).toBeGreaterThan(0);
+          expect(screen.getAllByText(/Rolac 10/i).length).toBeGreaterThan(0);
+        },
+        { timeout: 10000 }
+      );
+
+      // Verify inputs populated and manual re-evaluation button is ready
       expect(screen.getByDisplayValue(/PRX-BD-2026-081/i)).toBeInTheDocument();
       expect(screen.getByDisplayValue(/Mohammad Abdul Karim/i)).toBeInTheDocument();
 
@@ -40,7 +52,7 @@ describe('PrescriptionAnalysisPage', () => {
       });
       expect(submitBtn).not.toBeDisabled();
 
-      // Submit form
+      // Submit form manually as well
       fireEvent.click(submitBtn);
 
       // Analysis results appear after pipeline completion
@@ -51,6 +63,8 @@ describe('PrescriptionAnalysisPage', () => {
           ).toBeInTheDocument();
           expect(screen.getAllByText(/Bizoran 5\/20/i).length).toBeGreaterThan(0);
           expect(screen.getAllByText(/Rolac 10/i).length).toBeGreaterThan(0);
+          expect(screen.getByRole('button', { name: /Export PDF/i })).toBeInTheDocument();
+          expect(screen.getByRole('button', { name: /Full Audit Report/i })).toBeInTheDocument();
         },
         { timeout: 10000 }
       );

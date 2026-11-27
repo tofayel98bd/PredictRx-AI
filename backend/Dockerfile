@@ -22,15 +22,19 @@ COPY backend/alembic/ ./alembic/
 COPY backend/app/ ./app/
 COPY ai_engine/ ./ai_engine/
 
-# Create upload directory
-RUN mkdir -p uploads
+# Create upload directory and non-root runtime user
+RUN mkdir -p uploads && \
+    adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
+
+USER appuser
 
 # Expose API port
 EXPOSE 8000
 
 # Healthcheck
-HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=5 \
+HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
     CMD curl -f http://localhost:${PORT:-8000}/health || exit 1
 
 # Run database migrations, initial master seeding, and start production Uvicorn server
-CMD ["sh", "-c", "alembic upgrade head && python -m app.db.init_db && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && python -m app.db.init_db && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --timeout-keep-alive 65"]

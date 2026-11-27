@@ -130,22 +130,24 @@ def seed_patients(db: Session) -> None:
 
 
 def seed_bd_drugs(db: Session) -> None:
-    """Seed DGDA Bangladesh brand-to-generic drug catalog (260+ common brands)."""
+    """Seed DGDA Bangladesh brand-to-generic drug catalog (400+ common brands) idempotently."""
     from app.db.seeds.bd_drugs_data import BD_DRUGS_SEED_DATA
 
+    existing_pairs = {
+        (row[0].strip().lower(), (row[1] or "").strip().lower())
+        for row in db.execute(select(BDDrugCatalog.brand_name, BDDrugCatalog.strength)).all()
+    }
     count_added = 0
     for d_data in BD_DRUGS_SEED_DATA:
-        existing = db.execute(
-            select(BDDrugCatalog).where(
-                BDDrugCatalog.brand_name == d_data["brand_name"],
-                BDDrugCatalog.strength == d_data["strength"],
-            )
-        ).scalar_one_or_none()
-        if not existing:
-            drug = BDDrugCatalog(**d_data)
-            db.add(drug)
+        key = (d_data["brand_name"].strip().lower(), (d_data.get("strength") or "").strip().lower())
+        if key not in existing_pairs:
+            db.add(BDDrugCatalog(**d_data))
+            existing_pairs.add(key)
             count_added += 1
-    db.commit()
+    if count_added > 0:
+        db.commit()
+        from app.services.drug_normalization_service import DrugNormalizationService
+        DrugNormalizationService.invalidate_cache()
     logger.info(f"Seeded {count_added} new DGDA drugs into catalog (total seed size: {len(BD_DRUGS_SEED_DATA)})")
 
 
